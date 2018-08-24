@@ -195,7 +195,7 @@ and agree upon. This consists of a small JSON file (e.g. call it `genesis.json`)
 	* 推特 [后青春期的诗](https://twitter.com/chain_stayreal)
 	
 
-# 播客链配置文件(boker.json)示例配置
+# boker.json, for Example
 
 {
 	"boker": {
