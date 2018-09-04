@@ -1,11 +1,8 @@
 ## Go Ethereum
 
-Official golang implementation of the Ethereum protocol. This project is an experiment, transforming its consensus algorithm into dpos.
+Official golang implementation of Boker chain. 
 
-[![API Reference](
-https://camo.githubusercontent.com/915b7be44ada53c290eb157634330494ebe3e30a/68747470733a2f2f676f646f632e6f72672f6769746875622e636f6d2f676f6c616e672f6764646f3f7374617475732e737667
-)](https://godoc.org/github.com/ethereum/go-ethereum)
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/ethereum/go-ethereum?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[æ’­å®¢é“¾å®˜ç½‘](http://www.videoblkchain.com/)[æ’­å®¢é“¾ç”µæŠ¥ç¾¤](https://t.me/Bobbyglobal)[æ’­å®¢é“¾ç™½çš®ä¹¦ä¸‹è½½åœ°å€](http://yibokeclips.otvcloud.com/uploads/apks/blkV2.1.pdf) [æ’­å®¢é“¾æ¨ç‰¹](https://twitter.com/BokerBobby)	
 
 Automated builds are available for stable releases and the unstable master branch.
 Binary archives are published at https://geth.ethereum.org/downloads/.
@@ -180,19 +177,19 @@ First, you'll need to create the genesis state of your networks, which all nodes
 and agree upon. This consists of a small JSON file (e.g. call it `genesis.json`):
 
 ```json
-# ²¥¿ÍÁ´¹Ù·½
+# æ’­å®¢é“¾å®˜æ–¹
 
-	* [²¥¿ÍÁ´¹ÙÍø](http://www.videoblkchain.com/)
-	* [²¥¿ÍÁ´µç±¨Èº](https://t.me/Bobbyglobal) 
-	* [²¥¿ÍÁ´°×Æ¤ÊéÏÂÔØµØÖ·](http://yibokeclips.otvcloud.com/uploads/apks/blkV2.1.pdf) 
-	* [²¥¿ÍÁ´ÍÆÌØ](https://twitter.com/BokerBobby)		
+	* [æ’­å®¢é“¾å®˜ç½‘](http://www.videoblkchain.com/)
+	* [æ’­å®¢é“¾ç”µæŠ¥ç¾¤](https://t.me/Bobbyglobal) 
+	* [æ’­å®¢é“¾ç™½çš®ä¹¦ä¸‹è½½åœ°å€](http://yibokeclips.otvcloud.com/uploads/apks/blkV2.1.pdf) 
+	* [æ’­å®¢é“¾æ¨ç‰¹](https://twitter.com/BokerBobby)		
 		
-# ²¥¿ÍÁ´¼¼Êõ¸ºÔğÈË	
-	* Î¢ĞÅ¹«ÖÚºÅ [ÇøÊ²Ã´¿éÊ²Ã´Á´°¡](Blockchain_fxh7622) 
-	* ÍÆÌØ [ÇøÊ²Ã´¿éÊ²Ã´Á´°¡](https://twitter.com/chain_fxh7622) 
+# æ’­å®¢é“¾æŠ€æœ¯è´Ÿè´£äºº	
+	* å¾®ä¿¡å…¬ä¼—å· [åŒºä»€ä¹ˆå—ä»€ä¹ˆé“¾å•Š](Blockchain_fxh7622) 
+	* æ¨ç‰¹ [åŒºä»€ä¹ˆå—ä»€ä¹ˆé“¾å•Š](https://twitter.com/chain_fxh7622) 
 	
-# ÖÇÄÜºÏÔ¼¸ºÔğÈË
-	* ÍÆÌØ [ºóÇà´ºÆÚµÄÊ«](https://twitter.com/chain_stayreal)
+# æ™ºèƒ½åˆçº¦è´Ÿè´£äºº
+	* æ¨ç‰¹ [åé’æ˜¥æœŸçš„è¯—](https://twitter.com/chain_stayreal)
 	
 
 # boker.json, for Example
