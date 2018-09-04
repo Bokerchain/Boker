@@ -2,7 +2,10 @@
 
 Official golang implementation of Boker chain. 
 
-[播客链官网](http://www.videoblkchain.com/)[播客链电报群](https://t.me/Bobbyglobal)[播客链白皮书下载地址](http://yibokeclips.otvcloud.com/uploads/apks/blkV2.1.pdf) [播客链推特](https://twitter.com/BokerBobby)	
+[播客链官网](http://www.videoblkchain.com/)
+[播客链电报群](https://t.me/Bobbyglobal)
+[播客链白皮书下载地址](http://yibokeclips.otvcloud.com/uploads/apks/blkV2.1.pdf)
+[播客链推特](https://twitter.com/BokerBobby)	
 
 Automated builds are available for stable releases and the unstable master branch.
 Binary archives are published at https://geth.ethereum.org/downloads/.
