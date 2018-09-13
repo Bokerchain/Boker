@@ -1,6 +1,6 @@
-## Go Ethereum
+## Boker Chain
 
-Official golang implementation of Boker chain. 
+Official golang implementation of Boker Chain. 
 
 [播客链官网](http://www.videoblkchain.com/)<br>
 [播客链电报群](https://t.me/Bobbyglobal)<br>
