@@ -34,12 +34,12 @@ The Boker Chain project comes with several wrappers/executables found in the `cm
 
 ### 1、Initialize with genesis.json
 	geth --datadir "/projects/ethereum/geth/node" init genesis.json
-`--datadir` flag specify the data directory of your node
+--datadir flag specify the data directory of your node
 
 ### 2、Run
 	nohup geth --nodiscover --maxpeers 3 --identity "bokerchain" --rpc --rpcaddr 0.0.0.0 --rpccorsdomain "*" --rpcvhosts '*' --datadir "/projects/ethereum/geth/node" --port 30303 --rpcapi "db,eth,net,web3" --networkid 96579 &
-`--datadir`		flag should be idential to that in first step
-`--networkid`	flag specify your private net id
+--datadir		flag should be idential to that in first step  <br/>
+--networkid`	flag specify your private net id
 
 ### 3、Enter console mode
 	geth attach ipc:/projects/ethereum/geth/node/geth.ipc
