@@ -45,71 +45,34 @@ The go-ethereum project comes with several wrappers/executables found in the `cm
 
 ### Initialize with genesis.json
 	geth --datadir "/projects/ethereum/geth/node" init genesis.json
-	
-	`--datadir` flag specify the data directory of your node
-	
-### Run geth
+`--datadir` flag specify the data directory of your node
+
+### Run
 	nohup geth --nodiscover --maxpeers 3 --identity "bokerchain" --rpc --rpcaddr 0.0.0.0 --rpccorsdomain "*" --rpcvhosts '*' --datadir "/projects/ethereum/geth/node" --port 30303 --rpcapi "db,eth,net,web3" --networkid 96579 &
-	
-	`--datadir` flag should be idential to that in first step
-	`--networkid` flag specify your private net id
-	
+`--datadir`		flag should be idential to that in first step
+`--networkid`	flag specify your private net id
 
-### Full node on the main Ethereum network
+### Console mode
+	geth attach ipc:/projects/ethereum/geth/node/geth.ipc
 
-By far the most common scenario is people wanting to simply interact with the Ethereum network:
-create accounts; transfer funds; deploy and interact with contracts. For this particular use-case
-the user doesn't care about years-old historical data, so we can fast-sync quickly to the current
-state of the network. To do so:
 
-```
-$ geth --fast --cache=512 console
-```
+### Create new account
+	personal.newAccount()
 
-This command will:
+### Unlock account
+	personal.unlockAccount("0x1d4443a3eff8a5df88ecd9d91a58037585289be0", "123456", 0)
 
- * Start geth in fast sync mode (`--fast`), causing it to download more data in exchange for avoiding
-   processing the entire history of the Ethereum network, which is very CPU intensive.
- * Bump the memory allowance of the database to 512MB (`--cache=512`), which can help significantly in
-   sync times especially for HDD users. This flag is optional and you can set it as high or as low as
-   you'd like, though we'd recommend the 512MB - 2GB range.
- * Start up Geth's built-in interactive [JavaScript console](https://github.com/ethereum/go-ethereum/wiki/JavaScript-Console),
-   (via the trailing `console` subcommand) through which you can invoke all official [`web3` methods](https://github.com/ethereum/wiki/wiki/JavaScript-API)
-   as well as Geth's own [management APIs](https://github.com/ethereum/go-ethereum/wiki/Management-APIs).
-   This too is optional and if you leave it out you can always attach to an already running Geth instance
-   with `geth attach`.
+### Set current account as first validator to process first transaction
+	miner.setLocalValidator()
 
-### Full node on the Ethereum test network
+### Set new validator
+	eth.addValidator("0x1d4443a3eff8a5df88ecd9d91a58037585289be0", 10000)
 
-Transitioning towards developers, if you'd like to play around with creating Ethereum contracts, you
-almost certainly would like to do that without any real money involved until you get the hang of the
-entire system. In other words, instead of attaching to the main network, you want to join the **test**
-network with your node, which is fully equivalent to the main network, but with play-Ether only.
+### Start mining
+	miner.start()
 
-```
-$ geth --testnet --fast --cache=512 console
-```
 
-The `--fast`, `--cache` flags and `console` subcommand have the exact same meaning as above and they
-are equally useful on the testnet too. Please see above for their explanations if you've skipped to
-here.
-
-Specifying the `--testnet` flag however will reconfigure your Geth instance a bit:
-
- * Instead of using the default data directory (`~/.ethereum` on Linux for example), Geth will nest
-   itself one level deeper into a `testnet` subfolder (`~/.ethereum/testnet` on Linux). Note, on OSX
-   and Linux this also means that attaching to a running testnet node requires the use of a custom
-   endpoint since `geth attach` will try to attach to a production node endpoint by default. E.g.
-   `geth attach <datadir>/testnet/geth.ipc`. Windows users are not affected by this.
- * Instead of connecting the main Ethereum network, the client will connect to the test network,
-   which uses different P2P bootnodes, different network IDs and genesis states.
-   
-*Note: Although there are some internal protective measures to prevent transactions from crossing
-over between the main network and test network, you should make sure to always use separate accounts
-for play-money and real-money. Unless you manually move accounts, Geth will by default correctly
-separate the two networks and will not make any accounts available between them.*
-
-### Configuration
+## Configuration
 
 As an alternative to passing the numerous flags to the `geth` binary, you can also pass a configuration file via:
 
