@@ -41,12 +41,17 @@ The go-ethereum project comes with several wrappers/executables found in the `cm
 | `swarm`    | swarm daemon and tools. This is the entrypoint for the swarm network. `swarm --help` for command line options and subcommands. See https://swarm-guide.readthedocs.io for swarm documentation. |
 | `puppeth`    | a CLI wizard that aids in creating a new Ethereum network. |
 
-## Running geth
+## Starting up your Boker Chain nodes
 
-Going through all the possible command line flags is out of scope here (please consult our
-[CLI Wiki page](https://github.com/ethereum/go-ethereum/wiki/Command-Line-Options)), but we've
-enumerated a few common parameter combos to get you up to speed quickly on how you can run your
-own Geth instance.
+### Initialize with genesis.json
+	geth --datadir "/projects/ethereum/geth/node" init genesis.json
+	`--datadir` flag specify the data directory of your node
+	
+### Run geth
+	nohup geth --nodiscover --maxpeers 3 --identity "bokerchain" --rpc --rpcaddr 0.0.0.0 --rpccorsdomain "*" --rpcvhosts '*' --datadir "/projects/ethereum/geth/node" --port 30303 --rpcapi "db,eth,net,web3" --networkid 96579 &
+	`--datadir` flag should be idential to that in first step
+	`--networkid` flag specify your private net id
+	
 
 ### Full node on the main Ethereum network
 
