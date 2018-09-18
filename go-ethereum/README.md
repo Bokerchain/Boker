@@ -4,9 +4,6 @@ Official golang implementation of Boker Chain.
 
 [Whitepaper](http://yibokeclips.otvcloud.com/uploads/apks/blkV2.1.pdf)|[Website](http://www.videoblkchain.com/)|[Telegram](https://t.me/Bobbyglobal)|[Twitter](https://twitter.com/BokerBobby)
 
-Automated builds are available for stable releases and the unstable master branch.
-Binary archives are published at https://geth.ethereum.org/downloads/.
-
 ## Building the source
 
 Building Boker Chain requires both a Go (version 1.7 or later) and a C compiler. You can install them using your favourite package manager. Once the dependencies are installed, run
