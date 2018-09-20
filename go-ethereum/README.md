@@ -6,7 +6,7 @@ Official golang implementation of Boker Chain.
 
 ## Building the source
 
-Building Boker Chain requires both a Go (version 1.7 or later) and a C compiler. You can install them using your favourite package manager. Once the dependencies are installed, run
+Building Boker Chain requires both a Go (version 1.7.3 or later) and a C compiler. You can install them using your favourite package manager. Once the dependencies are installed, run
 
     make geth
 
