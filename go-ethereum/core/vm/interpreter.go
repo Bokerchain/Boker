@@ -48,7 +48,7 @@ func NewInterpreter(evm *EVM, cfg Config) *Interpreter {
 	// We use the STOP instruction whether to see
 	// the jump table was initialised. If it was not
 	// we'll set the default jump table.
-	if !cfg.JumpTable[STOP].valid {
+	/*if !cfg.JumpTable[STOP].valid {
 		switch {
 		case evm.ChainConfig().IsByzantium(evm.BlockNumber):
 			cfg.JumpTable = byzantiumInstructionSet
@@ -57,6 +57,9 @@ func NewInterpreter(evm *EVM, cfg Config) *Interpreter {
 		default:
 			cfg.JumpTable = frontierInstructionSet
 		}
+	}*/
+	if !cfg.JumpTable[STOP].valid {
+		cfg.JumpTable = frontierInstructionSet
 	}
 
 	return &Interpreter{

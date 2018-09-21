@@ -18,7 +18,7 @@ package rpc
 
 import (
 	"context"
-	"fmt"
+	_ "fmt"
 	"net"
 
 	"github.com/boker/go-ethereum/log"
@@ -27,6 +27,8 @@ import (
 // CreateIPCListener creates an listener, on Unix platforms this is a unix socket, on
 // Windows this is a named pipe
 func CreateIPCListener(endpoint string) (net.Listener, error) {
+
+	log.Info("****CreateIPCListener****", "endpoint", endpoint)
 	return ipcListen(endpoint)
 }
 
@@ -37,7 +39,9 @@ func (srv *Server) ServeListener(l net.Listener) error {
 		if err != nil {
 			return err
 		}
-		log.Trace(fmt.Sprint("accepted conn", conn.RemoteAddr()))
+		//log.Trace(fmt.Sprint("accepted conn", conn.RemoteAddr()))
+		log.Info("****ServeListener****", "accepted conn", conn.RemoteAddr())
+
 		go srv.ServeCodec(NewJSONCodec(conn), OptionMethodInvocation|OptionSubscriptions)
 	}
 }

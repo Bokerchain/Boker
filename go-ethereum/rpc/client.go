@@ -27,7 +27,7 @@ var (
 
 const (
 	// Timeouts
-	tcpKeepAliveInterval = 30 * time.Second
+	tcpKeepAliveInterval = 30 * time.Second //TCP的超时时长
 	defaultDialTimeout   = 10 * time.Second // used when dialing if the context has no deadline
 	defaultWriteTimeout  = 10 * time.Second // used for calls if the context has no deadline
 	subscribeTimeout     = 5 * time.Second  // overall timeout eth_subscribe, rpc_modules calls
@@ -222,6 +222,8 @@ func (c *Client) Close() {
 // The result must be a pointer so that package json can unmarshal into it. You
 // can also pass nil, in which case the result is ignored.
 func (c *Client) Call(result interface{}, method string, args ...interface{}) error {
+
+	//log.Info("(c *Client) Call", "method", method)
 	ctx := context.Background()
 	return c.CallContext(ctx, result, method, args...)
 }
@@ -230,13 +232,15 @@ func (c *Client) Call(result interface{}, method string, args ...interface{}) er
 //结果必须是一个指针，以便包json可以解组。 您也可以传递nil，在这种情况下会忽略结果。
 func (c *Client) CallContext(ctx context.Context, result interface{}, method string, args ...interface{}) error {
 
+	//log.Info("****CallContext****", "method", method)
+
 	//将参数形成一个Json结构,并返回RPC调用的一个类型jsonrpcMessage(封装了响应消息标准内容结构，包括版本，ID，方法，参数，错误，返回值)
 	msg, err := c.newMessage(method, args...)
 	if err != nil {
 		return err
 	}
 
-	//
+	//log.Info("CallContext newMessage", "msg", msg)
 	op := &requestOp{ids: []json.RawMessage{msg.ID}, resp: make(chan *jsonrpcMessage, 1)}
 
 	//通过rpc不同的渠道发送响应消息
@@ -337,11 +341,15 @@ func (c *Client) BatchCallContext(ctx context.Context, b []BatchElem) error {
 
 // EthSubscribe registers a subscripion under the "eth" namespace.
 func (c *Client) EthSubscribe(ctx context.Context, channel interface{}, args ...interface{}) (*ClientSubscription, error) {
+
+	log.Info("****EthSubscribe****")
 	return c.Subscribe(ctx, "eth", channel, args...)
 }
 
 // ShhSubscribe registers a subscripion under the "shh" namespace.
 func (c *Client) ShhSubscribe(ctx context.Context, channel interface{}, args ...interface{}) (*ClientSubscription, error) {
+
+	log.Info("****ShhSubscribe****")
 	return c.Subscribe(ctx, "shh", channel, args...)
 }
 
@@ -392,6 +400,7 @@ func (c *Client) Subscribe(ctx context.Context, namespace string, channel interf
 }
 
 func (c *Client) newMessage(method string, paramsIn ...interface{}) (*jsonrpcMessage, error) {
+
 	params, err := json.Marshal(paramsIn)
 	if err != nil {
 		return nil, err
@@ -773,5 +782,7 @@ func (sub *ClientSubscription) unmarshal(result json.RawMessage) (interface{}, e
 
 func (sub *ClientSubscription) requestUnsubscribe() error {
 	var result interface{}
+
+	log.Info("requestUnsubscribe", "Method", sub.namespace+unsubscribeMethodSuffix)
 	return sub.client.Call(&result, sub.namespace+unsubscribeMethodSuffix, sub.subid)
 }

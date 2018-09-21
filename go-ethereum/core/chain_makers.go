@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/boker/go-ethereum/bokerface"
+	"github.com/boker/go-ethereum/boker/api"
+	"github.com/boker/go-ethereum/boker/protocol"
 	"github.com/boker/go-ethereum/common"
 	"github.com/boker/go-ethereum/consensus/dpos"
 	"github.com/boker/go-ethereum/consensus/ethash"
@@ -57,7 +58,7 @@ func (b *BlockGen) SetExtra(data []byte) {
 }
 
 //添加一个交易到区块
-func (b *BlockGen) AddTx(tx *types.Transaction, boker bokerface.BokerInterface) {
+func (b *BlockGen) AddTx(tx *types.Transaction, boker bokerapi.Api) {
 
 	//判断gas池是否为nil
 	if b.gasPool == nil {
@@ -171,7 +172,8 @@ func GenerateChain(config *params.ChainConfig, parent *types.Block, db ethdb.Dat
 			panic(fmt.Sprintf("state write error: %v", err))
 		}
 		h.Root = root
-		h.DposContext = parent.Header().DposContext
+		h.DposProto = parent.Header().DposProto
+		h.BokerProto = parent.Header().BokerProto
 		return types.NewBlock(h, b.txs, b.uncles, b.receipts), b.receipts
 	}
 
@@ -203,15 +205,16 @@ func makeHeader(config *params.ChainConfig, parent *types.Block, state *state.St
 
 	//创建区块头
 	return &types.Header{
-		Root:        state.IntermediateRoot(config.IsEIP158(parent.Number())),
-		ParentHash:  parent.Hash(),
-		Coinbase:    parent.Coinbase(),
-		Difficulty:  parent.Difficulty(),
-		DposContext: &types.DposContextProto{},
-		GasLimit:    CalcGasLimit(parent),
-		GasUsed:     new(big.Int),
-		Number:      new(big.Int).Add(parent.Number(), common.Big1),
-		Time:        time,
+		Root:       state.IntermediateRoot(config.IsEIP158(parent.Number())),
+		ParentHash: parent.Hash(),
+		Coinbase:   parent.Coinbase(),
+		Difficulty: parent.Difficulty(),
+		DposProto:  &types.DposContextProto{},
+		BokerProto: &protocol.BokerBackendProto{},
+		GasLimit:   CalcGasLimit(parent),
+		GasUsed:    new(big.Int),
+		Number:     new(big.Int).Add(parent.Number(), common.Big1),
+		Time:       time,
 	}
 }
 

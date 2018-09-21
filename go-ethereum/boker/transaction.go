@@ -2,16 +2,16 @@
 package boker
 
 import (
-	"errors"
+	"context"
 	"math/big"
 
-	"github.com/boker/go-ethereum/accounts/abi/bind"
-	"github.com/boker/go-ethereum/accounts/abi/bind/backends"
+	"github.com/boker/go-ethereum/accounts"
+	"github.com/boker/go-ethereum/boker/protocol"
 	"github.com/boker/go-ethereum/common"
-	"github.com/boker/go-ethereum/core"
 	"github.com/boker/go-ethereum/core/types"
-	"github.com/boker/go-ethereum/crypto"
 	"github.com/boker/go-ethereum/eth"
+	"github.com/boker/go-ethereum/internal/ethapi"
+	"github.com/boker/go-ethereum/log"
 )
 
 //播客链的基础合约管理
@@ -21,89 +21,72 @@ type BokerTransaction struct {
 
 func NewTransaction(ethereum *eth.Ethereum) *BokerTransaction {
 
-	bokerTransaction := new(BokerTransaction)
-	bokerTransaction.ethereum = ethereum
-	return bokerTransaction
+	return &BokerTransaction{
+		ethereum: ethereum,
+	}
 }
 
-//产生部署基础合约交易
-func (t *BokerTransaction) DeployTransaction(txType types.TxType, address common.Address) error {
+func (t *BokerTransaction) SubmitBokerTransaction(ctx context.Context, txType protocol.TxType, to common.Address) error {
 
+	log.Info("****SubmitBokerTransaction****", "txType", txType, "to", to.String())
 	if t.ethereum != nil {
 
-		DeployKey, err := crypto.HexToECDSA(t.ethereum.BlockChain().Config().Producer.PrivateKey)
+		//得到From账号
+		from, err := t.ethereum.ApiBackend.Coinbase()
 		if err != nil {
+			log.Error("bokerTransaction CoinBase", "error", err)
 			return err
 		}
-		DeployAddr := crypto.PubkeyToAddress(DeployKey.PublicKey)
-		DeployBalance := big.NewInt(0)
-		DeployBalance.SetInt64(t.ethereum.BlockChain().Config().Producer.Balance)
+		log.Info("SubmitBokerTransaction CoinBase", "from", from.String())
 
-		//构造backend和帐号
-		backend := backends.NewSimulatedBackend(core.GenesisAlloc{DeployAddr: {Balance: DeployBalance}}, t.ethereum.Boker)
-		opts := bind.NewKeyedTransactor(DeployKey)
-
-		//得到Nonce
-		nonce, err := backend.PendingNonceAt(opts.Context, t.ethereum.BlockChain().Config().Coinbase)
-
-		//判断Value值是否为空
-		value := opts.Value
-		if value == nil {
-			value = new(big.Int)
+		//设置参数（其中有些参数可以通过调用设置默认设置来进行获取）
+		args := ethapi.SendTxArgs{
+			From:     from,
+			Type:     txType,
+			Nonce:    nil,
+			To:       &to,
+			Gas:      nil,
+			GasPrice: nil,
+			Value:    nil,
 		}
+
+		//查找包含所请求签名者的钱包
+		account := accounts.Account{Address: args.From}
+
+		//根据帐号得到钱包信息
+		wallet, err := t.ethereum.AccountManager().Find(account)
+		if err != nil {
+			log.Error("SubmitBokerTransaction AccountManager Find", "error", err)
+			return err
+		}
+
+		//设置默认设置
+		if err := args.SetDefaults(ctx, t.ethereum.ApiBackend); err != nil {
+			log.Error("SubmitBokerTransaction SetDefaults", "error", err)
+			return err
+		}
+
 		var input []byte
-		rawTx := types.NewBaseTransaction(txType, nonce, address, value, input)
+		tx := types.NewBaseTransaction(args.Type, (uint64)(*args.Nonce), (common.Address)(*args.To), (*big.Int)(args.Value), input, []byte(""))
 
-		//判断交易是否有签名者
-		if opts.Signer == nil {
-			return errors.New("no signer to authorize the transaction with")
+		var chainID *big.Int
+		if config := t.ethereum.ApiBackend.ChainConfig(); config.IsEIP155(t.ethereum.ApiBackend.CurrentBlock().Number()) {
+			chainID = config.ChainId
 		}
 
-		if err := backend.SendTransaction(opts.Context, rawTx); err != nil {
+		//对该笔交易签名来确保该笔交易的真实有效性
+		signed, err := wallet.SignTxWithPassphrase(account, t.ethereum.Password(), tx, chainID)
+		if err != nil {
+			log.Error("SubmitBokerTransaction SignTxWithPassphrase", "error", err)
 			return err
 		}
+
+		if _, err := ethapi.SubmitTransaction(ctx, t.ethereum.ApiBackend, signed); err != nil {
+			log.Error("SubmitBokerTransaction SubmitTransaction", "error", err)
+			return err
+		}
+
 		return nil
 	}
-	return nil
-}
-
-//产生取消部署基础合约交易
-func (t *BokerTransaction) UnDeployTransaction(txType types.TxType, address common.Address) error {
-
-	if t.ethereum != nil {
-
-		DeployKey, err := crypto.HexToECDSA(t.ethereum.BlockChain().Config().Producer.PrivateKey)
-		if err != nil {
-			return err
-		}
-		DeployAddr := crypto.PubkeyToAddress(DeployKey.PublicKey)
-		DeployBalance := big.NewInt(0)
-		DeployBalance.SetInt64(t.ethereum.BlockChain().Config().Producer.Balance)
-
-		//构造backend和帐号
-		backend := backends.NewSimulatedBackend(core.GenesisAlloc{DeployAddr: {Balance: DeployBalance}}, t.ethereum.Boker)
-		opts := bind.NewKeyedTransactor(DeployKey)
-
-		//得到Nonce
-		nonce, err := backend.PendingNonceAt(opts.Context, t.ethereum.BlockChain().Config().Coinbase)
-
-		//判断Value值是否为空
-		value := opts.Value
-		if value == nil {
-			value = new(big.Int)
-		}
-		var input []byte
-		rawTx := types.NewBaseTransaction(txType, nonce, address, value, input)
-
-		//判断交易是否有签名者
-		if opts.Signer == nil {
-			return errors.New("no signer to authorize the transaction with")
-		}
-
-		if err := backend.SendTransaction(opts.Context, rawTx); err != nil {
-			return err
-		}
-		return nil
-	}
-	return nil
+	return protocol.ErrEthereumRuning
 }

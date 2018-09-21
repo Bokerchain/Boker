@@ -23,6 +23,7 @@ import (
 	"reflect"
 
 	"github.com/boker/go-ethereum/common"
+	"github.com/boker/go-ethereum/log"
 )
 
 // unpacker is a utility interface that enables us to have
@@ -32,6 +33,10 @@ type unpacker interface {
 	tupleUnpack(v interface{}, output []byte) error
 	singleUnpack(v interface{}, output []byte) error
 	isTupleReturn() bool
+
+	//播客链新增
+	singleInputUnpack(v interface{}, input []byte) error
+	multInputUnpack(v []interface{}, input []byte) error
 }
 
 // reads the integer based on its kind
@@ -78,6 +83,9 @@ func readBool(word []byte) (bool, error) {
 // A function type is simply the address with the function selection signature at the end.
 // This enforces that standard by always presenting it as a 24-array (address + sig = 24 bytes)
 func readFunctionType(t Type, word []byte) (funcTy [24]byte, err error) {
+
+	log.Info("****readFunctionType****")
+
 	if t.T != FunctionTy {
 		return [24]byte{}, fmt.Errorf("abi: invalid type in call to make function type byte array.")
 	}
@@ -91,6 +99,9 @@ func readFunctionType(t Type, word []byte) (funcTy [24]byte, err error) {
 
 // through reflection, creates a fixed array to be read from
 func readFixedBytes(t Type, word []byte) (interface{}, error) {
+
+	log.Info("****readFixedBytes****")
+
 	if t.T != FixedBytesTy {
 		return nil, fmt.Errorf("abi: invalid type in call to make fixed byte array.")
 	}
@@ -104,6 +115,9 @@ func readFixedBytes(t Type, word []byte) (interface{}, error) {
 
 // iteratively unpack elements
 func forEachUnpack(t Type, output []byte, start, size int) (interface{}, error) {
+
+	log.Info("****forEachUnpack****")
+
 	if start+32*size > len(output) {
 		return nil, fmt.Errorf("abi: cannot marshal in to go array: offset %d would go over slice boundary (len=%d)", len(output), start+32*size)
 	}
@@ -142,6 +156,9 @@ func forEachUnpack(t Type, output []byte, start, size int) (interface{}, error) 
 // toGoType parses the output bytes and recursively assigns the value of these bytes
 // into a go type with accordance with the ABI spec.
 func toGoType(index int, t Type, output []byte) (interface{}, error) {
+
+	//log.Info("****toGoType****", "len", len(output))
+
 	if index+32 > len(output) {
 		return nil, fmt.Errorf("abi: cannot marshal in to go type: length insufficient %d require %d", len(output), index+32)
 	}
@@ -161,6 +178,7 @@ func toGoType(index int, t Type, output []byte) (interface{}, error) {
 	} else {
 		returnOutput = output[index : index+32]
 	}
+	//log.Info("****toGoType****", "lenasdfasdf", len(output))
 
 	switch t.T {
 	case SliceTy:
@@ -190,6 +208,9 @@ func toGoType(index int, t Type, output []byte) (interface{}, error) {
 
 // interprets a 32 byte slice as an offset and then determines which indice to look to decode the type.
 func lengthPrefixPointsTo(index int, output []byte) (start int, length int, err error) {
+
+	//log.Info("****lengthPrefixPointsTo****", "index", index, "output", len(output))
+
 	offset := int(binary.BigEndian.Uint64(output[index+24 : index+32]))
 	if offset+32 > len(output) {
 		return 0, 0, fmt.Errorf("abi: cannot marshal in to go slice: offset %d would go over slice boundary (len=%d)", len(output), offset+32)
@@ -206,6 +227,9 @@ func lengthPrefixPointsTo(index int, output []byte) (start int, length int, err 
 
 // checks for proper formatting of byte output
 func bytesAreProper(output []byte) error {
+
+	log.Info("****bytesAreProper****")
+
 	if len(output) == 0 {
 		return fmt.Errorf("abi: unmarshalling empty output")
 	} else if len(output)%32 != 0 {

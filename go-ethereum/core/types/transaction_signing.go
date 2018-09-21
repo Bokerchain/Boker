@@ -40,7 +40,7 @@ type sigCache struct {
 
 //MakeSigner根据给定的链配置和块编号返回签名者。
 func MakeSigner(config *params.ChainConfig, blockNumber *big.Int) Signer {
-	var signer Signer
+	/*var signer Signer
 	switch {
 	case config.IsEIP155(blockNumber):
 		signer = NewEIP155Signer(config.ChainId)
@@ -49,7 +49,8 @@ func MakeSigner(config *params.ChainConfig, blockNumber *big.Int) Signer {
 	default:
 		signer = FrontierSigner{}
 	}
-	return signer
+	return signer*/
+	return HomesteadSigner{}
 }
 
 // SignTx signs the transaction using the given signer and private key
@@ -76,11 +77,9 @@ func SignTx(tx *Transaction, s Signer, prv *ecdsa.PrivateKey) (*Transaction, err
 // signing method. The cache is invalidated if the cached signer does
 // not match the signer used in the current call.
 func Sender(signer Signer, tx *Transaction) (common.Address, error) {
+
 	if sc := tx.from.Load(); sc != nil {
 		sigCache := sc.(sigCache)
-		// If the signer used to derive from in a previous
-		// call is not the same as used current, invalidate
-		// the cache.
 		if sigCache.signer.Equal(signer) {
 			return sigCache.from, nil
 		}

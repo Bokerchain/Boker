@@ -38,6 +38,7 @@ import (
 	"github.com/boker/go-ethereum/core/types"
 	"github.com/boker/go-ethereum/crypto"
 	"github.com/boker/go-ethereum/event"
+	_ "github.com/boker/go-ethereum/log"
 )
 
 var (
@@ -279,9 +280,9 @@ func (ks *KeyStore) SignTx(a accounts.Account, tx *types.Transaction, chainID *b
 		return nil, ErrLocked
 	}
 	// Depending on the presence of the chain ID, sign with EIP155 or homestead
-	if chainID != nil {
+	/*if chainID != nil {
 		return types.SignTx(tx, types.NewEIP155Signer(chainID), unlockedKey.PrivateKey)
-	}
+	}*/
 	return types.SignTx(tx, types.HomesteadSigner{}, unlockedKey.PrivateKey)
 }
 
@@ -300,6 +301,7 @@ func (ks *KeyStore) SignHashWithPassphrase(a accounts.Account, passphrase string
 // SignTxWithPassphrase signs the transaction if the private key matching the
 // given address can be decrypted with the given passphrase.
 func (ks *KeyStore) SignTxWithPassphrase(a accounts.Account, passphrase string, tx *types.Transaction, chainID *big.Int) (*types.Transaction, error) {
+
 	_, key, err := ks.getDecryptedKey(a, passphrase)
 	if err != nil {
 		return nil, err
@@ -307,9 +309,10 @@ func (ks *KeyStore) SignTxWithPassphrase(a accounts.Account, passphrase string, 
 	defer zeroKey(key.PrivateKey)
 
 	// Depending on the presence of the chain ID, sign with EIP155 or homestead
-	if chainID != nil {
+	/*if chainID != nil {
 		return types.SignTx(tx, types.NewEIP155Signer(chainID), key.PrivateKey)
-	}
+	}*/
+	//log.Info("SignTxWithPassphrase types.HomesteadSigner")
 	return types.SignTx(tx, types.HomesteadSigner{}, key.PrivateKey)
 }
 

@@ -26,6 +26,8 @@ import (
 	"math/big"
 	"reflect"
 	"strings"
+
+	"github.com/boker/go-ethereum/log"
 )
 
 var (
@@ -156,7 +158,7 @@ func wrapStreamError(err error, typ reflect.Type) error {
 	case ErrExpectedString:
 		return &decodeError{msg: "expected input string or byte", typ: typ}
 	case errUintOverflow:
-		return &decodeError{msg: "input string too long", typ: typ}
+		return &decodeError{msg: "input string too long errUintOverflow", typ: typ}
 	case errNotAtEOL:
 		return &decodeError{msg: "input list has too many elements", typ: typ}
 	}
@@ -385,7 +387,7 @@ func decodeByteArray(s *Stream, val reflect.Value) error {
 	switch kind {
 	case Byte:
 		if vlen == 0 {
-			return &decodeError{msg: "input string too long", typ: val.Type()}
+			return &decodeError{msg: "input string too long vlen = 0", typ: val.Type()}
 		}
 		if vlen > 1 {
 			return &decodeError{msg: "input string too short", typ: val.Type()}
@@ -394,7 +396,8 @@ func decodeByteArray(s *Stream, val reflect.Value) error {
 		val.Index(0).SetUint(bv)
 	case String:
 		if uint64(vlen) < size {
-			return &decodeError{msg: "input string too long", typ: val.Type()}
+			log.Error("decodeByteArray ", "vlen", uint64(vlen), "size", size)
+			return &decodeError{msg: "input string too long uint64(vlen) < size", typ: val.Type()}
 		}
 		if uint64(vlen) > size {
 			return &decodeError{msg: "input string too short", typ: val.Type()}
@@ -906,6 +909,7 @@ func (s *Stream) Kind() (kind Kind, size uint64, err error) {
 	return s.kind, s.size, s.kinderr
 }
 
+//将流得到指定的类型和类型长度信息
 func (s *Stream) readKind() (kind Kind, size uint64, err error) {
 	b, err := s.readByte()
 	if err != nil {

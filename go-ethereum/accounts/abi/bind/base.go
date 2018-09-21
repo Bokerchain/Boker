@@ -5,14 +5,16 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	_ "reflect"
 
 	"github.com/boker/go-ethereum"
 	"github.com/boker/go-ethereum/accounts/abi"
+	"github.com/boker/go-ethereum/boker/protocol"
 	"github.com/boker/go-ethereum/common"
 	"github.com/boker/go-ethereum/core/types"
 	"github.com/boker/go-ethereum/crypto"
 	"github.com/boker/go-ethereum/eth"
-	"github.com/boker/go-ethereum/include"
+	"github.com/boker/go-ethereum/log"
 	"github.com/boker/go-ethereum/node"
 )
 
@@ -63,6 +65,8 @@ func NewBoundContract(address common.Address,
 
 func DeployContract(opts *TransactOpts, abi abi.ABI, bytecode []byte, backend ContractBackend, params ...interface{}) (common.Address, *types.Transaction, *BoundContract, error) {
 
+	log.Info("****DeployContract****")
+
 	//赋值
 	c := NewBoundContract(common.Address{}, abi, backend, backend)
 
@@ -70,7 +74,7 @@ func DeployContract(opts *TransactOpts, abi abi.ABI, bytecode []byte, backend Co
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
-	tx, err := c.transact(opts, nil, append(bytecode, input...), types.Binary)
+	tx, err := c.transact(opts, nil, append(bytecode, input...), []byte(""), protocol.Binary)
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
@@ -80,6 +84,8 @@ func DeployContract(opts *TransactOpts, abi abi.ABI, bytecode []byte, backend Co
 
 //调用合约方法，并将params作为输入值和将输出设置为result
 func (c *BoundContract) Call(opts *CallOpts, result interface{}, method string, params ...interface{}) error {
+
+	//log.Info("****Call****")
 
 	//判断opts是否为空
 	if opts == nil {
@@ -138,6 +144,8 @@ func (c *BoundContract) Call(opts *CallOpts, result interface{}, method string, 
 //得到当前分币帐号
 func (c *BoundContract) getTokenNoder(opts *TransactOpts) (common.Address, error) {
 
+	//ethereum.ChainReader.
+
 	var ether *eth.Ethereum
 	if err := GethNode.Service(&ether); err != nil {
 		return common.Address{}, err
@@ -165,6 +173,17 @@ func (c *BoundContract) getProducer(opts *TransactOpts) (common.Address, error) 
 	return ether.BlockChain().CurrentBlock().DposCtx().GetCurrentProducer()
 }
 
+//得到参数类型
+func typeof(v interface{}) bool {
+
+	switch v.(type) {
+	case string:
+		return true
+	default:
+		return false
+	}
+}
+
 //使用输入的值作为参数调用合约方法
 func (c *BoundContract) Transact(opts *TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
 
@@ -173,38 +192,40 @@ func (c *BoundContract) Transact(opts *TransactOpts, method string, params ...in
 	if err != nil {
 		return nil, err
 	}
+	log.Info("****Transact****", "input", input)
 
-	var ether *eth.Ethereum
-	if err := GethNode.Service(&ether); err != nil {
+	extra := []byte("")
+	var e *eth.Ethereum
+	if err := GethNode.Service(&e); err != nil {
 		return nil, err
 	}
 
-	contractType, err := ether.Boker.GetContract(c.address)
+	contractType, err := e.Boker().GetContract(c.address)
 	if err != nil {
 		return nil, err
 	}
 
-	if contractType == types.ContractVote { //当前调用的是投票基础合约
+	if contractType == protocol.ContractVote { //当前调用的是投票基础合约
 
-		if method == include.RegisterCandidateMethod {
+		if method == protocol.RegisterCandidateMethod {
 
 			//候选人注册方法名
-			return c.transact(opts, &c.address, input, types.RegisterCandidate)
-		} else if method == include.VoteCandidateMethod {
+			return c.transact(opts, &c.address, input, extra, protocol.RegisterCandidate)
+		} else if method == protocol.VoteCandidateMethod {
 
 			//投票方法名
-			return c.transact(opts, &c.address, input, types.ProducerVote)
-		} else if method == include.RotateVoteMethod {
+			return c.transact(opts, &c.address, input, extra, protocol.VoteUser)
+		} else if method == protocol.RotateVoteMethod {
 
 			//转换投票方法名
-			return c.transact(opts, &c.address, input, types.RotateVote)
+			return c.transact(opts, &c.address, input, extra, protocol.VoteEpoch)
 		}
 		return nil, errors.New("vote contract unknown method")
 
-	} else if contractType == types.ContractAssignToken {
+	} else if contractType == protocol.ContractAssignToken {
 
 		//判断是否是通证分配协议
-		if method == include.AssignTokenMethod {
+		if method == protocol.AssignTokenMethod {
 
 			//得到当前的分币节点
 			tokennoder, err := c.getTokenNoder(opts)
@@ -216,31 +237,35 @@ func (c *BoundContract) Transact(opts *TransactOpts, method string, params ...in
 			if tokennoder != opts.From {
 				return nil, errors.New("current assign token not is from account")
 			}
-			return c.transact(opts, &c.address, input, types.AssignToken)
+			return c.transact(opts, &c.address, input, extra, protocol.AssignToken)
 		}
 		return nil, errors.New("assign token contract unknown method")
 
 	}
-	return c.transact(opts, &c.address, input, types.Binary)
+	return c.transact(opts, &c.address, input, extra, protocol.Binary)
 
 }
 
 func (c *BoundContract) Transfer(opts *TransactOpts) (*types.Transaction, error) {
 
-	var ether *eth.Ethereum
-	if err := GethNode.Service(&ether); err != nil {
+	log.Info("****Transfer****")
+
+	var e *eth.Ethereum
+	if err := GethNode.Service(&e); err != nil {
 		return nil, err
 	}
 
-	txType, err := ether.Boker.GetContract(c.address)
+	txType, err := e.Boker().GetContract(c.address)
 	if err != nil {
 		return nil, err
 	}
 
-	return c.transact(opts, &c.address, nil, types.TxType(txType))
+	return c.transact(opts, &c.address, nil, []byte(""), protocol.TxType(txType))
 }
 
-func (c *BoundContract) baseTransact(opts *TransactOpts, contract *common.Address, input []byte, transactTypes types.TxType) (*types.Transaction, error) {
+func (c *BoundContract) baseTransact(opts *TransactOpts, contract *common.Address, payload []byte, extra []byte, transactTypes protocol.TxType) (*types.Transaction, error) {
+
+	log.Info("****baseTransact****", "from", opts.From)
 
 	//判断Value值是否为空
 	var err error
@@ -272,7 +297,7 @@ func (c *BoundContract) baseTransact(opts *TransactOpts, contract *common.Addres
 	} else {
 
 		//合约已经创建，则创建一个交易
-		rawTx = types.NewBaseTransaction(transactTypes, nonce, c.address, value, input)
+		rawTx = types.NewBaseTransaction(transactTypes, nonce, c.address, value, payload, extra)
 	}
 
 	//判断交易是否有签名者
@@ -287,13 +312,16 @@ func (c *BoundContract) baseTransact(opts *TransactOpts, contract *common.Addres
 	}
 
 	//将交易注入pending池中
+	log.Info("****c.transactor.SendTransaction****")
 	if err := c.transactor.SendTransaction(ensureContext(opts.Context), signedTx); err != nil {
 		return nil, err
 	}
 	return signedTx, nil
 }
 
-func (c *BoundContract) normalTransact(opts *TransactOpts, contract *common.Address, input []byte, transactTypes types.TxType) (*types.Transaction, error) {
+func (c *BoundContract) normalTransact(opts *TransactOpts, contract *common.Address, payload []byte, extra []byte, transactTypes protocol.TxType) (*types.Transaction, error) {
+
+	log.Info("****normalTransact****", "from", opts.From)
 
 	//判断Value值是否为空
 	var err error
@@ -339,7 +367,7 @@ func (c *BoundContract) normalTransact(opts *TransactOpts, contract *common.Addr
 		}
 
 		//估算所需要的Gas
-		msg := ethereum.CallMsg{From: opts.From, To: contract, Value: value, Data: input}
+		msg := ethereum.CallMsg{From: opts.From, To: contract, Value: value, Data: payload, Extra: extra}
 		gasLimit, err = c.transactor.EstimateGas(ensureContext(opts.Context), msg)
 		if err != nil {
 			return nil, fmt.Errorf("failed to estimate gas needed: %v", err) //估算所需gas失败
@@ -350,10 +378,10 @@ func (c *BoundContract) normalTransact(opts *TransactOpts, contract *common.Addr
 	var rawTx *types.Transaction
 	if contract == nil {
 		//如果合约尚未创建，则创建合约
-		rawTx = types.NewContractCreation(nonce, value, gasLimit, gasPrice, input)
+		rawTx = types.NewContractCreation(nonce, value, gasLimit, gasPrice, payload, extra)
 	} else {
 		//合约已经创建，则创建一个交易
-		rawTx = types.NewTransaction(transactTypes, nonce, c.address, value, gasLimit, gasPrice, input)
+		rawTx = types.NewTransaction(transactTypes, nonce, c.address, value, gasLimit, gasPrice, payload, extra)
 	}
 
 	//判断交易是否有签名者
@@ -368,23 +396,26 @@ func (c *BoundContract) normalTransact(opts *TransactOpts, contract *common.Addr
 	}
 
 	//将交易注入pending池中
+	log.Info("****c.transactor.SendTransaction****")
 	if err := c.transactor.SendTransaction(ensureContext(opts.Context), signedTx); err != nil {
 		return nil, err
 	}
 	return signedTx, nil
 }
 
-func (c *BoundContract) transact(opts *TransactOpts, contract *common.Address, input []byte, transactTypes types.TxType) (*types.Transaction, error) {
+func (c *BoundContract) transact(opts *TransactOpts, contract *common.Address, payload []byte, extra []byte, transactTypes protocol.TxType) (*types.Transaction, error) {
+
+	log.Info("****transact****", "from", opts.From)
 
 	/*根据不同类型计算使用的Gas信息*/
-	if transactTypes == types.Binary {
+	if transactTypes == protocol.Binary {
 
 		//普通交易
-		return c.normalTransact(opts, contract, input, transactTypes)
-	} else if types.IsDeploy(transactTypes) || types.IsVote(transactTypes) || types.IsToken(transactTypes) {
+		return c.normalTransact(opts, contract, payload, extra, transactTypes)
+	} else if (transactTypes >= protocol.SetVote) && (transactTypes <= protocol.SetValidator) {
 
 		//基础合约交易
-		return c.baseTransact(opts, contract, input, transactTypes)
+		return c.baseTransact(opts, contract, payload, extra, transactTypes)
 	} else {
 
 		//未知的类型

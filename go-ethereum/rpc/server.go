@@ -101,9 +101,11 @@ func (s *Server) RegisterName(name string, rcvr interface{}) error {
 		}
 		for _, m := range methods {
 			regsvc.callbacks[formatName(m.method.Name)] = m
+			//log.Info("RegisterName", "callbacks method.Name", m.method.Name)
 		}
 		for _, s := range subscriptions {
 			regsvc.subscriptions[formatName(s.method.Name)] = s
+			//log.Info("RegisterName", "subscriptions method.Name", s.method.Name)
 		}
 		return nil
 	}
@@ -116,6 +118,9 @@ func (s *Server) RegisterName(name string, rcvr interface{}) error {
 	}
 
 	s.services[svc.name] = svc
+
+	//log.Info("RegisterName", "name", svc.name)
+
 	return nil
 }
 
@@ -437,6 +442,7 @@ func (s *Server) readRequest(codec ServerCodec) ([]*serverRequest, bool, Error) 
 			}
 			continue
 		}
+		log.Info("readRequest ", "svcname", svc.name, "service", r.service, "method", r.method)
 
 		requests[i] = &serverRequest{id: r.id, err: &methodNotFoundError{r.service, r.method}}
 	}

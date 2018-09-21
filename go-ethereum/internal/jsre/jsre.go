@@ -28,6 +28,7 @@ import (
 
 	"github.com/boker/go-ethereum/common"
 	"github.com/boker/go-ethereum/internal/jsre/deps"
+	_ "github.com/boker/go-ethereum/log"
 	"github.com/robertkrimen/otto"
 )
 
@@ -306,9 +307,11 @@ func (self *JSRE) loadScript(call otto.FunctionCall) otto.Value {
 // Evaluate executes code and pretty prints the result to the specified output
 // stream.
 func (self *JSRE) Evaluate(code string, w io.Writer) error {
-	var fail error
 
+	var fail error
 	self.Do(func(vm *otto.Otto) {
+
+		//将用户输入直接调用web3.js来进行编码，并且直接调用bridge.send将编码后的数据发送给RPC的对应API处理
 		val, err := vm.Run(code)
 		if err != nil {
 			prettyError(vm, err, w)
@@ -316,7 +319,17 @@ func (self *JSRE) Evaluate(code string, w io.Writer) error {
 			prettyPrint(vm, val, w)
 		}
 		fmt.Fprintln(w)
+
+		/*vm.Run(`
+		var str = web3.toAscii("0x657468657265756d000000000000000000000000000000000000000000000000");
+		console.log(str); // "ethereum"
+		`)
+
+		str, err := vm.Get("str")
+		log.Info("toAscii", "str", str.String())
+		*/
 	})
+
 	return fail
 }
 

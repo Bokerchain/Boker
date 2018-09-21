@@ -63,6 +63,7 @@ type ChainReader interface {
 	// the canonical chain.
 	SubscribeNewHead(ctx context.Context, ch chan<- *types.Header) (Subscription, error)
 	CurrentBlock(ctx context.Context) (*types.Block, error)
+	GetCurrentBlock() (*types.Block, error)
 }
 
 // TransactionReader provides access to past transactions and their receipts.
@@ -120,6 +121,7 @@ type CallMsg struct {
 	GasPrice *big.Int        // wei <-> gas exchange ratio
 	Value    *big.Int        // amount of wei sent along with the call
 	Data     []byte          // input data, usually an ABI-encoded contract method invocation
+	Extra    []byte
 }
 
 // A ContractCaller provides contract calls, essentially transactions that are executed by

@@ -10,7 +10,7 @@ import (
 
 	"github.com/boker/go-ethereum"
 	"github.com/boker/go-ethereum/accounts/abi/bind"
-	"github.com/boker/go-ethereum/bokerface"
+	"github.com/boker/go-ethereum/boker/api"
 	"github.com/boker/go-ethereum/common"
 	"github.com/boker/go-ethereum/common/math"
 	"github.com/boker/go-ethereum/consensus/ethash"
@@ -36,18 +36,17 @@ type SimulatedBackend struct {
 	pendingBlock *types.Block        //根据请求导入当前待处理的块
 	pendingState *state.StateDB      //目前处于待处理状态的待处理状态
 	config       *params.ChainConfig //链配置信息
-	boker        bokerface.BokerInterface
+	boker        bokerapi.Api        //播客链接口
 }
 
 //创建一个新的用于进行测试的后台模拟链
-func NewSimulatedBackend(alloc core.GenesisAlloc, boker bokerface.BokerInterface) *SimulatedBackend {
-	database, _ := ethdb.NewMemDatabase()
+func NewSimulatedBackend(alloc core.GenesisAlloc, boker bokerapi.Api) *SimulatedBackend {
 
+	database, _ := ethdb.NewMemDatabase()
 	genesis := core.Genesis{
 		Config: params.DposChainConfig,
 		Alloc:  alloc,
 	}
-
 	genesis.MustCommit(database)
 
 	blockchain, _ := core.NewBlockChain(database, genesis.Config, ethash.NewFaker(), vm.Config{})
@@ -244,16 +243,13 @@ func (b *SimulatedBackend) EstimateGas(ctx context.Context, call ethereum.CallMs
 	return new(big.Int).SetUint64(hi), nil
 }
 
-// callContract implemens common code between normal and pending contract calls.
-// state is modified during execution, make sure to copy it if necessary.
 func (b *SimulatedBackend) callContract(ctx context.Context, call ethereum.CallMsg, block *types.Block, statedb *state.StateDB) ([]byte, *big.Int, bool, error) {
 
-	// Ensure message is initialized properly.
 	//如果GasPrice为nil则设置GasPrice为1
 	if call.GasPrice == nil {
 		call.GasPrice = big.NewInt(1)
 	}
-	//如果Gas为nil或者Gas未签名，则设置Gas为50000000
+	//如果Gas为nil或者Gas未签名，则设置Gas为50000000 = 50MW
 	if call.Gas == nil || call.Gas.Sign() == 0 {
 		call.Gas = big.NewInt(50000000)
 	}
@@ -261,26 +257,24 @@ func (b *SimulatedBackend) callContract(ctx context.Context, call ethereum.CallM
 	if call.Value == nil {
 		call.Value = new(big.Int)
 	}
-	// Set infinite balance to the fake caller account.
+
+	//Set infinite balance to the fake caller account.
 	from := statedb.GetOrNewStateObject(call.From)
 	from.SetBalance(math.MaxBig256)
-	// Execute the call.
 	msg := callmsg{call}
 
 	//创建虚拟机的上下文
 	evmContext := core.NewEVMContext(msg, block.Header(), b.blockchain, nil)
-	// Create a new environment which holds all relevant information
-	// about the transaction and calling mechanisms.
-	//创建这个交易所使用的虚拟机
 	vmenv := vm.NewEVM(evmContext, statedb, b.config, vm.Config{})
 	gaspool := new(core.GasPool).AddGas(math.MaxBig256)
 
 	//创建这个交易的状态对象
-	ret, gasUsed, _, failed, err := core.NewStateTransition(vmenv, msg, gaspool).TransitionDb()
+	ret, gasUsed, _, failed, _, err := core.NewStateTransition(vmenv, msg, gaspool).TransitionDb()
 	return ret, gasUsed, failed, err
 }
 
 func (b *SimulatedBackend) SendTransaction(ctx context.Context, tx *types.Transaction) error {
+
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
@@ -339,3 +333,4 @@ func (m callmsg) GasPrice() *big.Int   { return m.CallMsg.GasPrice }
 func (m callmsg) Gas() *big.Int        { return m.CallMsg.Gas }
 func (m callmsg) Value() *big.Int      { return m.CallMsg.Value }
 func (m callmsg) Data() []byte         { return m.CallMsg.Data }
+func (m callmsg) Extra() []byte        { return m.CallMsg.Extra }

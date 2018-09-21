@@ -158,75 +158,6 @@ func enableWhisper(ctx *cli.Context) bool {
 }
 
 //产生一个全节点
-/*func makeFullNode(ctx *cli.Context) *node.Node {
-
-	//产生一个节点的配置
-	log.Info("makeConfigNode")
-	stack, cfg := makeConfigNode(ctx)
-
-	//注册构造函数
-	log.Info("RegisterEthService")
-	utils.RegisterEthService(stack, &cfg.Eth)
-
-	log.Info("RegisterDashboardService")
-	if ctx.GlobalBool(utils.DashboardEnabledFlag.Name) {
-		utils.RegisterDashboardService(stack, &cfg.Dashboard)
-	}
-
-	log.Info("enableWhisper")
-	// Whisper must be explicitly enabled by specifying at least 1 whisper flag
-	shhEnabled := enableWhisper(ctx)
-	if shhEnabled {
-		if ctx.GlobalIsSet(utils.WhisperMaxMessageSizeFlag.Name) {
-			cfg.Shh.MaxMessageSize = uint32(ctx.Int(utils.WhisperMaxMessageSizeFlag.Name))
-		}
-		if ctx.GlobalIsSet(utils.WhisperMinPOWFlag.Name) {
-			cfg.Shh.MinimumAcceptedPOW = ctx.Float64(utils.WhisperMinPOWFlag.Name)
-		}
-		utils.RegisterShhService(stack, &cfg.Shh)
-	}
-
-	// Add the Ethereum Stats daemon if requested.
-	log.Info("RegisterEthStatsService")
-	if cfg.Ethstats.URL != "" {
-		utils.RegisterEthStatsService(stack, cfg.Ethstats.URL)
-	}
-
-	// Add the release oracle service so it boots along with node.
-	log.Info("NewReleaseService")
-	if err := stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
-		config := release.Config{
-			Oracle: relOracle,
-			Major:  uint32(params.VersionMajor),
-			Minor:  uint32(params.VersionMinor),
-			Patch:  uint32(params.VersionPatch),
-		}
-		commit, _ := hex.DecodeString(gitCommit)
-		copy(config.Commit[:], commit)
-		return release.NewReleaseService(ctx, config)
-	}); err != nil {
-		utils.Fatalf("Failed to register the Geth release oracle service: %v", err)
-	}
-
-	log.Info("Set Ethereum Boker")
-	if err := stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
-
-		//设置播客链指针
-		var ethereum *eth.Ethereum
-		if err := ctx.Service(&ethereum); err == nil {
-			bokerChain := boker.New(ethereum)
-			ethereum.SetBoker(bokerChain)
-		}
-		return nil, nil
-	}); err != nil {
-		utils.Fatalf("Failed to register the Geth release oracle service: %v", err)
-	}
-
-	return stack
-}
-*/
-
-//产生一个全节点
 func makeFullNode(ctx *cli.Context) *node.Node {
 
 	//产生一个节点的配置
@@ -268,17 +199,6 @@ func makeFullNode(ctx *cli.Context) *node.Node {
 		utils.Fatalf("Failed to register the Geth release oracle service: %v", err)
 	}
 
-	//在这里启动调用基础合约的协程
-	/*if err := stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
-
-		log.Info("Create Base Contract Manager")
-		//utils.Fatalf("Create Base Contract Manager")
-		stack.Ctx = ctx
-		return nil, contracts.NewBaseContractManager(ctx)
-	}); err != nil {
-		log.Error("Failed to register the Base Contract service: %v", err)
-		utils.Fatalf("Failed to register the Base Contract service: %v", err)
-	}*/
 	return stack
 }
 

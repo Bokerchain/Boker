@@ -279,6 +279,7 @@ type jsonrpcCall struct {
 
 // Send implements the web3 provider "send" method.
 func (b *bridge) Send(call otto.FunctionCall) (response otto.Value) {
+
 	// Remarshal the request into a Go value.
 	JSON, _ := call.Otto.Object("JSON")
 	reqVal, err := JSON.Call("stringify", call.Argument(0))
@@ -291,6 +292,7 @@ func (b *bridge) Send(call otto.FunctionCall) (response otto.Value) {
 		reqs   []jsonrpcCall
 		batch  bool
 	)
+	//log.Info("(b *bridge) Send", "rawReq", rawReq)
 	dec.UseNumber() // avoid float64s
 	if rawReq[0] == '[' {
 		batch = true
@@ -307,6 +309,8 @@ func (b *bridge) Send(call otto.FunctionCall) (response otto.Value) {
 		resp, _ := call.Otto.Object(`({"jsonrpc":"2.0"})`)
 		resp.Set("id", req.Id)
 		var result json.RawMessage
+
+		//log.Info("Send", "Method", req.Method, "Params", req.Params)
 		err = b.client.Call(&result, req.Method, req.Params...)
 		switch err := err.(type) {
 		case nil:

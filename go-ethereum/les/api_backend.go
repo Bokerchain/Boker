@@ -18,9 +18,11 @@ package les
 
 import (
 	"context"
+	"errors"
 	"math/big"
 
 	"github.com/boker/go-ethereum/accounts"
+	"github.com/boker/go-ethereum/boker/api"
 	"github.com/boker/go-ethereum/common"
 	"github.com/boker/go-ethereum/common/math"
 	"github.com/boker/go-ethereum/core"
@@ -181,4 +183,33 @@ func (b *LesApiBackend) ServiceFilter(ctx context.Context, session *bloombits.Ma
 	for i := 0; i < bloomFilterThreads; i++ {
 		go session.Multiplex(bloomRetrievalBatch, bloomRetrievalWait, b.eth.bloomRequests)
 	}
+}
+
+func (b *LesApiBackend) Coinbase() (common.Address, error) {
+
+	return common.Address{}, errors.New("Les Type Have`t Coinbase")
+}
+
+func (b *LesApiBackend) SetCoinbase(coinbase common.Address) {
+
+	b.eth.SetCoinbase(coinbase)
+}
+
+func (b *LesApiBackend) Boker() bokerapi.Api {
+	return b.eth.boker
+}
+
+func (b *LesApiBackend) Password() string {
+
+	return b.eth.Password()
+}
+
+func (b *LesApiBackend) SetPassword(password string) {
+
+	b.eth.SetPassword(password)
+}
+
+func (b *LesApiBackend) DecodeParams(code []byte) ([]byte, error) {
+
+	return b.eth.DecodeParams(code)
 }

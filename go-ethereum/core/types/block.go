@@ -26,6 +26,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/boker/go-ethereum/boker/protocol"
 	"github.com/boker/go-ethereum/common"
 	"github.com/boker/go-ethereum/common/hexutil"
 	"github.com/boker/go-ethereum/crypto/sha3"
@@ -68,23 +69,24 @@ func (n *BlockNonce) UnmarshalText(input []byte) error {
 
 // Header represents a block header in the Ethereum blockchain.
 type Header struct {
-	ParentHash  common.Hash       `json:"parentHash"       gencodec:"required"` //该区块的父区块的Hash值
-	UncleHash   common.Hash       `json:"sha3Uncles"       gencodec:"required"` //该区块的叔区块的Hash值
-	Validator   common.Address    `json:"validator"        gencodec:"required"` //该区块的验证者
-	Coinbase    common.Address    `json:"coinbase"         gencodec:"required"` //打包该区块矿工的地址，矿工费和发现区块的奖励会被发送到该地址
-	Root        common.Hash       `json:"stateRoot"        gencodec:"required"` //Merkle树根节点的Hash，以太坊中的交易状态信息是以Merkle状态树的形式进行存储的，Root是该状态树的根节点的Hash值
-	TxHash      common.Hash       `json:"transactionsRoot" gencodec:"required"` //保存该区块中交易Merkle树的根节点的Hash值
-	ReceiptHash common.Hash       `json:"receiptsRoot"     gencodec:"required"` //一个区块中所包含的交易中的接收者也是以Merkle树的形式进行存储的，该值是该Merkle树根节点的Hash值
-	DposContext *DposContextProto `json:"dposContext"      gencodec:"required"` //采用的Dpos上下文
-	Bloom       Bloom             `json:"logsBloom"        gencodec:"required"` //用于索引与搜索的结构（详见Tips）
-	Difficulty  *big.Int          `json:"difficulty"       gencodec:"required"` //该区块的难度
-	Number      *big.Int          `json:"number"           gencodec:"required"` //所有祖先区块的数量（也就是区块高度）
-	GasLimit    *big.Int          `json:"gasLimit"         gencodec:"required"` //该区块的gas上限
-	GasUsed     *big.Int          `json:"gasUsed"          gencodec:"required"` //该区块使用的gas
-	Time        *big.Int          `json:"timestamp"        gencodec:"required"` //区块开始打包的时间
-	Extra       []byte            `json:"extraData"        gencodec:"required"` //区块相关的附加信息
-	MixDigest   common.Hash       `json:"mixHash"          gencodec:"required"` //该哈希值与Nonce值一起能够证明在该区块上已经进行了足够的计算（用于验证该区块挖矿成功与否的Hash值）
-	Nonce       BlockNonce        `json:"nonce"            gencodec:"required"` //该哈希值与MixDigest值一起能够证明在该区块上已经进行了足够的计算（用于验证该区块挖矿成功与否的Hash值）
+	ParentHash  common.Hash                 `json:"parentHash"       gencodec:"required"`  //该区块的父区块的Hash值
+	UncleHash   common.Hash                 `json:"sha3Uncles"       gencodec:"required"`  //该区块的叔区块的Hash值
+	Validator   common.Address              `json:"validator"        gencodec:"required"`  //该区块的验证者
+	Coinbase    common.Address              `json:"coinbase"         gencodec:"required"`  //打包该区块矿工的地址，矿工费和发现区块的奖励会被发送到该地址
+	Root        common.Hash                 `json:"stateRoot"        gencodec:"required"`  //Merkle树根节点的Hash，以太坊中的交易状态信息是以Merkle状态树的形式进行存储的，Root是该状态树的根节点的Hash值
+	TxHash      common.Hash                 `json:"transactionsRoot" gencodec:"required"`  //保存该区块中交易Merkle树的根节点的Hash值
+	ReceiptHash common.Hash                 `json:"receiptsRoot"     gencodec:"required"`  //一个区块中所包含的交易中的接收者也是以Merkle树的形式进行存储的，该值是该Merkle树根节点的Hash值
+	DposProto   *DposContextProto           `json:"dposContext"      gencodec:"required"`  //采用的Dpos上下文
+	BokerProto  *protocol.BokerBackendProto `json:"bokerBackend"      gencodec:"required"` //播客链上下文
+	Bloom       Bloom                       `json:"logsBloom"        gencodec:"required"`  //用于索引与搜索的结构（详见Tips）
+	Difficulty  *big.Int                    `json:"difficulty"       gencodec:"required"`  //该区块的难度
+	Number      *big.Int                    `json:"number"           gencodec:"required"`  //所有祖先区块的数量（也就是区块高度）
+	GasLimit    *big.Int                    `json:"gasLimit"         gencodec:"required"`  //该区块的gas上限
+	GasUsed     *big.Int                    `json:"gasUsed"          gencodec:"required"`  //该区块使用的gas
+	Time        *big.Int                    `json:"timestamp"        gencodec:"required"`  //区块开始打包的时间
+	Extra       []byte                      `json:"extraData"        gencodec:"required"`  //区块相关的附加信息
+	MixDigest   common.Hash                 `json:"mixHash"          gencodec:"required"`  //该哈希值与Nonce值一起能够证明在该区块上已经进行了足够的计算（用于验证该区块挖矿成功与否的Hash值）
+	Nonce       BlockNonce                  `json:"nonce"            gencodec:"required"`  //该哈希值与MixDigest值一起能够证明在该区块上已经进行了足够的计算（用于验证该区块挖矿成功与否的Hash值）
 }
 
 // field type overrides for gencodec
@@ -263,9 +265,15 @@ func CopyHeader(h *Header) *Header {
 	}
 
 	// add dposContextProto to header
-	cpy.DposContext = &DposContextProto{}
-	if h.DposContext != nil {
-		cpy.DposContext = h.DposContext
+	cpy.DposProto = &DposContextProto{}
+	if h.DposProto != nil {
+		cpy.DposProto = h.DposProto
+	}
+
+	//
+	cpy.BokerProto = &protocol.BokerBackendProto{}
+	if h.BokerProto != nil {
+		cpy.BokerProto = h.BokerProto
 	}
 	return &cpy
 }
@@ -439,7 +447,7 @@ func (h *Header) String() string {
 	Extra:		    %s
 	MixDigest:      %x
 	Nonce:		    %x
-]`, h.Hash(), h.ParentHash, h.UncleHash, h.Validator, h.Coinbase, h.Root, h.TxHash, h.ReceiptHash, h.DposContext, h.Bloom, h.Difficulty, h.Number, h.GasLimit, h.GasUsed, h.Time, h.Extra, h.MixDigest, h.Nonce)
+]`, h.Hash(), h.ParentHash, h.UncleHash, h.Validator, h.Coinbase, h.Root, h.TxHash, h.ReceiptHash, h.DposProto, h.Bloom, h.Difficulty, h.Number, h.GasLimit, h.GasUsed, h.Time, h.Extra, h.MixDigest, h.Nonce)
 }
 
 type Blocks []*Block

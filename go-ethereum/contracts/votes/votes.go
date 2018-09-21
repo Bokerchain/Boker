@@ -4,90 +4,45 @@ package votes
 //go: 生成go文件 abigen --abi BokerVerifyVote.sol:BokerVerifyVote.abi --bin BokerVerifyVote.sol:BokerVerifyVote.bin  --pkg votes --out contract.go
 
 import (
+	"context"
 	"math/big"
 	"time"
 
 	"github.com/boker/go-ethereum/accounts/abi/bind"
-	"github.com/boker/go-ethereum/accounts/abi/bind/backends"
+	"github.com/boker/go-ethereum/boker/protocol"
 	"github.com/boker/go-ethereum/common"
-	"github.com/boker/go-ethereum/core"
-	"github.com/boker/go-ethereum/crypto"
 	"github.com/boker/go-ethereum/eth"
-	"github.com/boker/go-ethereum/include"
 	"github.com/boker/go-ethereum/log"
 )
 
 //投票服务
 type VerifyVotesService struct {
-	config       include.BokerConfig  //通证分配的配置
-	votesSession VotesSession         //分币session
-	addr         common.Address       //合约地址
-	backend      bind.ContractBackend //后台对象
-	ethereum     *eth.Ethereum        //以太坊对象
-	currentEpoch *big.Int             //当前周期序号
-	tickQuit     chan chan error      //tick退出chan
-	epochQuit    chan chan error      //epoch退出chan
-	start        bool                 //是否已经启动
+	currentEpoch *big.Int        //当前周期序号
+	votes        *Votes          //分币session
+	addr         common.Address  //合约地址
+	ethereum     *eth.Ethereum   //以太坊对象
+	tickQuit     chan chan error //tick退出chan
+	epochQuit    chan chan error //epoch退出chan
+	start        bool            //是否已经启动
 }
 
 //创建一个新服务来定期执行
-func NewVerifyVotesService(ethereum *eth.Ethereum, config include.BokerConfig) (*VerifyVotesService, error) {
+func NewVerifyVotesService(ethereum *eth.Ethereum, address common.Address) (*VerifyVotesService, error) {
 
 	//创建投票对象
 	var votesService *VerifyVotesService = new(VerifyVotesService)
-	transactOpts, backend, addr, contract, err := votesService.initContract()
+	votes, err := NewVotes(address, eth.NewContractBackend(ethereum.ApiBackend))
 	if err != nil {
 		return nil, err
 	}
-
-	//定义一个分配币的session
-	session := VotesSession{
-		Contract:     contract,
-		TransactOpts: *transactOpts,
-	}
-	votesService.votesSession = session
-	votesService.addr = addr
-	votesService.backend = backend
-	votesService.config = config
+	votesService.votes = votes
+	votesService.addr = address
+	votesService.ethereum = ethereum
 	votesService.tickQuit = make(chan chan error)
 	votesService.epochQuit = make(chan chan error)
 	votesService.start = false
 
 	return votesService, nil
-}
-
-func (votesService *VerifyVotesService) initContract() (*bind.TransactOpts, bind.ContractBackend, common.Address, *Votes, error) {
-
-	//根据读取到的数据来进行处理
-	DeployKey, err := crypto.HexToECDSA(votesService.ethereum.BlockChain().Config().Producer.PrivateKey)
-	if err != nil {
-
-	}
-	DeployAddr := crypto.PubkeyToAddress(DeployKey.PublicKey)
-	DeployBalance := big.NewInt(0)
-	DeployBalance.SetInt64(votesService.ethereum.BlockChain().Config().Producer.Balance)
-
-	//构造backend和帐号
-	backend := backends.NewSimulatedBackend(core.GenesisAlloc{DeployAddr: {Balance: DeployBalance}}, votesService.ethereum.Boker)
-	auth := bind.NewKeyedTransactor(DeployKey)
-
-	//部署合约并得到合约地址
-	addr, _, contract, err := DeployVotes(auth, backend)
-	if err != nil {
-		panic(err)
-	}
-
-	//提交合约
-	backend.Commit()
-	code, err := backend.CodeAt(nil, addr, nil)
-	if err != nil {
-		panic(err)
-	}
-	if len(code) == 0 {
-		panic("empty code")
-	}
-
-	return auth, backend, addr, contract, nil
 }
 
 func (votesService *VerifyVotesService) Start() {
@@ -110,17 +65,25 @@ func (votesService *VerifyVotesService) Stop() error {
 	return <-errEpoch
 }
 
+func (votesService *VerifyVotesService) createTransactOpts() *bind.TransactOpts {
+
+	if coinbase, err := votesService.ethereum.Coinbase(); err == nil {
+		return bind.NewPasswordTransactor(votesService.ethereum, coinbase)
+	}
+	return nil
+}
+
 //产生tick时钟
 func (votesService *VerifyVotesService) tick() {
 
-	timer := time.NewTimer(include.VotesInterval * 1)
+	timer := time.NewTimer(protocol.VotesInterval * 1)
 	defer timer.Stop()
 
 	for {
 		select {
 		case <-timer.C:
 			votesService.tickVotes()
-			timer.Reset(include.VotesInterval * 1)
+			timer.Reset(protocol.VotesInterval * 1)
 		case errc := <-votesService.tickQuit:
 			errc <- nil
 			return
@@ -137,10 +100,14 @@ func (votesService *VerifyVotesService) tickVotes() {
 	}
 
 	//调用时钟函数，判断是否周期发生改变
-	epochBool, err := votesService.votesSession.TickVote()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	callOpts := &bind.CallOpts{Context: ctx}
+	defer cancel()
+
+	epochBool, err := votesService.votes.TickVote(callOpts)
 	if err != nil {
 		if err == bind.ErrNoCode {
-			log.Error("tickVote method not found", "Contract", votesService.config.Address)
+			log.Error("tickVote method not found", "Contract", votesService.addr)
 		} else {
 			log.Error("Failed to tickVote", "err", err)
 		}
@@ -149,10 +116,12 @@ func (votesService *VerifyVotesService) tickVotes() {
 
 		//调用转换票数函数
 		if epochBool {
-			_, err := votesService.votesSession.RotateVote()
+
+			opts := votesService.createTransactOpts()
+			_, err := votesService.votes.RotateVote(opts)
 			if err != nil {
 				if err == bind.ErrNoCode {
-					log.Error("rotateVote method not found", "Contract", votesService.config.Address)
+					log.Error("rotateVote method not found", "Contract", votesService.addr)
 				} else {
 					log.Error("Failed to rotateVote", "err", err)
 				}
@@ -165,14 +134,14 @@ func (votesService *VerifyVotesService) tickVotes() {
 //定期获取周期
 func (votesService *VerifyVotesService) getEpoch() {
 
-	timer := time.NewTimer(include.VotesInterval * 5)
+	timer := time.NewTimer(protocol.VotesInterval * 5)
 	defer timer.Stop()
 
 	for {
 		select {
 		case <-timer.C:
 			votesService.tickEpoch()
-			timer.Reset(include.VotesInterval * 5)
+			timer.Reset(protocol.VotesInterval * 5)
 
 		case errc := <-votesService.epochQuit:
 			errc <- nil
@@ -184,10 +153,14 @@ func (votesService *VerifyVotesService) getEpoch() {
 func (votesService *VerifyVotesService) tickEpoch() {
 
 	//调用是否周期发生改变
-	epochIndex, err := votesService.votesSession.GetVoteRound()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	callOpts := &bind.CallOpts{Context: ctx}
+	defer cancel()
+
+	epochIndex, err := votesService.votes.GetVoteRound(callOpts)
 	if err != nil {
 		if err == bind.ErrNoCode {
-			log.Error("GetVoteRound method not found", "Contract", votesService.config.Address)
+			log.Error("GetVoteRound method not found", "Contract", votesService.addr)
 		} else {
 			log.Error("Failed to GetVoteRound", "err", err)
 		}
@@ -198,10 +171,10 @@ func (votesService *VerifyVotesService) tickEpoch() {
 		if epochIndex != votesService.currentEpoch && epochIndex.Int64() == votesService.currentEpoch.Int64()+1 {
 
 			//调用获取候选人列表数据
-			candidateArray, err := votesService.votesSession.GetCandidates()
+			candidateArray, err := votesService.votes.GetCandidates(callOpts)
 			if err != nil {
 				if err == bind.ErrNoCode {
-					log.Error("GetCandidates method not found", "Contract", votesService.config.Address)
+					log.Error("GetCandidates method not found", "Contract", votesService.addr)
 				} else {
 					log.Error("Failed to GetCandidates", "err", err)
 				}
@@ -226,7 +199,7 @@ func (votesService *VerifyVotesService) tickEpoch() {
 
 func (votesService *VerifyVotesService) GetVotesAddr() common.Address {
 
-	return votesService.config.Address
+	return votesService.addr
 }
 
 func (votesService *VerifyVotesService) getCurrentProducer() error {
@@ -236,13 +209,13 @@ func (votesService *VerifyVotesService) getCurrentProducer() error {
 		//得到当前的出块节点
 		producer, err := votesService.ethereum.BlockChain().CurrentBlock().DposCtx().GetCurrentProducer()
 		if err != nil {
-			return include.ErrInvalidProducer
+			return protocol.ErrInvalidProducer
 		}
 
 		//得到当前挖矿节点
 		coinbase, err := votesService.ethereum.Coinbase()
 		if err != nil {
-			return include.ErrInvalidCoinbase
+			return protocol.ErrInvalidCoinbase
 		}
 
 		//将当前出块节点和当前节点进行比较，如果是当前出块节点，则允许继续进行处理
@@ -250,7 +223,7 @@ func (votesService *VerifyVotesService) getCurrentProducer() error {
 			return nil
 		}
 	}
-	return include.ErrInvalidSystem
+	return protocol.ErrInvalidSystem
 }
 
 func (votesService *VerifyVotesService) IsStart() bool { return votesService.start }

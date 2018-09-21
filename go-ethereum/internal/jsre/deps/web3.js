@@ -1450,7 +1450,7 @@ SolidityType.prototype.isDynamicArray = function (name) {
  * "type[4]" => true
  *
  * @method isStaticArray
- * @param {String} name
+ * @param {String} nameNew
  * @return {Bool} true if the type is static array
  */
 SolidityType.prototype.isStaticArray = function (name) {
@@ -3992,6 +3992,7 @@ var utils = require('../utils/utils');
 var errors = require('./errors');
 var formatters = require('./formatters');
 var sha3 = require('../utils/sha3');
+var codearg;
 
 /**
  * This prototype should be used to call/sendTransaction to solidity functions
@@ -4057,6 +4058,9 @@ SolidityFunction.prototype.toPayload = function (args) {
     this.validateArgs(args);
     options.to = this._address;
     options.data = '0x' + this.signature() + coder.encodeParams(this._inputTypes, args);
+
+	codearg = args
+
     return options;
 };
 
@@ -4156,6 +4160,7 @@ SolidityFunction.prototype.estimateGas = function () {
 
     this._eth.estimateGas(payload, callback);
 };
+
 
 /**
  * Return the encoded data of the call
@@ -5430,7 +5435,7 @@ var methods = function () {
         call: 'eth_getWork',
         params: 0
     });
-
+	
     return [
         getBalance,
         getStorageAt,
@@ -5461,10 +5466,6 @@ var methods = function () {
 
 var properties = function () {
     return [
-        new Property({
-            name: 'validator',
-            getter: 'eth_validator'
-        }),
         new Property({
             name: 'coinbase',
             getter: 'eth_coinbase'

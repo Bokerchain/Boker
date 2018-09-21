@@ -5,6 +5,7 @@ import (
 	"sync/atomic"
 
 	"github.com/boker/go-ethereum/accounts"
+	"github.com/boker/go-ethereum/boker/api"
 	"github.com/boker/go-ethereum/common"
 	"github.com/boker/go-ethereum/consensus"
 	"github.com/boker/go-ethereum/core"
@@ -23,9 +24,9 @@ type Backend interface {
 	BlockChain() *core.BlockChain
 	TxPool() *core.TxPool
 	ChainDb() ethdb.Database
+	Boker() bokerapi.Api
 }
 
-//创建区块并搜索POW值
 type Miner struct {
 	mux         *event.TypeMux
 	worker      *worker
@@ -59,6 +60,7 @@ func New(eth Backend, config *params.ChainConfig, mux *event.TypeMux, engine con
 // the loop is exited. This to prevent a major security vuln where external parties can DOS you with blocks
 // and halt your mining operation for as long as the DOS continues.
 func (self *Miner) update() {
+
 	events := self.mux.Subscribe(downloader.StartEvent{}, downloader.DoneEvent{}, downloader.FailedEvent{})
 out:
 	for ev := range events.Chan() {
@@ -78,9 +80,7 @@ out:
 			if shouldStart {
 				self.Start(self.coinbase)
 			}
-			// unsubscribe. we're only interested in this event once
 			events.Unsubscribe()
-			// stop immediately and ignore all further pending events
 			break out
 		}
 	}
@@ -94,10 +94,10 @@ func (self *Miner) Start(coinbase common.Address) {
 	log.Info("Miner Start Set Coinbase Address", "Info", coinbase)
 	self.worker.setCoinbase(coinbase)
 	self.coinbase = coinbase
-	
+
 	//
 	self.worker.config.Coinbase = coinbase
-	
+
 	if atomic.LoadInt32(&self.canStart) == 0 {
 		log.Info("Network syncing, will start miner afterwards")
 		return
@@ -150,4 +150,8 @@ func (self *Miner) PendingBlock() *types.Block {
 func (self *Miner) SetCoinbase(addr common.Address) {
 	self.coinbase = addr
 	self.worker.setCoinbase(addr)
+}
+
+func (self *Miner) GetWorker() *worker {
+	return self.worker
 }

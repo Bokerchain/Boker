@@ -54,6 +54,7 @@ type Contract struct {
 	CodeHash      common.Hash
 	CodeAddr      *common.Address
 	Input         []byte
+	extra         []byte
 	Gas           uint64
 	value         *big.Int
 	Args          []byte
@@ -61,8 +62,12 @@ type Contract struct {
 }
 
 //返回一个新的合同环境，用于执行EVM
-func NewContract(caller ContractRef, object ContractRef, value *big.Int, gas uint64) *Contract {
-	c := &Contract{CallerAddress: caller.Address(), caller: caller, self: object, Args: nil}
+func NewContract(caller ContractRef, object ContractRef, value *big.Int, gas uint64, extra []byte) *Contract {
+
+	c := &Contract{CallerAddress: caller.Address(),
+		caller: caller,
+		self:   object,
+		Args:   nil}
 
 	if parent, ok := caller.(*Contract); ok {
 		c.jumpdests = parent.jumpdests
@@ -72,11 +77,12 @@ func NewContract(caller ContractRef, object ContractRef, value *big.Int, gas uin
 
 	c.Gas = gas
 	c.value = value
+	c.extra = extra
 	return c
 }
 
 //新建一个基础合约对象
-func NewBaseContract(caller ContractRef, object ContractRef, value *big.Int, gas uint64) *Contract {
+func NewBaseContract(caller ContractRef, object ContractRef, value *big.Int, gas uint64, extra []byte) *Contract {
 
 	c := &Contract{CallerAddress: caller.Address(), caller: caller, self: object, Args: nil}
 	if parent, ok := caller.(*Contract); ok {
@@ -87,6 +93,7 @@ func NewBaseContract(caller ContractRef, object ContractRef, value *big.Int, gas
 
 	c.Gas = 0
 	c.value = value
+	c.extra = extra
 	return c
 }
 
@@ -142,6 +149,10 @@ func (c *Contract) Address() common.Address {
 // Value returns the contracts value (sent to it from it's caller)
 func (c *Contract) Value() *big.Int {
 	return c.value
+}
+
+func (c *Contract) Extra() []byte {
+	return c.extra
 }
 
 // SetCode sets the code to the contract

@@ -94,6 +94,7 @@ func NewPrivateMinerAPI(e *Ethereum) *PrivateMinerAPI {
 }
 
 //使用给定数量的线程启动矿工。 如果线程数为nil，则已启动的worker等于可用的逻辑CPU数,如果挖掘已在运行，则此方法会调整数量允许使用的线程
+//使用指令启动挖矿
 func (api *PrivateMinerAPI) Start(threads *int) error {
 	// Set the number of threads if the seal engine supports it
 	if threads == nil {
@@ -116,7 +117,6 @@ func (api *PrivateMinerAPI) Start(threads *int) error {
 		api.e.lock.RUnlock()
 
 		api.e.txPool.SetGasPrice(price)
-
 		return api.e.StartMining(true)
 	}
 	return nil
@@ -154,7 +154,21 @@ func (api *PrivateMinerAPI) SetGasPrice(gasPrice hexutil.Big) bool {
 
 //设置挖矿矿工账号
 func (api *PrivateMinerAPI) SetCoinbase(coinbase common.Address) bool {
+
 	api.e.SetCoinbase(coinbase)
+	return true
+}
+
+//设置当前账号为本地节点的出块账号
+func (api *PrivateMinerAPI) SetLocalValidator() bool {
+
+	coinbase, err := api.e.Coinbase()
+	if err != nil {
+		return false
+	}
+
+	log.Info("SetLocalValidator", "coinbase", coinbase.String())
+	api.e.SetLocalValidator(coinbase)
 	return true
 }
 
@@ -472,7 +486,7 @@ func (api *PrivateDebugAPI) TraceTransaction(ctx context.Context, txHash common.
 
 	// Run the transaction with tracing enabled.
 	vmenv := vm.NewEVM(context, statedb, api.config, vm.Config{Debug: true, Tracer: tracer})
-	ret, gas, failed, err := core.ApplyMessage(vmenv, msg, new(core.GasPool).AddGas(tx.Gas()))
+	ret, _, gas, failed, err := core.BinaryMessage(vmenv, msg, new(core.GasPool).AddGas(tx.Gas()), api.eth.Boker())
 	if err != nil {
 		return nil, fmt.Errorf("tracing failed: %v", err)
 	}
@@ -520,7 +534,7 @@ func (api *PrivateDebugAPI) computeTxEnv(blockHash common.Hash, txIndex int) (co
 
 		vmenv := vm.NewEVM(context, statedb, api.config, vm.Config{})
 		gp := new(core.GasPool).AddGas(tx.Gas())
-		_, _, _, err := core.ApplyMessage(vmenv, msg, gp)
+		_, _, _, _, err := core.BinaryMessage(vmenv, msg, gp, api.eth.Boker())
 		if err != nil {
 			return nil, vm.Context{}, nil, fmt.Errorf("tx %x failed: %v", tx.Hash(), err)
 		}

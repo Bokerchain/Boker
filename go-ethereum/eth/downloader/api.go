@@ -21,7 +21,7 @@ import (
 	"sync"
 
 	ethereum "github.com/boker/go-ethereum"
-	"github.com/boker/go-ethereum/bokerface"
+	"github.com/boker/go-ethereum/boker/api"
 	"github.com/boker/go-ethereum/event"
 	"github.com/boker/go-ethereum/rpc"
 )
@@ -33,14 +33,14 @@ type PublicDownloaderAPI struct {
 	mux                       *event.TypeMux
 	installSyncSubscription   chan chan interface{}
 	uninstallSyncSubscription chan *uninstallSyncSubscriptionRequest
-	boker                     bokerface.BokerInterface
+	boker                     bokerapi.Api
 }
 
 // NewPublicDownloaderAPI create a new PublicDownloaderAPI. The API has an internal event loop that
 // listens for events from the downloader through the global event mux. In case it receives one of
 // these events it broadcasts it to all syncing subscriptions that are installed through the
 // installSyncSubscription channel.
-func NewPublicDownloaderAPI(d *Downloader, m *event.TypeMux, boker bokerface.BokerInterface) *PublicDownloaderAPI {
+func NewPublicDownloaderAPI(d *Downloader, m *event.TypeMux, boker bokerapi.Api) *PublicDownloaderAPI {
 	api := &PublicDownloaderAPI{
 		d:   d,
 		mux: m,

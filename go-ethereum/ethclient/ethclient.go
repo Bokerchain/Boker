@@ -8,9 +8,11 @@ import (
 	"math/big"
 
 	"github.com/boker/go-ethereum"
+	_ "github.com/boker/go-ethereum/boker/protocol"
 	"github.com/boker/go-ethereum/common"
 	"github.com/boker/go-ethereum/common/hexutil"
 	"github.com/boker/go-ethereum/core/types"
+	"github.com/boker/go-ethereum/log"
 	"github.com/boker/go-ethereum/rlp"
 	"github.com/boker/go-ethereum/rpc"
 )
@@ -117,7 +119,7 @@ func (ec *Client) getBlock(ctx context.Context, method string, args ...interface
 	return types.NewBlockWithHeader(head).WithBody(txs, uncles), nil
 }
 
-// HeaderByHash returns the block header with the given hash.
+//通过Hash得到区块头
 func (ec *Client) HeaderByHash(ctx context.Context, hash common.Hash) (*types.Header, error) {
 	var head *types.Header
 	err := ec.c.CallContext(ctx, &head, "eth_getBlockByHash", hash, false)
@@ -157,6 +159,7 @@ func (tx *rpcTransaction) UnmarshalJSON(msg []byte) error {
 
 //根据所给的hash返回相应的交易
 func (ec *Client) TransactionByHash(ctx context.Context, hash common.Hash) (tx *types.Transaction, isPending bool, err error) {
+
 	var json *rpcTransaction
 	err = ec.c.CallContext(ctx, &json, "eth_getTransactionByHash", hash)
 	if err != nil {
@@ -177,6 +180,7 @@ func (ec *Client) TransactionByHash(ctx context.Context, hash common.Hash) (tx *
 // There is a fast-path for transactions retrieved by TransactionByHash and
 // TransactionInBlock. Getting their sender address can be done without an RPC interaction.
 func (ec *Client) TransactionSender(ctx context.Context, tx *types.Transaction, block common.Hash, index uint) (common.Address, error) {
+
 	// Try to load the address from the cache.
 	sender, err := types.Sender(&senderFromServer{blockhash: block}, tx)
 	if err == nil {
@@ -202,8 +206,9 @@ func (ec *Client) TransactionCount(ctx context.Context, blockHash common.Hash) (
 	return uint(num), err
 }
 
-//根据给定的区块，获取这个区块中指定顺序的交易
+//根据给定的区块，获取这个区块中指定序号的交易
 func (ec *Client) TransactionInBlock(ctx context.Context, blockHash common.Hash, index uint) (*types.Transaction, error) {
+
 	var json *rpcTransaction
 	err := ec.c.CallContext(ctx, &json, "eth_getTransactionByBlockHashAndIndex", blockHash, hexutil.Uint64(index))
 	if err == nil {
@@ -217,8 +222,7 @@ func (ec *Client) TransactionInBlock(ctx context.Context, blockHash common.Hash,
 	return json.tx, err
 }
 
-// TransactionReceipt returns the receipt of a transaction by transaction hash.
-// Note that the receipt is not available for pending transactions.
+//根据给定的Hash得到交易收据(注意的是，收据不适合用于正在penging的交易)
 func (ec *Client) TransactionReceipt(ctx context.Context, txHash common.Hash) (*types.Receipt, error) {
 	var r *types.Receipt
 	err := ec.c.CallContext(ctx, &r, "eth_getTransactionReceipt", txHash)
@@ -245,9 +249,9 @@ type rpcProgress struct {
 	KnownStates   hexutil.Uint64
 }
 
-// SyncProgress retrieves the current progress of the sync algorithm. If there's
-// no sync currently running, it returns nil.
+//检索同步算法当前的进度，如果当前没有同步操作，则返回nil
 func (ec *Client) SyncProgress(ctx context.Context) (*ethereum.SyncProgress, error) {
+
 	var raw json.RawMessage
 	if err := ec.c.CallContext(ctx, &raw, "eth_syncing"); err != nil {
 		return nil, err
@@ -270,15 +274,14 @@ func (ec *Client) SyncProgress(ctx context.Context) (*ethereum.SyncProgress, err
 	}, nil
 }
 
-// SubscribeNewHead subscribes to notifications about the current blockchain head
-// on the given channel.
+//订阅区块链新链头变化通知
 func (ec *Client) SubscribeNewHead(ctx context.Context, ch chan<- *types.Header) (ethereum.Subscription, error) {
 	return ec.c.EthSubscribe(ctx, ch, "newHeads", map[string]struct{}{})
 }
 
 // State Access
 
-// NetworkID returns the network ID (also known as the chain ID) for this chain.
+//返回此链的网络ID
 func (ec *Client) NetworkID(ctx context.Context) (*big.Int, error) {
 	version := new(big.Int)
 	var ver string
@@ -291,8 +294,7 @@ func (ec *Client) NetworkID(ctx context.Context) (*big.Int, error) {
 	return version, nil
 }
 
-// BalanceAt returns the wei balance of the given account.
-// The block number can be nil, in which case the balance is taken from the latest known block.
+//返回指定账户的余额（单位wei），如果是nil则从最新的块中获取
 func (ec *Client) BalanceAt(ctx context.Context, account common.Address, blockNumber *big.Int) (*big.Int, error) {
 	var result hexutil.Big
 	err := ec.c.CallContext(ctx, &result, "eth_getBalance", account, toBlockNumArg(blockNumber))
@@ -315,9 +317,7 @@ func (ec *Client) CodeAt(ctx context.Context, account common.Address, blockNumbe
 	return result, err
 }
 
-// NonceAt returns the account nonce of the given account.
-// The block number can be nil, in which case the nonce is taken from the latest known block.
-//根据给定的账号获取Nonce，如果给定的区块序号为nil，则返回最后已知区块的Nonce
+//从给定的区块序号中获取指定账号的Nonce，如果区块序号为nil则从最新的区块中获取
 func (ec *Client) NonceAt(ctx context.Context, account common.Address, blockNumber *big.Int) (uint64, error) {
 	var result hexutil.Uint64
 	err := ec.c.CallContext(ctx, &result, "eth_getTransactionCount", account, toBlockNumArg(blockNumber))
@@ -326,14 +326,14 @@ func (ec *Client) NonceAt(ctx context.Context, account common.Address, blockNumb
 
 // Filters
 
-// FilterLogs executes a filter query.
+//日志过滤器
 func (ec *Client) FilterLogs(ctx context.Context, q ethereum.FilterQuery) ([]types.Log, error) {
 	var result []types.Log
 	err := ec.c.CallContext(ctx, &result, "eth_getLogs", toFilterArg(q))
 	return result, err
 }
 
-// SubscribeFilterLogs subscribes to the results of a streaming filter query.
+//订阅日志过滤器
 func (ec *Client) SubscribeFilterLogs(ctx context.Context, q ethereum.FilterQuery, ch chan<- types.Log) (ethereum.Subscription, error) {
 	return ec.c.EthSubscribe(ctx, ch, "logs", toFilterArg(q))
 }
@@ -353,7 +353,7 @@ func toFilterArg(q ethereum.FilterQuery) interface{} {
 
 // Pending State
 
-// PendingBalanceAt returns the wei balance of the given account in the pending state.
+//返回处于Pending状态的账户的余额（单位：Wei）
 func (ec *Client) PendingBalanceAt(ctx context.Context, account common.Address) (*big.Int, error) {
 	var result hexutil.Big
 	err := ec.c.CallContext(ctx, &result, "eth_getBalance", account, "pending")
@@ -409,8 +409,7 @@ func (ec *Client) PendingCallContract(ctx context.Context, msg ethereum.CallMsg)
 	return hex, nil
 }
 
-// SuggestGasPrice retrieves the currently suggested gas price to allow a timely
-// execution of a transaction.
+//返回当前执行交易建议的Gas价格
 func (ec *Client) SuggestGasPrice(ctx context.Context) (*big.Int, error) {
 	var hex hexutil.Big
 	if err := ec.c.CallContext(ctx, &hex, "eth_gasPrice"); err != nil {
@@ -419,10 +418,7 @@ func (ec *Client) SuggestGasPrice(ctx context.Context) (*big.Int, error) {
 	return (*big.Int)(&hex), nil
 }
 
-// EstimateGas tries to estimate the gas needed to execute a specific transaction based on
-// the current pending state of the backend blockchain. There is no guarantee that this is
-// the true gas limit requirement as other transactions may be added or removed by miners,
-// but it should provide a basis for setting a reasonable default.
+//返回当前基于执行指定交易所需要的Gas，由于矿工可以自己添加或者删除其它的交易，因此这个Gas不保证是真正的Gas限制，但是他可以作为合理的Gas设置基础
 func (ec *Client) EstimateGas(ctx context.Context, msg ethereum.CallMsg) (*big.Int, error) {
 	var hex hexutil.Big
 	err := ec.c.CallContext(ctx, &hex, "eth_estimateGas", toCallArg(msg))
@@ -432,45 +428,60 @@ func (ec *Client) EstimateGas(ctx context.Context, msg ethereum.CallMsg) (*big.I
 	return (*big.Int)(&hex), nil
 }
 
-// SendTransaction injects a signed transaction into the pending pool for execution.
-//
-// If the transaction was a contract creation use the TransactionReceipt method to get the
-// contract address after the transaction has been mined.
+//播客链禁止 RPC 指令
 func (ec *Client) SendTransaction(ctx context.Context, tx *types.Transaction) error {
+
 	data, err := rlp.EncodeToBytes(tx)
 	if err != nil {
 		return err
 	}
+	log.Info("SendTransaction", "len", len(data), "data", data)
+
+	tx_tmp := new(types.Transaction)
+	if err := rlp.DecodeBytes(data, tx_tmp); err != nil {
+
+		log.Error("SendTransaction", "error", err, "data", data)
+		return err
+	}
+
 	return ec.c.CallContext(ctx, nil, "eth_sendRawTransaction", common.ToHex(data))
 }
 
 /****播客链新增的RPC调用****/
 
-//播客链中新增加的RPC调用，用来得到当前出块节点
-func (ec *Client) GetCurrentProducerAt(ctx context.Context) ([]byte, error) {
+//得到最后一次的出块节点
+func (ec *Client) GetLastProducerAt(ctx context.Context) ([]byte, error) {
 
 	var result hexutil.Bytes
-	err := ec.c.CallContext(ctx, &result, "eth_getCurrentProducer")
+	err := ec.c.CallContext(ctx, &result, "eth_getLastProducer")
 	return result, err
 }
 
-//播客链中新增加的RPC调用，用来得到当前分币节点
-func (ec *Client) GetCurrentTokenNoderAt(ctx context.Context) ([]byte, error) {
+//得到最后一次的分币节点
+func (ec *Client) GetLastTokenNoderAt(ctx context.Context) ([]byte, error) {
 
 	var result hexutil.Bytes
-	err := ec.c.CallContext(ctx, &result, "eth_getCurrentTokenNoder")
+	err := ec.c.CallContext(ctx, &result, "eth_getLastTokenNoder")
 	return result, err
 }
 
-//播客链中新增加的RPC调用，设置用户私钥
-func (ec *Client) SetPrivateKey(ctx context.Context, address common.Address, privatekey string) error {
+//得到下一次的出块节点
+func (ec *Client) GetNextProducerAt(ctx context.Context) ([]byte, error) {
 
 	var result hexutil.Bytes
-	err := ec.c.CallContext(ctx, &result, "eth_setPrivateKey", address, privatekey)
-	return err
+	err := ec.c.CallContext(ctx, &result, "eth_getNextProducer")
+	return result, err
 }
 
-//播客链中新增加的RPC调用，用来设置基础合约信息
+//得到下一次的分币节点
+func (ec *Client) GetNextTokenNoderAt(ctx context.Context) ([]byte, error) {
+
+	var result hexutil.Bytes
+	err := ec.c.CallContext(ctx, &result, "eth_getNextTokenNoder")
+	return result, err
+}
+
+//设置基础合约
 func (ec *Client) SetBaseContracts(ctx context.Context, address common.Address, contractType uint64) error {
 
 	var result hexutil.Bytes
@@ -478,7 +489,7 @@ func (ec *Client) SetBaseContracts(ctx context.Context, address common.Address, 
 	return err
 }
 
-//播客链中新增加的RPC调用，用来取消基础合约信息
+//取消基础合约
 func (ec *Client) CancelBaseContracts(ctx context.Context, address common.Address, contractType uint64) error {
 
 	var result hexutil.Bytes
@@ -486,11 +497,19 @@ func (ec *Client) CancelBaseContracts(ctx context.Context, address common.Addres
 	return err
 }
 
-//播客链中新增加的RPC调用，添加一个验证者信息
+//添加唯一验证人
 func (ec *Client) AddValidator(ctx context.Context, address common.Address, votes uint64) error {
 
 	var result hexutil.Bytes
 	err := ec.c.CallContext(ctx, &result, "eth_addValidator", address, votes)
+	return err
+}
+
+//解析合约的Abi的Payload参数信息
+func (ec *Client) DecodeAbi(ctx context.Context, abiJson string, method string, payload string) error {
+
+	var result hexutil.Bytes
+	err := ec.c.CallContext(ctx, &result, "eth_decodeAbi", abiJson, method, payload)
 	return err
 }
 

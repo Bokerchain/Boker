@@ -19,7 +19,7 @@ package core
 import (
 	"math/big"
 
-	"github.com/boker/go-ethereum/bokerface"
+	"github.com/boker/go-ethereum/boker/api"
 	"github.com/boker/go-ethereum/core/state"
 	"github.com/boker/go-ethereum/core/types"
 	"github.com/boker/go-ethereum/core/vm"
@@ -35,5 +35,5 @@ type Validator interface {
 //区块处理器接口
 type Processor interface {
 	Process(block *types.Block, statedb *state.StateDB, cfg vm.Config) (types.Receipts, []*types.Log, *big.Int, error)
-	SetBoker(boker bokerface.BokerInterface)
+	SetBoker(boker bokerapi.Api)
 }

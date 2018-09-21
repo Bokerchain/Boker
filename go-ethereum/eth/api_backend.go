@@ -21,6 +21,7 @@ import (
 	"math/big"
 
 	"github.com/boker/go-ethereum/accounts"
+	"github.com/boker/go-ethereum/boker/api"
 	"github.com/boker/go-ethereum/common"
 	"github.com/boker/go-ethereum/common/math"
 	"github.com/boker/go-ethereum/core"
@@ -134,6 +135,8 @@ func (b *EthApiBackend) SubscribeLogsEvent(ch chan<- []*types.Log) event.Subscri
 
 //将交易放入放入到本地交易池中（本地发生的交易放在本地交易池中）
 func (b *EthApiBackend) SendTx(ctx context.Context, signedTx *types.Transaction) error {
+
+	//log.Info("****SendTx****", "Nonce", signedTx.Nonce())
 	return b.eth.txPool.AddLocal(signedTx)
 }
 
@@ -202,4 +205,32 @@ func (b *EthApiBackend) ServiceFilter(ctx context.Context, session *bloombits.Ma
 	for i := 0; i < bloomFilterThreads; i++ {
 		go session.Multiplex(bloomRetrievalBatch, bloomRetrievalWait, b.eth.bloomRequests)
 	}
+}
+
+func (b *EthApiBackend) Coinbase() (common.Address, error) {
+	return b.eth.Coinbase()
+}
+
+func (b *EthApiBackend) SetCoinbase(coinbase common.Address) {
+
+	b.eth.SetCoinbase(coinbase)
+}
+
+func (b *EthApiBackend) Boker() bokerapi.Api {
+	return b.eth.boker
+}
+
+func (b *EthApiBackend) Password() string {
+
+	return b.eth.Password()
+}
+
+func (b *EthApiBackend) SetPassword(password string) {
+
+	b.eth.SetPassword(password)
+}
+
+func (b *EthApiBackend) DecodeParams(code []byte) ([]byte, error) {
+
+	return b.eth.DecodeParams(code)
 }

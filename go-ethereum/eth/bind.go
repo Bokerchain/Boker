@@ -21,7 +21,6 @@ import (
 	"math/big"
 
 	"github.com/boker/go-ethereum"
-	"github.com/boker/go-ethereum/bokerface"
 	"github.com/boker/go-ethereum/common"
 	"github.com/boker/go-ethereum/common/hexutil"
 	"github.com/boker/go-ethereum/core/types"
@@ -46,10 +45,10 @@ type ContractBackend struct {
 // NewContractBackend creates a new native contract backend using an existing
 // Ethereum object.
 //创建一个合约后台用于现有的以太坊对象
-func NewContractBackend(apiBackend ethapi.Backend, boker bokerface.BokerInterface) *ContractBackend {
+func NewContractBackend(apiBackend ethapi.Backend) *ContractBackend {
 	return &ContractBackend{
-		eapi:  ethapi.NewPublicEthereumAPI(apiBackend, boker),
-		bcapi: ethapi.NewPublicBlockChainAPI(apiBackend, boker),
+		eapi:  ethapi.NewPublicEthereumAPI(apiBackend),
+		bcapi: ethapi.NewPublicBlockChainAPI(apiBackend),
 		txapi: ethapi.NewPublicTransactionPoolAPI(apiBackend, new(ethapi.AddrLocker)),
 	}
 }
@@ -134,6 +133,7 @@ func (b *ContractBackend) EstimateGas(ctx context.Context, msg ethereum.CallMsg)
 // SendTransaction implements bind.ContractTransactor injects the transaction
 // into the pending pool for execution.
 func (b *ContractBackend) SendTransaction(ctx context.Context, tx *types.Transaction) error {
+
 	raw, _ := rlp.EncodeToBytes(tx)
 	_, err := b.txapi.SendRawTransaction(ctx, raw)
 	return err

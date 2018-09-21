@@ -476,6 +476,13 @@ func opGasLimit(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack 
 	return nil, nil
 }
 
+//播客链新增的操作码
+func opExtra(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
+
+	stack.push(new(big.Int).SetBytes(evm.Extra[:]))
+	return nil, nil
+}
+
 func opPop(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	evm.interpreter.intPool.put(stack.pop())
 	return nil, nil

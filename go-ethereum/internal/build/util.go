@@ -18,6 +18,7 @@ package build
 
 import (
 	"bytes"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -60,13 +61,27 @@ func GOPATH() string {
 	return os.Getenv("GOPATH")
 }
 
-// VERSION returns the content of the VERSION file.
-func VERSION() string {
-	version, err := ioutil.ReadFile("VERSION")
+//返回以太坊和播客链的版本信息
+type VersionConfig struct {
+	ethereum string `json:"ethereum"`    //以太坊版本
+	boker    string `json:"json:"boker"` //播客链版本
+}
+
+func VERSION() (string, string) {
+
+	buffer, err := ioutil.ReadFile("VERSION")
 	if err != nil {
 		log.Fatal(err)
 	}
-	return string(bytes.TrimSpace(version))
+
+	config := VersionConfig{}
+	err = json.Unmarshal(buffer, &config)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(config.ethereum)
+	log.Println(config.boker)
+	return string(strings.Replace(config.ethereum, " ", "", -1)), string(strings.Replace(config.boker, " ", "", -1))
 }
 
 var warnedAboutGit bool

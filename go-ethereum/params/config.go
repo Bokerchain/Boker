@@ -11,18 +11,6 @@ var (
 	MainnetGenesisHash = common.HexToHash("0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3") // Mainnet genesis hash to enforce below configs on
 )
 
-//基础合约分类
-var (
-	BaseContractDeploy uint64 = 1 //部署基础合约
-	RegisterCandidate  uint64 = 2 //注册候选人
-	ProducerVote       uint64 = 3 //出块节点投票选举
-	ProducerTick       uint64 = 4 //出块节点tick
-	SetProducer        uint64 = 5 //设置出块节点
-	AssignToken        uint64 = 6 //分配通证
-	ProducerReward     uint64 = 7 //出块节点出块奖励
-	TransferToken      uint64 = 8
-)
-
 var (
 	DposChainConfig = &ChainConfig{
 		ChainId:        big.NewInt(5),
@@ -35,9 +23,8 @@ var (
 		EIP158Block:    big.NewInt(0),
 		ByzantiumBlock: big.NewInt(0),
 		Coinbase:       common.Address{},
-		Dpos:           &DposConfig{},
-		Contracts:      &BaseContractConfig{},
-		Producer:       &ProducerConfig{},
+		//Dpos:           &DposConfig{},
+		//Contracts:      &BaseContractConfig{},
 	}
 	TestChainConfig = &ChainConfig{
 		big.NewInt(1),
@@ -49,10 +36,7 @@ var (
 		big.NewInt(0),
 		big.NewInt(0),
 		big.NewInt(0),
-		common.Address{},
-		nil,
-		nil,
-		nil}
+		common.Address{}}
 
 	AllEthashProtocolChanges = &ChainConfig{
 		big.NewInt(1337),
@@ -64,10 +48,7 @@ var (
 		big.NewInt(0),
 		big.NewInt(0),
 		big.NewInt(0),
-		common.Address{},
-		nil,
-		nil,
-		nil}
+		common.Address{}}
 
 	AllCliqueProtocolChanges = &ChainConfig{
 		big.NewInt(1337),
@@ -79,28 +60,24 @@ var (
 		big.NewInt(0),
 		big.NewInt(0),
 		big.NewInt(0),
-		common.Address{},
-		nil,
-		nil,
-		nil}
+		common.Address{}}
 )
 
 //ChainConfig是确定区块链设置的核心配置,ChainConfig基于每个块存储在数据库中。
 //意即由其创世块标识的任何网络都可以拥有自己的网络一组配置选项。
 type ChainConfig struct {
-	ChainId        *big.Int            `json:"chainId"`                  //Chain id identifies the current chain and is used for replay protection
-	HomesteadBlock *big.Int            `json:"homesteadBlock,omitempty"` //Homestead switch block (nil = no fork, 0 = already homestead)
-	DAOForkBlock   *big.Int            `json:"daoForkBlock,omitempty"`   //TheDAO hard-fork switch block (nil = no fork)
-	DAOForkSupport bool                `json:"daoForkSupport,omitempty"` //Whether the nodes supports or opposes the DAO hard-fork
-	EIP150Block    *big.Int            `json:"eip150Block,omitempty"`    //EIP150 HF block (nil = no fork)
-	EIP150Hash     common.Hash         `json:"eip150Hash,omitempty"`     //EIP150 HF hash (needed for header only clients as only gas pricing changed)
-	EIP155Block    *big.Int            `json:"eip155Block,omitempty"`    //EIP155 HF block
-	EIP158Block    *big.Int            `json:"eip158Block,omitempty"`    //EIP158 HF block
-	ByzantiumBlock *big.Int            `json:"byzantiumBlock,omitempty"` //Byzantium switch block (nil = no fork, 0 = already on byzantium)
-	Coinbase       common.Address      `json:"coinbase,omitempty"`       //播客链新增当前挖矿的账号
-	Dpos           *DposConfig         `json:"dpos,omitempty"`           //播客链新增Dpos的配置信息
-	Contracts      *BaseContractConfig `json:"contracts,omitempty"`      //播客链新增基础合约配置信息
-	Producer       *ProducerConfig     `json:"producer,omitempty"`       //播客链新增出块节点使用的信息
+	ChainId        *big.Int       `json:"chainId"`                  //Chain id identifies the current chain and is used for replay protection
+	HomesteadBlock *big.Int       `json:"homesteadBlock,omitempty"` //Homestead switch block (nil = no fork, 0 = already homestead)
+	DAOForkBlock   *big.Int       `json:"daoForkBlock,omitempty"`   //TheDAO hard-fork switch block (nil = no fork)
+	DAOForkSupport bool           `json:"daoForkSupport,omitempty"` //Whether the nodes supports or opposes the DAO hard-fork
+	EIP150Block    *big.Int       `json:"eip150Block,omitempty"`    //EIP150 HF block (nil = no fork)
+	EIP150Hash     common.Hash    `json:"eip150Hash,omitempty"`     //EIP150 HF hash (needed for header only clients as only gas pricing changed)
+	EIP155Block    *big.Int       `json:"eip155Block,omitempty"`    //EIP155 HF block
+	EIP158Block    *big.Int       `json:"eip158Block,omitempty"`    //EIP158 HF block
+	ByzantiumBlock *big.Int       `json:"byzantiumBlock,omitempty"` //Byzantium switch block (nil = no fork, 0 = already on byzantium)
+	Coinbase       common.Address `json:"coinbase,omitempty"`       //播客链新增当前挖矿的账号
+	//Dpos           *DposConfig    `json:"dpos,omitempty"`           //播客链新增Dpos的配置信息
+	//Contracts      *BaseContractConfig `json:"contracts,omitempty"`      //播客链新增基础合约配置信息
 }
 
 // CliqueConfig is the consensus engine configs for proof-of-authority based sealing.
@@ -119,31 +96,13 @@ type DposConfig struct {
 	Validators []common.Address `json:"validators"` //初始化时的验证者帐号信息
 }
 
-//播客链中基础合约相关配置信息
-type BaseContract struct {
-	ContractType    uint64         `json:"contracttype"`    //基础合约类型
-	DeployAddress   common.Address `json:"deployaddress"`   //部署账号
-	ContractAddress common.Address `json:"contractaddress"` //合约地址
-}
-
-type BaseContractConfig struct {
-	Bases []BaseContract `json:"bases,omitempty"`
-}
-
-//播客链用来分配通证的账号和私钥信息
-type ProducerConfig struct {
-	Account    common.Address `json:"coinbase"`   //基础合约类型
-	PrivateKey string         `json:"privatekey"` //基础合约类型
-	Balance    int64          `json:"balance"`    //部署合约所使用的费用
-}
-
 func (d *DposConfig) String() string {
 	return "Dpos"
 }
 
 //实现fmt.Stringer接口
 func (c *ChainConfig) String() string {
-	return fmt.Sprintf("{ChainID: %v Homestead: %v DAO: %v DAOSupport: %v EIP150: %v EIP155: %v EIP158: %v Byzantium: %v Engine: %v}",
+	return fmt.Sprintf("{ChainID: %v Homestead: %v DAO: %v DAOSupport: %v EIP150: %v EIP155: %v EIP158: %v Byzantium: %v}",
 		c.ChainId,
 		c.HomesteadBlock,
 		c.DAOForkBlock,
@@ -152,7 +111,7 @@ func (c *ChainConfig) String() string {
 		c.EIP155Block,
 		c.EIP158Block,
 		c.ByzantiumBlock,
-		c.Dpos,
+		//c.Dpos,
 	)
 }
 

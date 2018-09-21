@@ -130,6 +130,7 @@ func (n *Node) Register(constructor ServiceConstructor) error {
 
 // Start create a live P2P node and starts running it.
 func (n *Node) Start() error {
+
 	n.lock.Lock()
 	defer n.lock.Unlock()
 
@@ -155,7 +156,7 @@ func (n *Node) Start() error {
 		n.serverConfig.NodeDatabase = n.config.NodeDB()
 	}
 	running := &p2p.Server{Config: n.serverConfig}
-	log.Info("Starting peer-to-peer node", "instance", n.serverConfig.Name)
+	//log.Info("Starting peer-to-peer node", "instance", n.serverConfig.Name)
 
 	//通过node的serviceFuncs所包含的构造函数，生成了一系列的Service
 	services := make(map[reflect.Type]Service)
@@ -187,23 +188,23 @@ func (n *Node) Start() error {
 		}
 		services[kind] = service
 	}
-	log.Info("services := make(map[reflect.Type]Service)")
+	//log.Info("create Service Context and Constrctor")
 
 	//将这些Service所使用的协议，加入到了P2P服务对象running的协议变量Protocols中维护了起来
 	for _, service := range services {
 		running.Protocols = append(running.Protocols, service.Protocols()...)
 	}
-	log.Info("for _, service := range services {")
+	//log.Info("append Protocols")
 
 	//启动P2P服务running
 	if err := running.Start(); err != nil {
 		return convertFileLockError(err)
 	}
-	log.Info("if err := running.Start(); err != nil {")
 
 	//启动生成的Service
 	started := []reflect.Type{}
 	for kind, service := range services {
+
 		// Start the next service, stopping all previous upon failure
 		if err := service.Start(running); err != nil {
 			for _, kind := range started {
@@ -213,10 +214,11 @@ func (n *Node) Start() error {
 
 			return err
 		}
+
 		// Mark the service started for potential cleanup
 		started = append(started, kind)
 	}
-	log.Info("started := []reflect.Type{}")
+	//log.Info("Start reflect Service")
 
 	//启动注册的RPC接口服务
 	if err := n.startRPC(services); err != nil {
@@ -226,7 +228,7 @@ func (n *Node) Start() error {
 		running.Stop()
 		return err
 	}
-	log.Info("if err := n.startRPC(services); err != nil {")
+	//log.Info("Start RPC")
 
 	//完成启动的初始化工作
 	n.services = services
@@ -269,15 +271,21 @@ func (n *Node) startRPC(services map[reflect.Type]Service) error {
 	if err := n.startInProc(apis); err != nil {
 		return err
 	}
+
+	//log.Info("startIPC", "apis", apis)
 	if err := n.startIPC(apis); err != nil {
 		n.stopInProc()
 		return err
 	}
+
+	//log.Info("startHTTP", "httpEndpoint", n.httpEndpoint, "apis", apis, "HTTPModules", n.config.HTTPModules, "HTTPCors", n.config.HTTPCors)
 	if err := n.startHTTP(n.httpEndpoint, apis, n.config.HTTPModules, n.config.HTTPCors); err != nil {
 		n.stopIPC()
 		n.stopInProc()
 		return err
 	}
+
+	//log.Info("startWS", "wsEndpoint", n.wsEndpoint, "apis", apis, "WSModules", n.config.WSModules, "WSOrigins", n.config.WSOrigins, "WSExposeAll", n.config.WSExposeAll)
 	if err := n.startWS(n.wsEndpoint, apis, n.config.WSModules, n.config.WSOrigins, n.config.WSExposeAll); err != nil {
 		n.stopHTTP()
 		n.stopIPC()

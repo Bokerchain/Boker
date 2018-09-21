@@ -4,56 +4,36 @@ package assigntoken
 //go: 生成go文件 abigen --abi BokerAssignToken.sol:BokerAssignToken.abi --bin BokerAssignToken.sol:BokerAssignToken.bin  --pkg assigntoken --out contract.go
 
 import (
-	_ "errors"
-	"math/big"
+	"context"
 	"time"
 
 	"github.com/boker/go-ethereum/accounts/abi/bind"
-	"github.com/boker/go-ethereum/accounts/abi/bind/backends"
+	"github.com/boker/go-ethereum/boker/protocol"
 	"github.com/boker/go-ethereum/common"
-	"github.com/boker/go-ethereum/core"
-	"github.com/boker/go-ethereum/crypto"
 	"github.com/boker/go-ethereum/eth"
-	"github.com/boker/go-ethereum/include"
 	"github.com/boker/go-ethereum/log"
 )
 
-//定义部署合约的用户信息
-/*var (
-	DeployKey, _  = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
-	DeployAddr    = crypto.PubkeyToAddress(DeployKey.PublicKey)
-	DeployBalance = big.NewInt(1000000)
-)*/
-
 //定期进行分配通证
 type AssignTokenService struct {
-	config       include.BokerConfig  //通证分配的配置
-	tokenSession AssigntokenSession   //分币session
-	addr         common.Address       //合约地址
-	backend      bind.ContractBackend //后台对象
-	ethereum     *eth.Ethereum        //以太坊对象
-	quit         chan chan error      //退出chan
-	start        bool                 //是否已经启动
+	token    *Assigntoken    //分币session
+	addr     common.Address  //合约地址
+	ethereum *eth.Ethereum   //以太坊对象
+	quit     chan chan error //退出chan
+	start    bool            //是否已经启动
 }
 
 //创建一个新服务来定期执行
-func NewAssignTokenService(ethereum *eth.Ethereum, config include.BokerConfig) (*AssignTokenService, error) {
+func NewAssignTokenService(ethereum *eth.Ethereum, address common.Address) (*AssignTokenService, error) {
 
 	var assignToken *AssignTokenService = new(AssignTokenService)
-	transactOpts, backend, addr, contract, err := assignToken.initContract()
+
+	token, err := NewAssigntoken(address, eth.NewContractBackend(ethereum.ApiBackend))
 	if err != nil {
 		return nil, err
 	}
-
-	//定义一个分配币的session
-	session := AssigntokenSession{
-		Contract:     contract,
-		TransactOpts: *transactOpts,
-	}
-	assignToken.tokenSession = session
-	assignToken.addr = addr
-	assignToken.backend = backend
-	assignToken.config = config
+	assignToken.token = token
+	assignToken.addr = address
 	assignToken.ethereum = ethereum
 	assignToken.quit = make(chan chan error)
 	assignToken.start = false
@@ -61,38 +41,12 @@ func NewAssignTokenService(ethereum *eth.Ethereum, config include.BokerConfig) (
 	return assignToken, nil
 }
 
-func (tokenService *AssignTokenService) initContract() (*bind.TransactOpts, bind.ContractBackend, common.Address, *Assigntoken, error) {
+func (tokenService *AssignTokenService) createTransactOpts() *bind.TransactOpts {
 
-	//根据读取到的数据来进行处理
-	DeployKey, err := crypto.HexToECDSA(tokenService.ethereum.BlockChain().Config().Producer.PrivateKey)
-	if err != nil {
-
+	if coinbase, err := tokenService.ethereum.Coinbase(); err == nil {
+		return bind.NewPasswordTransactor(tokenService.ethereum, coinbase)
 	}
-	DeployAddr := crypto.PubkeyToAddress(DeployKey.PublicKey)
-	DeployBalance := big.NewInt(0)
-	DeployBalance.SetInt64(tokenService.ethereum.BlockChain().Config().Producer.Balance)
-
-	//构造backend和帐号
-	backend := backends.NewSimulatedBackend(core.GenesisAlloc{DeployAddr: {Balance: DeployBalance}}, tokenService.ethereum.Boker)
-	auth := bind.NewKeyedTransactor(DeployKey)
-
-	//部署合约并得到合约地址
-	addr, _, contract, err := DeployAssigntoken(auth, backend)
-	if err != nil {
-		panic(err)
-	}
-
-	//提交合约
-	backend.Commit()
-	code, err := backend.CodeAt(nil, addr, nil)
-	if err != nil {
-		panic(err)
-	}
-	if len(code) == 0 {
-		panic("empty code")
-	}
-
-	return auth, backend, addr, contract, nil
+	return nil
 }
 
 func (tokenService *AssignTokenService) Start() {
@@ -112,14 +66,14 @@ func (tokenService *AssignTokenService) Stop() error {
 
 func (tokenService *AssignTokenService) tick() {
 
-	timer := time.NewTimer(include.AssignTokenInterval * 1)
+	timer := time.NewTimer(protocol.AssignTokenInterval * 1)
 	defer timer.Stop()
 
 	for {
 		select {
 		case <-timer.C:
 			tokenService.assignToken()
-			timer.Reset(include.AssignTokenInterval * 1)
+			timer.Reset(protocol.AssignTokenInterval * 1)
 		case errc := <-tokenService.quit:
 			errc <- nil
 			return
@@ -137,10 +91,14 @@ func (tokenService *AssignTokenService) assignToken() {
 	}
 
 	//调用时钟函数，判断是否周期发生改变
-	tokenBool, err := tokenService.tokenSession.CheckAssignToken()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	callOpts := &bind.CallOpts{Context: ctx}
+	defer cancel()
+
+	tokenBool, err := tokenService.token.CheckAssignToken(callOpts)
 	if err != nil {
 		if err == bind.ErrNoCode {
-			log.Debug("Assign Token address not found", "Contract", tokenService.config.Address)
+			log.Debug("Assign Token address not found", "Contract", tokenService.addr)
 		} else {
 			log.Error("Failed to retrieve current release", "err", err)
 		}
@@ -150,10 +108,11 @@ func (tokenService *AssignTokenService) assignToken() {
 		//开始分配通证
 		if tokenBool {
 
-			_, err := tokenService.tokenSession.AssignToken()
+			opts := tokenService.createTransactOpts()
+			_, err := tokenService.token.AssignToken(opts)
 			if err != nil {
 				if err == bind.ErrNoCode {
-					log.Debug("Release oracle not found", "Contract", tokenService.config.Address)
+					log.Debug("Release oracle not found", "Contract", tokenService.addr)
 				} else {
 					log.Error("Failed to retrieve current release", "err", err)
 				}
@@ -165,7 +124,7 @@ func (tokenService *AssignTokenService) assignToken() {
 
 func (tokenService *AssignTokenService) GetTokenAddr() common.Address {
 
-	return tokenService.config.Address
+	return tokenService.addr
 }
 
 func (tokenService *AssignTokenService) getCurrentTokenNoder() error {
@@ -175,13 +134,13 @@ func (tokenService *AssignTokenService) getCurrentTokenNoder() error {
 		//得到当前的出块节点
 		producer, err := tokenService.ethereum.BlockChain().CurrentBlock().DposCtx().GetCurrentProducer()
 		if err != nil {
-			return include.ErrInvalidTokenNoder
+			return protocol.ErrInvalidTokenNoder
 		}
 
 		//得到当前挖矿节点
 		coinbase, err := tokenService.ethereum.Coinbase()
 		if err != nil {
-			return include.ErrInvalidCoinbase
+			return protocol.ErrInvalidCoinbase
 		}
 
 		//将当前出块节点和当前节点进行比较，如果是当前出块节点，则允许继续进行处理
@@ -189,7 +148,7 @@ func (tokenService *AssignTokenService) getCurrentTokenNoder() error {
 			return nil
 		}
 	}
-	return include.ErrInvalidSystem
+	return protocol.ErrInvalidSystem
 }
 
 func (tokenService *AssignTokenService) IsStart() bool { return tokenService.start }

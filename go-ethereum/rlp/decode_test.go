@@ -560,6 +560,7 @@ var decodeTests = []decodeTest{
 func uintp(i uint) *uint { return &i }
 
 func runTests(t *testing.T, decode func([]byte, interface{}) error) {
+	
 	for i, test := range decodeTests {
 		input, err := hex.DecodeString(test.input)
 		if err != nil {

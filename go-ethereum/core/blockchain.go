@@ -10,7 +10,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/boker/go-ethereum/bokerface"
+	"github.com/boker/go-ethereum/boker/api"
 	"github.com/boker/go-ethereum/common"
 	"github.com/boker/go-ethereum/common/mclock"
 	"github.com/boker/go-ethereum/consensus"
@@ -54,27 +54,27 @@ type BlockChain struct {
 	logsFeed         event.Feed
 	scope            event.SubscriptionScope
 	genesisBlock     *types.Block
-	mu               sync.RWMutex             // global mutex for locking chain operations
-	chainmu          sync.RWMutex             // blockchain insertion lock
-	procmu           sync.RWMutex             // block processor lock
-	checkpoint       int                      // checkpoint counts towards the new checkpoint
-	currentBlock     *types.Block             // Current head of the block chain
-	currentFastBlock *types.Block             // Current head of the fast-sync chain (may be above the block chain!)
-	stateCache       state.Database           // State database to reuse between imports (contains state cache)
-	bodyCache        *lru.Cache               // Cache for the most recent block bodies
-	bodyRLPCache     *lru.Cache               // Cache for the most recent block bodies in RLP encoded format
-	blockCache       *lru.Cache               // Cache for the most recent entire blocks
-	futureBlocks     *lru.Cache               // future blocks are blocks added for later processing
-	quit             chan struct{}            // blockchain quit channel
-	running          int32                    // running must be called atomically
-	procInterrupt    int32                    // interrupt signaler for block processing(procInterrupt must be atomically called)
-	wg               sync.WaitGroup           // chain processing wait group for shutting down
-	engine           consensus.Engine         //共识引擎
-	processor        Processor                //区块处理器接口
-	validator        Validator                //区块验证接口
-	vmConfig         vm.Config                //虚拟机配置
-	badBlocks        *lru.Cache               // Bad block cache
-	boker            bokerface.BokerInterface //播客链的接口类
+	mu               sync.RWMutex     // global mutex for locking chain operations
+	chainmu          sync.RWMutex     // blockchain insertion lock
+	procmu           sync.RWMutex     // block processor lock
+	checkpoint       int              // checkpoint counts towards the new checkpoint
+	currentBlock     *types.Block     // Current head of the block chain
+	currentFastBlock *types.Block     // Current head of the fast-sync chain (may be above the block chain!)
+	stateCache       state.Database   // State database to reuse between imports (contains state cache)
+	bodyCache        *lru.Cache       // Cache for the most recent block bodies
+	bodyRLPCache     *lru.Cache       // Cache for the most recent block bodies in RLP encoded format
+	blockCache       *lru.Cache       // Cache for the most recent entire blocks
+	futureBlocks     *lru.Cache       // future blocks are blocks added for later processing
+	quit             chan struct{}    // blockchain quit channel
+	running          int32            // running must be called atomically
+	procInterrupt    int32            // interrupt signaler for block processing(procInterrupt must be atomically called)
+	wg               sync.WaitGroup   // chain processing wait group for shutting down
+	engine           consensus.Engine //共识引擎
+	processor        Processor        //区块处理器接口
+	validator        Validator        //区块验证接口
+	vmConfig         vm.Config        //虚拟机配置
+	badBlocks        *lru.Cache       // Bad block cache
+	boker            bokerapi.Api     //播客链的接口类
 }
 
 //返回初始化后的块链， 它初始化默认的以太坊验证器和处理器
@@ -116,7 +116,6 @@ func NewBlockChain(chainDb ethdb.Database,
 	if err != nil {
 		return nil, err
 	}
-	log.Info("NewHeaderChain")
 
 	bc.genesisBlock = bc.GetBlockByNumber(0)
 	if bc.genesisBlock == nil {
@@ -297,10 +296,10 @@ func (bc *BlockChain) GasLimit() *big.Int {
 	return bc.currentBlock.GasLimit()
 }
 
-func (bc *BlockChain) GetBoker() bokerface.BokerInterface {
+/*func (bc *BlockChain) Boker() bokerapi.Api {
 
 	return bc.boker
-}
+}*/
 
 // LastBlockHash return the hash of the HEAD block.
 func (bc *BlockChain) LastBlockHash() common.Hash {
@@ -366,7 +365,7 @@ func (bc *BlockChain) Validator() Validator {
 }
 
 //设置播客链接口
-func (bc *BlockChain) SetBoker(boker bokerface.BokerInterface) {
+func (bc *BlockChain) SetBoker(boker bokerapi.Api) {
 	bc.procmu.Lock()
 	defer bc.procmu.Unlock()
 	bc.boker = boker
@@ -374,7 +373,7 @@ func (bc *BlockChain) SetBoker(boker bokerface.BokerInterface) {
 }
 
 //得到播客链接口
-func (bc *BlockChain) Boker() bokerface.BokerInterface {
+func (bc *BlockChain) Boker() bokerapi.Api {
 	bc.procmu.RLock()
 	defer bc.procmu.RUnlock()
 	return bc.boker
@@ -888,6 +887,8 @@ func (bc *BlockChain) InsertChain(chain types.Blocks) (int, error) {
 //将区块插入到链中
 func (bc *BlockChain) insertChain(chain types.Blocks) (int, []interface{}, []*types.Log, error) {
 
+	log.Info("****insertChain****")
+
 	//进行健全性检查，确保所提供的链实际顺序和已连接的
 	for i := 1; i < len(chain); i++ {
 
@@ -999,7 +1000,7 @@ func (bc *BlockChain) insertChain(chain types.Blocks) (int, []interface{}, []*ty
 		} else {
 			parent = chain[i-1]
 		}
-		block.DposContext, err = types.NewDposContextFromProto(bc.chainDb, parent.Header().DposContext)
+		block.DposContext, err = types.NewDposContextFromProto(bc.chainDb, parent.Header().DposProto)
 		if err != nil {
 			return i, events, coalescedLogs, err
 		}

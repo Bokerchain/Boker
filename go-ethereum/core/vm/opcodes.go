@@ -37,18 +37,20 @@ func (op OpCode) IsStaticJump() bool {
 
 const (
 	// 0x0 range - arithmetic ops
-	STOP OpCode = iota
-	ADD
-	MUL
-	SUB
-	DIV
-	SDIV
-	MOD
-	SMOD
-	ADDMOD
-	MULMOD
-	EXP
-	SIGNEXTEND
+	STOP OpCode = iota //停止执行
+
+	//算术运算
+	ADD        //加法操作
+	MUL        //乘法操作
+	SUB        //减法操作
+	DIV        //除法操作
+	SDIV       //有符号除法
+	MOD        //求模操作
+	SMOD       //有符号求模操作
+	ADDMOD     //先加再求模
+	MULMOD     //先乘再求模
+	EXP        //指数运算
+	SIGNEXTEND //扩展有符号整数的长度
 )
 
 const (
@@ -64,36 +66,38 @@ const (
 	NOT
 	BYTE
 
-	SHA3 = 0x20
+	SHA3 = 0x20 //计算SHA3-256散列
 )
 
 const (
 	// 0x30 range - closure state
-	ADDRESS OpCode = 0x30 + iota
-	BALANCE
-	ORIGIN
-	CALLER
-	CALLVALUE
-	CALLDATALOAD
-	CALLDATASIZE
-	CALLDATACOPY
-	CODESIZE
-	CODECOPY
-	GASPRICE
-	EXTCODESIZE
-	EXTCODECOPY
+	//环境信息
+	ADDRESS      OpCode = 0x30 + iota //获取当前执行帐户的地址
+	BALANCE                           //获取给定帐户的余额
+	ORIGIN                            //获取执行起始地址
+	CALLER                            //获取调用者地址
+	CALLVALUE                         //通过负责此执行的指令/事务获取存储值
+	CALLDATALOAD                      //获取当前环境的输入数据
+	CALLDATASIZE                      //获取当前环境中的输入数据的大小
+	CALLDATACOPY                      //将当前环境中的输入数据复制到内存
+	CODESIZE                          //获取在当前环境中运行的代码的大小
+	CODECOPY                          //将当前环境中运行的代码复制到内存
+	GASPRICE                          //获取当前环境中的Gas价格
+	EXTCODESIZE                       //获取在当前环境中使用给定偏移量运行的代码大小
+	EXTCODECOPY                       //将在当前环境中运行的代码复制到具有给定偏移量的内存中
 	RETURNDATASIZE
 	RETURNDATACOPY
 )
 
 const (
 	// 0x40 range - block operations
-	BLOCKHASH OpCode = 0x40 + iota
-	COINBASE
-	TIMESTAMP
-	NUMBER
-	DIFFICULTY
-	GASLIMIT
+	//块信息
+	BLOCKHASH  OpCode = 0x40 + iota //获取最近完成块的哈希值
+	COINBASE                        //获取块的Coinbase地址
+	TIMESTAMP                       //获取块的时间戳
+	NUMBER                          //获取块的编号
+	DIFFICULTY                      //获得块的难度
+	GASLIMIT                        //获取块的气体限制
 )
 
 const (
@@ -197,12 +201,13 @@ const (
 
 const (
 	// 0xf0 range - closures
-	CREATE OpCode = 0xf0 + iota
-	CALL
-	CALLCODE
-	RETURN
-	DELEGATECALL
-	STATICCALL = 0xfa
+	//系统操作
+	CREATE       OpCode = 0xf0 + iota //创建具有关联代码的新帐户
+	CALL                              //消息呼叫到帐户
+	CALLCODE                          //调用自己，但是从TO参数而不是从自己的地址获取代码
+	RETURN                            //暂停执行返回输出数据
+	DELEGATECALL                      //在理念上类似于CALLCODE，除了它将发送者和值从父作用域传播到子作用域
+	STATICCALL   = 0xfa
 
 	REVERT       = 0xfd
 	SELFDESTRUCT = 0xff

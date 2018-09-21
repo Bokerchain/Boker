@@ -24,6 +24,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/boker/go-ethereum/boker/api"
 	"github.com/boker/go-ethereum/common"
 	"github.com/boker/go-ethereum/common/math"
 	"github.com/boker/go-ethereum/consensus"
@@ -499,6 +500,7 @@ func (ethash *Ethash) VerifySeal(chain consensus.ChainReader, header *types.Head
 // Prepare implements consensus.Engine, initializing the difficulty field of a
 // header to conform to the ethash protocol. The changes are done inline.
 func (ethash *Ethash) Prepare(chain consensus.ChainReader, header *types.Header) error {
+
 	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
 	if parent == nil {
 		return consensus.ErrUnknownAncestor
@@ -509,7 +511,14 @@ func (ethash *Ethash) Prepare(chain consensus.ChainReader, header *types.Header)
 }
 
 //打包新区块
-func (ethash *Ethash) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt, ctx *types.DposContext) (*types.Block, error) {
+func (ethash *Ethash) Finalize(chain consensus.ChainReader,
+	header *types.Header,
+	state *state.StateDB,
+	txs []*types.Transaction,
+	uncles []*types.Header,
+	receipts []*types.Receipt,
+	ctx *types.DposContext,
+	boker bokerapi.Api) (*types.Block, error) {
 
 	//计算报酬
 	AccumulateRewards(chain.Config(), state, header, uncles)

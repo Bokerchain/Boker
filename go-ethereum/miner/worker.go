@@ -9,6 +9,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/boker/go-ethereum/boker/protocol"
 	"github.com/boker/go-ethereum/common"
 	"github.com/boker/go-ethereum/consensus"
 	"github.com/boker/go-ethereum/consensus/dpos"
@@ -19,9 +20,9 @@ import (
 	"github.com/boker/go-ethereum/core/vm"
 	"github.com/boker/go-ethereum/ethdb"
 	"github.com/boker/go-ethereum/event"
-	"github.com/boker/go-ethereum/include"
 	"github.com/boker/go-ethereum/log"
 	"github.com/boker/go-ethereum/params"
+	"github.com/boker/go-ethereum/trie"
 	"gopkg.in/fatih/set.v0"
 )
 
@@ -64,10 +65,9 @@ type Result struct {
 
 // worker is the main object which takes care of applying messages to the new state
 type worker struct {
-	config *params.ChainConfig
-	engine consensus.Engine
-	mu     sync.Mutex
-	// update loop
+	config         *params.ChainConfig
+	engine         consensus.Engine
+	mu             sync.Mutex
 	mux            *event.TypeMux
 	txCh           chan core.TxPreEvent
 	txSub          event.Subscription
@@ -86,11 +86,11 @@ type worker struct {
 	uncleMu        sync.Mutex
 	possibleUncles map[common.Hash]*types.Block
 	unconfirmed    *unconfirmedBlocks // set of locally mined blocks pending canonicalness confirmations
-	// atomic status counters
-	mining  int32
-	atWork  int32
-	quitCh  chan struct{}
-	stopper chan struct{}
+	mining         int32
+	atWork         int32
+	quitCh         chan struct{}
+	stopper        chan struct{}
+	isStart        bool
 }
 
 func newWorker(config *params.ChainConfig, engine consensus.Engine, coinbase common.Address, eth Backend, mux *event.TypeMux) *worker {
@@ -112,6 +112,7 @@ func newWorker(config *params.ChainConfig, engine consensus.Engine, coinbase com
 		unconfirmed:    newUnconfirmedBlocks(eth.BlockChain(), miningLogAtDepth),
 		quitCh:         make(chan struct{}, 1),
 		stopper:        make(chan struct{}, 1),
+		isStart:        false,
 	}
 
 	//订阅交易池的TxPreEvent事件
@@ -122,9 +123,16 @@ func newWorker(config *params.ChainConfig, engine consensus.Engine, coinbase com
 
 	go worker.update()
 	go worker.wait()
-	worker.createNewWork()
+	//worker.createNewWork()
 
 	return worker
+}
+
+func (self *worker) CreateNewWork() {
+	if !self.isStart {
+		self.isStart = true
+		self.createNewWork()
+	}
 }
 
 func (self *worker) setCoinbase(addr common.Address) {
@@ -188,56 +196,78 @@ func (self *worker) mintBlock(now int64) {
 		return
 	}
 
-	//将当前的节点设置为验证节点
-	producerErr := engine.UpdateProducer(self.chain.CurrentBlock(), self.coinbase)
-	if producerErr != nil {
+	//获取当前出块节点的数量
+	size, sizeErr := engine.GetProducerSize(self.chain.CurrentBlock(), self.coinbase)
+	if sizeErr != nil {
 		return
 	}
-
-	//使用共识引擎来判断当前时间是否处在可以出块的时间,同时当前是否是这个节点应该进行出块
-	err := engine.CheckDeadline(self.chain.CurrentBlock(), now)
-	if err != nil {
-		//由于这里使用的是检测出块时间，因此这里可以不需要打印日志（大部分日志是正常的）
-		return
-	}
-
-	err = engine.CheckProducer(self.chain.CurrentBlock(), now)
-	if err != nil {
-		switch err {
-		case dpos.ErrWaitForPrevBlock,
-			dpos.ErrMintFutureBlock,
-			dpos.ErrInvalidBlockProducer,
-			include.ErrInvalidMintBlockTime:
-			{
-				log.Error("Failed to mint the block, while ", "err", err)
-				break
-			}
-		default:
-			{
-				log.Error("Failed to mint the block", "err", err)
-				break
-			}
+	if size == 0 {
+		if self.chain.CurrentBlock().Number().Uint64() != 0 {
+			log.Error("current block number is`t zero")
+			return
 		}
-		return
-	}
+		if err := engine.CheckDeadline(self.chain.CurrentBlock(), now); err != nil {
+			return
+		}
+		if self.chain.Boker().IsValidator(self.coinbase) {
 
-	//可以进行挖矿出块,创建一次挖矿矿工
-	work, err := self.createNewWork()
-	if err != nil {
-		log.Error("Failed to create the new work", "err", err)
-		return
-	}
-	//log.Info("block.header.Number %d", work.header.Number)
+			work, err := self.createNewWork()
+			if err != nil {
+				log.Error("Failed to create the new work", "err", err)
+				return
+			}
 
-	//对区块进行封包处理
-	result, err := self.engine.Seal(self.chain, work.Block, self.quitCh)
-	if err != nil {
-		log.Error("Failed to seal the block", "err", err)
-		return
-	}
-	//log.Info("self.engine.Seal")
+			//对区块进行封包处理
+			result, err := self.engine.Seal(self.chain, work.Block, self.quitCh)
+			if err != nil {
+				log.Error("Failed to seal the block", "err", err)
+				return
+			}
+			self.recv <- &Result{work, result}
+		} else {
+			log.Error("current coinbase is`t special account", "coinbase", self.coinbase)
+		}
 
-	self.recv <- &Result{work, result}
+	} else {
+
+		if err := engine.CheckDeadline(self.chain.CurrentBlock(), now); err != nil {
+			return
+		}
+
+		err := engine.CheckProducer(self.chain.CurrentBlock(), now)
+		if err != nil {
+			switch err {
+			case dpos.ErrWaitForPrevBlock,
+				dpos.ErrMintFutureBlock,
+				dpos.ErrInvalidBlockProducer,
+				protocol.ErrInvalidMintBlockTime:
+				{
+					log.Error("Failed to mint the block, while ", "err", err)
+					break
+				}
+			default:
+				{
+					log.Error("Failed to mint the block", "err", err)
+					break
+				}
+			}
+			return
+		}
+
+		//可以进行挖矿出块,创建一次挖矿矿工
+		work, err := self.createNewWork()
+		if err != nil {
+			log.Error("Failed to create the new work", "err", err)
+			return
+		}
+		//对区块进行封包处理
+		result, err := self.engine.Seal(self.chain, work.Block, self.quitCh)
+		if err != nil {
+			log.Error("Failed to seal the block", "err", err)
+			return
+		}
+		self.recv <- &Result{work, result}
+	}
 }
 
 //矿工挖矿循环
@@ -362,8 +392,26 @@ func (self *worker) wait() {
 	}
 }
 
+func newBokerFromProto(db ethdb.Database, bokerProto *protocol.BokerBackendProto) (*trie.Trie, *trie.Trie, error) {
+
+	//log.Info("****newBokerFromProto****")
+
+	baseTrie, err := trie.NewTrieWithPrefix(bokerProto.BaseHash, protocol.BasePrefix, db)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	contractTrie, err := trie.NewTrieWithPrefix(bokerProto.ContractHash, protocol.ContractPrefix, db)
+	if err != nil {
+		return nil, nil, err
+	}
+	return baseTrie, contractTrie, nil
+}
+
 //为当前周期创建一个新环境。
 func (self *worker) makeCurrent(parent *types.Block, header *types.Header) error {
+
+	//log.Info("****makeCurrent****")
 
 	//根据父块状态创建一个新的StateDB实例
 	state, err := self.chain.StateAt(parent.Root())
@@ -372,15 +420,26 @@ func (self *worker) makeCurrent(parent *types.Block, header *types.Header) error
 	}
 
 	//创建一个共识实例
-	dposContext, err := types.NewDposContextFromProto(self.chainDb, parent.Header().DposContext)
+	dposContext, err := types.NewDposContextFromProto(self.chainDb, parent.Header().DposProto)
 	if err != nil {
 		return err
 	}
 
+	//加载播客链信息
+	/*baseTrie, contractTrie, err := newBokerFromProto(self.chainDb, parent.Header().BokerProto)
+	if err != nil {
+		return err
+	}*/
+	/*log.Info("Read Boker",
+	"BokerProto", parent.Header().BokerProto.Root().String(),
+	"base", baseTrie.Hash().String(),
+	"contract", contractTrie.Hash().String())*/
+
 	//创建一个work实例
 	work := &Work{
-		config:      self.config,
-		signer:      types.NewEIP155Signer(self.config.ChainId),
+		config: self.config,
+		//signer:      types.NewEIP155Signer(self.config.ChainId),
+		signer:      types.HomesteadSigner{},
 		state:       state,
 		dposContext: dposContext,
 		ancestors:   set.New(),
@@ -424,7 +483,6 @@ func (self *worker) createNewWork() (*Work, error) {
 		tstamp = parent.Time().Int64() + 1
 	}
 
-	// this will ensure we're not going off too far in the future
 	if now := time.Now().Unix(); tstamp > now+1 {
 		wait := time.Duration(tstamp-now) * time.Second
 		log.Info("Mining too far in the future", "wait", common.PrettyDuration(wait))
@@ -467,6 +525,7 @@ func (self *worker) createNewWork() (*Work, error) {
 	}
 
 	// Could potentially happen if starting to mine in an odd state.
+	//log.Info("createNewWork makeCurrent", "number", header.Number)
 	err := self.makeCurrent(parent, header)
 	if err != nil {
 		return nil, fmt.Errorf("got error when create mining context, err: %s", err)
@@ -517,17 +576,28 @@ func (self *worker) createNewWork() (*Work, error) {
 	}
 
 	//使用共识引擎打包新区块
-	if work.Block, err = self.engine.Finalize(self.chain, header, work.state, work.txs, uncles, work.receipts, work.dposContext); err != nil {
+	if self.eth == nil {
+		log.Info("createNewWork check eth is nil")
+	}
+	if work.Block, err = self.engine.Finalize(self.chain, header, work.state, work.txs, uncles, work.receipts, work.dposContext, self.eth.Boker()); err != nil {
 		return nil, fmt.Errorf("got error when finalize block for sealing, err: %s", err)
 	}
 	work.Block.DposContext = work.dposContext
 
 	//更新新块的矿工数量,如果我们正在挖矿，那我们只打印日志
 	if atomic.LoadInt32(&self.mining) == 1 {
-		//log.Info("Commit new mining work", "number", work.Block.Number(), "txs", work.tcount, "uncles", len(uncles), "elapsed", common.PrettyDuration(time.Since(tstart)))
-		log.Info("Commit new mining work", "number", work.Block.Number(), "txs", work.tcount, "uncles", len(uncles))
 		self.unconfirmed.Shift(work.Block.NumberU64() - 1)
 	}
+
+	//这里需要打印日志
+	/*log.Info("****current statistics****")
+	log.Info("Header", "lastNumber", header.Number, "dposProto", header.DposProto.Root().String(), "bokerProto", header.BokerProto.Root().String())
+	log.Info("Miner", "coinbase", self.coinbase, "engine", "Dpos")
+	log.Info("Validator", "validator", header.Validator)
+	tokenNoder, tokenErr := work.Block.DposContext.GetTokenNoder(header.Time.Int64())
+	if tokenErr == nil {
+		log.Info("Token Noder", "assign", tokenNoder)
+	}*/
 	return work, nil
 }
 
@@ -636,7 +706,7 @@ func (env *Work) commitTransaction(tx *types.Transaction, bc *core.BlockChain, c
 		tx,
 		env.header.GasUsed,
 		vm.Config{},
-		bc.GetBoker())
+		bc.Boker())
 
 	if err != nil {
 

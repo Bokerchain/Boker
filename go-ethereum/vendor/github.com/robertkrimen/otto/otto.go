@@ -228,6 +228,7 @@ import (
 	"fmt"
 	"strings"
 
+	_ "github.com/boker/go-ethereum/log"
 	"github.com/robertkrimen/otto/file"
 	"github.com/robertkrimen/otto/registry"
 )
@@ -535,6 +536,8 @@ func (self Otto) ContextSkip(limit int, skipNative bool) (ctx Context) {
 //      value, _ := vm.Call(`[ 1, 2, 3, undefined, 4 ].concat`, nil, 5, 6, 7, "abc")
 //
 func (self Otto) Call(source string, this interface{}, argumentList ...interface{}) (Value, error) {
+
+	//log.Info("(self Otto) Call", "source", source)
 
 	thisValue := Value{}
 

@@ -253,7 +253,6 @@ func (c *Console) Welcome() {
 	fmt.Fprintf(c.printer, "Welcome to the BokerChain Geth JavaScript console!\n\n")
 	c.jsre.Run(`
 		console.log("instance: " + web3.version.node);
-		console.log("validator: " + eth.validator);
 		console.log("coinbase: " + eth.coinbase);
 		console.log("at block: " + eth.blockNumber + " (" + new Date(1000 * eth.getBlock(eth.blockNumber).timestamp) + ")");
 		console.log("datadir: " + admin.datadir);
@@ -266,7 +265,7 @@ func (c *Console) Welcome() {
 			modules = append(modules, fmt.Sprintf("%s:%s", api, version))
 		}
 		sort.Strings(modules)
-		fmt.Fprintln(c.printer, "  modules:", strings.Join(modules, " "))
+		fmt.Fprintln(c.printer, "modules:", strings.Join(modules, " "))
 	}
 	fmt.Fprintln(c.printer)
 }
@@ -279,6 +278,7 @@ func (c *Console) Evaluate(statement string) error {
 			fmt.Fprintf(c.printer, "[native] error: %v\n", r)
 		}
 	}()
+
 	return c.jsre.Evaluate(statement, c.printer)
 }
 
@@ -351,6 +351,7 @@ func (c *Console) Interactive() {
 						}
 					}
 				}
+				//log.Info("Interactive", "input", input)
 				c.Evaluate(input)
 				input = ""
 			}

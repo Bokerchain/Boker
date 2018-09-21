@@ -21,11 +21,15 @@ import (
 	"errors"
 	"io"
 	"io/ioutil"
+	"math/big"
 
+	"github.com/boker/go-ethereum/accounts"
 	"github.com/boker/go-ethereum/accounts/keystore"
 	"github.com/boker/go-ethereum/common"
 	"github.com/boker/go-ethereum/core/types"
 	"github.com/boker/go-ethereum/crypto"
+	"github.com/boker/go-ethereum/eth"
+	"github.com/boker/go-ethereum/log"
 )
 
 // NewTransactor is a utility method to easily create a transaction signer from
@@ -57,6 +61,36 @@ func NewKeyedTransactor(key *ecdsa.PrivateKey) *TransactOpts {
 				return nil, err
 			}
 			return tx.WithSignature(signer, signature)
+		},
+	}
+}
+
+//播客链中使用密码创建的Opts
+func NewPasswordTransactor(ethereum *eth.Ethereum, addr common.Address) *TransactOpts {
+
+	keyAddr := addr
+	return &TransactOpts{
+		From: keyAddr,
+
+		Signer: func(signer types.Signer, address common.Address, tx *types.Transaction) (*types.Transaction, error) {
+
+			if address != keyAddr {
+				return nil, errors.New("not authorized to sign this account")
+			}
+
+			var chainID *big.Int
+			if config := ethereum.ApiBackend.ChainConfig(); config.IsEIP155(ethereum.ApiBackend.CurrentBlock().Number()) {
+				chainID = config.ChainId
+			}
+
+			account := accounts.Account{Address: address}
+			wallet, err := ethereum.AccountManager().Find(account)
+			if err != nil {
+				log.Error("SubmitBokerTransaction AccountManager Find", "error", err)
+				return nil, err
+			}
+
+			return wallet.SignTxWithPassphrase(account, ethereum.Password(), tx, chainID)
 		},
 	}
 }

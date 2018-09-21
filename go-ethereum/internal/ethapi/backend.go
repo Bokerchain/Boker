@@ -22,7 +22,7 @@ import (
 	"math/big"
 
 	"github.com/boker/go-ethereum/accounts"
-	"github.com/boker/go-ethereum/bokerface"
+	"github.com/boker/go-ethereum/boker/api"
 	"github.com/boker/go-ethereum/common"
 	"github.com/boker/go-ethereum/core"
 	"github.com/boker/go-ethereum/core/state"
@@ -66,23 +66,30 @@ type Backend interface {
 	Stats() (pending int, queued int)
 	TxPoolContent() (map[common.Address]types.Transactions, map[common.Address]types.Transactions)
 	SubscribeTxPreEvent(chan<- core.TxPreEvent) event.Subscription
-
 	ChainConfig() *params.ChainConfig
 	CurrentBlock() *types.Block
+
+	//获取播客链的接口
+	Coinbase() (common.Address, error)
+	SetCoinbase(coinbase common.Address)
+	Password() string
+	SetPassword(password string)
+	Boker() bokerapi.Api
+	DecodeParams(code []byte) ([]byte, error)
 }
 
-func GetAPIs(apiBackend Backend, boker bokerface.BokerInterface) []rpc.API {
+func GetAPIs(apiBackend Backend, boker bokerapi.Api) []rpc.API {
 	nonceLock := new(AddrLocker)
 	return []rpc.API{
 		{
 			Namespace: "eth",
 			Version:   "1.0",
-			Service:   NewPublicEthereumAPI(apiBackend, boker),
+			Service:   NewPublicEthereumAPI(apiBackend),
 			Public:    true,
 		}, {
 			Namespace: "eth",
 			Version:   "1.0",
-			Service:   NewPublicBlockChainAPI(apiBackend, boker),
+			Service:   NewPublicBlockChainAPI(apiBackend),
 			Public:    true,
 		}, {
 			Namespace: "eth",
@@ -92,7 +99,7 @@ func GetAPIs(apiBackend Backend, boker bokerface.BokerInterface) []rpc.API {
 		}, {
 			Namespace: "txpool",
 			Version:   "1.0",
-			Service:   NewPublicTxPoolAPI(apiBackend, boker),
+			Service:   NewPublicTxPoolAPI(apiBackend),
 			Public:    true,
 		}, {
 			Namespace: "debug",

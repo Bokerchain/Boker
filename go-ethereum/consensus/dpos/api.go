@@ -28,7 +28,7 @@ func (api *API) GetValidators(number *rpc.BlockNumber) ([]common.Address, error)
 		return nil, errUnknownBlock
 	}
 
-	epochTrie, err := types.NewEpochTrie(header.DposContext.EpochHash, api.dpos.db)
+	epochTrie, err := types.NewEpochTrie(header.DposProto.EpochHash, api.dpos.db)
 	if err != nil {
 		return nil, err
 	}

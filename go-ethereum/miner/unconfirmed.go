@@ -22,7 +22,7 @@ import (
 
 	"github.com/boker/go-ethereum/common"
 	"github.com/boker/go-ethereum/core/types"
-	"github.com/boker/go-ethereum/log"
+	_ "github.com/boker/go-ethereum/log"
 )
 
 // headerRetriever is used by the unconfirmed block set to verify whether a previously
@@ -96,7 +96,7 @@ func (set *unconfirmedBlocks) Shift(height uint64) {
 			break
 		}
 		// Block seems to exceed depth allowance, check for canonical status
-		header := set.chain.GetHeaderByNumber(next.index)
+		/*header := set.chain.GetHeaderByNumber(next.index)
 		switch {
 		case header == nil:
 			log.Warn("Failed to retrieve header of mined block", "number", next.index, "hash", next.hash)
@@ -104,7 +104,7 @@ func (set *unconfirmedBlocks) Shift(height uint64) {
 			log.Info("block reached canonical chain", "number", next.index, "hash", next.hash)
 		default:
 			log.Info("block  became a side fork", "number", next.index, "hash", next.hash)
-		}
+		}*/
 		// Drop the block out of the ring
 		if set.blocks.Value == set.blocks.Next().Value {
 			set.blocks = nil

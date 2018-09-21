@@ -25,7 +25,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/boker/go-ethereum/bokerface"
+	"github.com/boker/go-ethereum/boker/api"
 	"github.com/boker/go-ethereum/common"
 	"github.com/boker/go-ethereum/common/hexutil"
 	"github.com/boker/go-ethereum/core/types"
@@ -59,11 +59,11 @@ type PublicFilterAPI struct {
 	events    *EventSystem
 	filtersMu sync.Mutex
 	filters   map[rpc.ID]*filter
-	boker     bokerface.BokerInterface
+	boker     bokerapi.Api
 }
 
 // NewPublicFilterAPI returns a new PublicFilterAPI instance.
-func NewPublicFilterAPI(backend Backend, lightMode bool, boker bokerface.BokerInterface) *PublicFilterAPI {
+func NewPublicFilterAPI(backend Backend, lightMode bool, boker bokerapi.Api) *PublicFilterAPI {
 	api := &PublicFilterAPI{
 		backend: backend,
 		mux:     backend.EventMux(),

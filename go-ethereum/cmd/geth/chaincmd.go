@@ -122,7 +122,7 @@ Use "ethereum dump 0" to dump the genesis block.`,
 	}
 )
 
-//将初始化给定的JSON格式genesis文件,并将其写为如果不能成功，那么零区（即创世纪）或将会失败。
+//将初始化给定的JSON格式genesis文件,并将其写为如果不能成功，那么零区（即创世纪）或将会失败
 func initGenesis(ctx *cli.Context) error {
 
 	/****确保我们有一个有效的创世配置JSON****/
@@ -144,12 +144,11 @@ func initGenesis(ctx *cli.Context) error {
 	if err := json.NewDecoder(file).Decode(genesis); err != nil {
 		utils.Fatalf("invalid genesis file: %v", err)
 	}
-	log.Info("Load Genesis Dpos Validators", "Size", len(genesis.Config.Dpos.Validators))
-	log.Info("Load Genesis Contracts Bases", "Size", len(genesis.Config.Contracts.Bases))
 
 	//打开全数据库和轻型数据库的初始化
 	stack := makeFullNode(ctx)
 
+	//将创世区块写入到数据库中
 	for _, name := range []string{"chaindata", "lightchaindata"} {
 		chaindb, err := stack.OpenDatabase(name, 0, 0)
 		if err != nil {

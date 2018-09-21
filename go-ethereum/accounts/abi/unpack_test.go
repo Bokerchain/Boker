@@ -584,3 +584,110 @@ func TestUnmarshal(t *testing.T) {
 		t.Fatal("expected error:", err)
 	}
 }
+
+
+//这里提供了一个函数，来对合约的abi进行解析
+func DecodeAbi(abiJson string, name string, payload string) ([]string, error) {
+
+	var outArray = make([]string, 0)
+	return outArray, nil
+
+	const definition = `[{"constant":true,"inputs":[],"name":"show","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"str","type":"string"}],"name":"test","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"payable":false,"stateMutability":"nonpayable","type":"fallback"}]`
+
+	//解析Abi格式成为Json格式
+	var outArray = make([]string, 0)
+	abi, err := abi.JSON(strings.NewReader(definition))
+	if err != nil {
+		return outArray, err
+	}
+
+	payload = "f9fbd554000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000046861686100000000000000000000000000000000000000000000000000000000"
+	name = "test"
+	//剔除最前面的0x标记
+	var decodeString string = ""
+	hexFlag := strings.Index(payload, "0x")
+	if hexFlag == -1 {
+		decodeString = payload
+	} else {
+		decodeString = payload[2:]
+	}
+
+	//将字符串转换成[]Byte
+	decodeBytes, err := hex.DecodeString(decodeString)
+	if err != nil {
+		return outArray, err
+	}
+	log.Info("DecodeAbi", "decodeBytes", decodeBytes)
+
+	//根据函数的名称，设置函数的输入参数信息
+	method, ok := abi.Methods[name]
+	if !ok {
+		return outArray, errors.New("")
+	}
+
+	var mixedParams = make([]interface{}, 0)
+	for _, v := range method.Inputs {
+
+		kind := reflect.TypeOf(v.Type).Kind()
+		switch kind {
+
+		case reflect.Bool:
+			var Bool bool
+			mixedParams = append(mixedParams, Bool)
+		case reflect.Int:
+			var Int int
+			mixedParams = append(mixedParams, Int)
+		case reflect.Int8:
+			var Int8 int8
+			mixedParams = append(mixedParams, Int8)
+		case reflect.Int16:
+			var Int16 int16
+			mixedParams = append(mixedParams, Int16)
+		case reflect.Int32:
+			var Int32 int32
+			mixedParams = append(mixedParams, Int32)
+		case reflect.Int64:
+			var Int64 int64
+			mixedParams = append(mixedParams, Int64)
+		case reflect.Uint:
+			var UInt uint
+			mixedParams = append(mixedParams, UInt)
+		case reflect.Uint8:
+			var UInt8 uint8
+			mixedParams = append(mixedParams, UInt8)
+		case reflect.Uint16:
+			var UInt16 uint16
+			mixedParams = append(mixedParams, UInt16)
+		case reflect.Uint32:
+			var UInt32 uint32
+			mixedParams = append(mixedParams, UInt32)
+		case reflect.Uint64:
+			var UInt64 uint64
+			mixedParams = append(mixedParams, UInt64)
+		case reflect.String:
+			var String string
+			mixedParams = append(mixedParams, String)
+		}
+	}
+
+	//解析
+	if err := abi.Unpack(&mixedParams, name, decodeBytes[4:]); err != nil {
+
+		log.Info("DecodeAbi", "err", err)
+		return nil, err
+	}
+	log.Info("DecodeAbi", "mixedParams", mixedParams[0])
+	return outArray, nil*/
+}
+
+
+/*func main() {
+	
+	DecodeAbi("", "", "")
+	
+	//延时处理;
+	for {
+		time.Sleep(1 * time.Minute)
+	}
+	
+}*/

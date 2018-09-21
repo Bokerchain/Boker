@@ -2,45 +2,125 @@
 package boker
 
 import (
+	"github.com/boker/go-ethereum/boker/protocol"
 	"github.com/boker/go-ethereum/common"
-	"github.com/boker/go-ethereum/core/types"
 	"github.com/boker/go-ethereum/log"
 )
 
 //播客链的账号管理
+type AcccountLevel struct {
+	level []protocol.TxType
+}
 type BokerAccount struct {
-	accounts map[common.Address]types.TxType
+	accounts map[common.Address]AcccountLevel
 }
 
 func NewAccount() *BokerAccount {
 
 	bokerAccount := new(BokerAccount)
-	bokerAccount.accounts = make(map[common.Address]types.TxType)
+	bokerAccount.accounts = make(map[common.Address]AcccountLevel)
 	bokerAccount.loadAccount()
 	return bokerAccount
 }
 
-func (a *BokerAccount) loadAccount() {
+func (a *BokerAccount) loadVoteDeployAccount() {
 
-	log.Info("load bokerchain account")
+	log.Info("****loadVoteDeployAccount****")
 
-	//部署基础合约帐号
-	a.accounts[common.HexToAddress("0x3347cc0f61122bcffb2de5089f6c9c5f968366b2")] = types.DeployVote
-	//社区运营基金账户
-	a.accounts[common.HexToAddress("0xd7fd311c8f97349670963d87f37a68794dfa80ff")] = types.DeployAssignToken
-	//基金会账户
-	a.accounts[common.HexToAddress("0xa0da98da40f8c4aba880ad8d219a5c82c8bc97c4")] = types.DeployAssignToken
-	//团队账户
-	a.accounts[common.HexToAddress("0x81b7fee82a6356351edbf1339a845b2480ad53c2")] = types.DeployAssignToken
+	accountLevel := AcccountLevel{
+		level: make([]protocol.TxType, 0, 0),
+	}
+	accountLevel.level = append(accountLevel.level, protocol.SetVote)
+	accountLevel.level = append(accountLevel.level, protocol.CancelVote)
+	a.accounts[common.HexToAddress("0xd7fd311c8f97349670963d87f37a68794dfa80ff")] = accountLevel
 }
 
-func (a *BokerAccount) GetAccount(account common.Address) (types.TxType, error) {
+func (a *BokerAccount) loadTokenDeployAccount() {
+
+	log.Info("****loadTokenDeployAccount****")
+
+	accountLevel := AcccountLevel{
+		level: make([]protocol.TxType, 0, 0),
+	}
+	accountLevel.level = append(accountLevel.level, protocol.SetAssignToken)
+	accountLevel.level = append(accountLevel.level, protocol.CanclAssignToken)
+	a.accounts[common.HexToAddress("0xd7fd311c8f97349670963d87f37a68794dfa80ff")] = accountLevel
+}
+
+func (a *BokerAccount) loadSetValidator() {
+
+	log.Info("****loadSetValidator****")
+
+	//加载添加验证人账号
+	accountLevel := AcccountLevel{
+		level: make([]protocol.TxType, 0, 0),
+	}
+	accountLevel.level = append(accountLevel.level, protocol.SetValidator)
+	a.accounts[common.HexToAddress("0x97da0c2f933ff6aad55a0b9eb1933f5b0ae3cd9b")] = accountLevel
+}
+
+func (a *BokerAccount) IsValidator(address common.Address) bool {
+
+	if len(a.accounts) <= 0 {
+		return false
+	}
+
+	levels := a.accounts[address]
+	if len(levels.level) <= 0 {
+		return false
+	}
+
+	for _, v := range levels.level {
+		if v == protocol.SetValidator {
+			return true
+		}
+	}
+	return false
+}
+
+func (a *BokerAccount) loadCommunityAccount() {
+
+	log.Info("****loadCommunityAccount****")
+
+	//社区运营基金账户
+	communityOperationsAccount := AcccountLevel{
+		level: make([]protocol.TxType, 0, 0),
+	}
+	communityOperationsAccount.level = append(communityOperationsAccount.level, protocol.SetValidator)
+	a.accounts[common.HexToAddress("0xd7fd311c8f97349670963d87f37a68794dfa80ff")] = communityOperationsAccount
+
+	//基金会账户
+	foundationAccount := AcccountLevel{
+		level: make([]protocol.TxType, 0, 0),
+	}
+	foundationAccount.level = append(foundationAccount.level, protocol.SetValidator)
+	a.accounts[common.HexToAddress("0xd7fd311c8f97349670963d87f37a68794dfa80ff")] = foundationAccount
+
+	//团队账户
+	teamAccount := AcccountLevel{
+		level: make([]protocol.TxType, 0, 0),
+	}
+	teamAccount.level = append(teamAccount.level, protocol.SetValidator)
+	a.accounts[common.HexToAddress("0xd7fd311c8f97349670963d87f37a68794dfa80ff")] = teamAccount
+}
+
+func (a *BokerAccount) loadAccount() {
+
+	log.Info("****loadAccount****")
+	a.loadSetValidator()
+}
+
+func (a *BokerAccount) GetAccount(account common.Address) ([]protocol.TxType, error) {
 
 	if len(a.accounts) > 0 {
 		value, exist := a.accounts[account]
 		if exist {
-			return value, nil
+			return value.level, nil
 		}
 	}
-	return types.Binary, ErrNotFoundAccount
+
+	//测试使用
+	return []protocol.TxType{protocol.SetValidator}, nil
+
+	//return []protocol.TxType{protocol.Binary}, protocol.ErrSpecialAccount
 }

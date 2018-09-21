@@ -92,7 +92,7 @@ func (v *BlockValidator) ValidateDposState(block *types.Block) error {
 	//验证区块中记录的Dpos根和区块头中记录的Dpos根是否一致
 	header := block.Header()
 	localRoot := block.DposCtx().Root()
-	remoteRoot := header.DposContext.Root()
+	remoteRoot := header.DposProto.Root()
 	if remoteRoot != localRoot {
 		return fmt.Errorf("invalid dpos root (remote: %x local: %x)", remoteRoot, localRoot)
 	}

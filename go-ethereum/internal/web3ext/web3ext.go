@@ -402,33 +402,6 @@ web3._extend({
 			params: 2,
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter, null]
 		}),
-		
-		new web3._extend.Method({
-			name: 'getCurrentProducer',
-			call: 'eth_getCurrentProducer',
-			params: 0,
-		}),
-		new web3._extend.Method({
-			name: 'getCurrentTokenNoder',
-			call: 'eth_getCurrentTokenNoder',
-			params: 0,
-		}),
-		new web3._extend.Method({
-			name: 'setPrivateKey',
-			call: 'eth_setPrivateKey',
-			params: 0,
-		}),
-		new web3._extend.Method({
-			name: 'setBaseContracts',
-			call: 'eth_setBaseContracts',
-			params: 2,
-		}),
-		new web3._extend.Method({
-			name: 'cancelBaseContracts',
-			call: 'eth_cancelBaseContracts',
-			params: 2,
-		}),
-		
 		new web3._extend.Method({
 			name: 'resend',
 			call: 'eth_resend',
@@ -460,6 +433,50 @@ web3._extend({
 			params: 2,
 			inputFormatter: [web3._extend.formatters.inputBlockNumberFormatter, web3._extend.utils.toHex]
 		}),
+		
+		
+		new web3._extend.Method({
+			name: 'getLastProducer',
+			call: 'eth_getLastProducer',
+			params: 0,
+		}),
+		new web3._extend.Method({
+			name: 'getLastTokenNoder',
+			call: 'eth_getLastTokenNoder',
+			params: 0,
+		}),
+		new web3._extend.Method({
+			name: 'getNextProducer',
+			call: 'eth_getNextProducer',
+			params: 0,
+		}),
+		new web3._extend.Method({
+			name: 'getNextTokenNoder',
+			call: 'eth_getNextTokenNoder',
+			params: 0,
+		}),
+		new web3._extend.Method({
+			name: 'setBaseContracts',
+			call: 'eth_setBaseContracts',
+			params: 2,
+		}),
+		new web3._extend.Method({
+			name: 'cancelBaseContracts',
+			call: 'eth_cancelBaseContracts',
+			params: 2,
+		}),
+		new web3._extend.Method({
+			name: 'addValidator',
+			call: 'eth_addValidator',
+			params: 2,
+		}),	
+		
+		new web3._extend.Method({
+			name: 'decodeAbi',
+			call: 'eth_decodeAbi',
+			params: 3,
+		}),
+		
 	],
 	properties: [
 		new web3._extend.Property({
@@ -497,6 +514,11 @@ web3._extend({
 			call: 'miner_setCoinbase',
 			params: 1,
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'setLocalValidator',
+			call: 'miner_setLocalValidator',
+			params: 0,
 		}),
 		new web3._extend.Method({
 			name: 'setExtra',

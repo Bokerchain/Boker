@@ -23,7 +23,7 @@ import (
 	"time"
 
 	"github.com/boker/go-ethereum/accounts"
-	"github.com/boker/go-ethereum/bokerface"
+	"github.com/boker/go-ethereum/boker/api"
 	"github.com/boker/go-ethereum/common"
 	"github.com/boker/go-ethereum/common/hexutil"
 	"github.com/boker/go-ethereum/consensus"
@@ -69,7 +69,8 @@ type LightEthereum struct {
 	networkId                                  uint64
 	netRPCService                              *ethapi.PublicNetAPI
 	wg                                         sync.WaitGroup
-	Boker                                      bokerface.BokerInterface //播客链新增加的接口
+	password                                   string       //挖矿账号的密码
+	boker                                      bokerapi.Api //播客链新增加的接口
 }
 
 func New(ctx *node.ServiceContext, config *eth.Config) (*LightEthereum, error) {
@@ -87,13 +88,14 @@ func New(ctx *node.ServiceContext, config *eth.Config) (*LightEthereum, error) {
 	quitSync := make(chan struct{})
 
 	leth := &LightEthereum{
-		chainConfig:      chainConfig,
-		chainDb:          chainDb,
-		eventMux:         ctx.EventMux,
-		peers:            peers,
-		reqDist:          newRequestDistributor(peers, quitSync),
-		accountManager:   ctx.AccountManager,
-		engine:           dpos.New(chainConfig.Dpos, chainDb),
+		chainConfig:    chainConfig,
+		chainDb:        chainDb,
+		eventMux:       ctx.EventMux,
+		peers:          peers,
+		reqDist:        newRequestDistributor(peers, quitSync),
+		accountManager: ctx.AccountManager,
+		//engine:           dpos.New(chainConfig.Dpos, chainDb),
+		engine:           dpos.New(&params.DposConfig{}, chainDb),
 		shutdownChan:     make(chan bool),
 		networkId:        config.NetworkId,
 		bloomRequests:    make(chan chan *bloombits.Retrieval),
@@ -172,12 +174,12 @@ func (s *LightEthereum) APIs() []rpc.API {
 		}, {
 			Namespace: "eth",
 			Version:   "1.0",
-			Service:   downloader.NewPublicDownloaderAPI(s.protocolManager.downloader, s.eventMux, s.Boker),
+			Service:   downloader.NewPublicDownloaderAPI(s.protocolManager.downloader, s.eventMux, s.Boker()),
 			Public:    true,
 		}, {
 			Namespace: "eth",
 			Version:   "1.0",
-			Service:   filters.NewPublicFilterAPI(s.ApiBackend, true, s.Boker),
+			Service:   filters.NewPublicFilterAPI(s.ApiBackend, true, s.Boker()),
 			Public:    true,
 		}, {
 			Namespace: "net",
@@ -188,17 +190,36 @@ func (s *LightEthereum) APIs() []rpc.API {
 	}...)
 }
 
+func (s *LightEthereum) Password() string {
+
+	return s.password
+}
+
+func (s *LightEthereum) SetPassword(password string) {
+
+	s.password = password
+}
+
+func (s *LightEthereum) SetCoinbase(coinbase common.Address) {
+}
+
 func (s *LightEthereum) ResetWithGenesisBlock(gb *types.Block) {
 	s.blockchain.ResetWithGenesisBlock(gb)
 }
 
-func (s *LightEthereum) BlockChain() *light.LightChain           { return s.blockchain }
-func (s *LightEthereum) TxPool() *light.TxPool                   { return s.txPool }
-func (s *LightEthereum) Engine() consensus.Engine                { return s.engine }
-func (s *LightEthereum) LesVersion() int                         { return int(s.protocolManager.SubProtocols[0].Version) }
-func (s *LightEthereum) Downloader() *downloader.Downloader      { return s.protocolManager.downloader }
-func (s *LightEthereum) EventMux() *event.TypeMux                { return s.eventMux }
-func (s *LightEthereum) SetBoker(boker bokerface.BokerInterface) { s.Boker = boker }
+func (s *LightEthereum) DecodeParams(code []byte) ([]byte, error) {
+
+	return []byte(""), nil
+}
+
+func (s *LightEthereum) BlockChain() *light.LightChain      { return s.blockchain }
+func (s *LightEthereum) TxPool() *light.TxPool              { return s.txPool }
+func (s *LightEthereum) Engine() consensus.Engine           { return s.engine }
+func (s *LightEthereum) LesVersion() int                    { return int(s.protocolManager.SubProtocols[0].Version) }
+func (s *LightEthereum) Downloader() *downloader.Downloader { return s.protocolManager.downloader }
+func (s *LightEthereum) EventMux() *event.TypeMux           { return s.eventMux }
+func (s *LightEthereum) Boker() bokerapi.Api                { return s.boker }
+func (s *LightEthereum) SetBoker(boker bokerapi.Api)        { s.boker = boker }
 
 // Protocols implements node.Service, returning all the currently configured
 // network protocols to start.

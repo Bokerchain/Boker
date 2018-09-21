@@ -28,6 +28,7 @@ import (
 	"time"
 
 	ethereum "github.com/boker/go-ethereum"
+	"github.com/boker/go-ethereum/boker/protocol"
 	"github.com/boker/go-ethereum/common"
 	"github.com/boker/go-ethereum/core/types"
 	"github.com/boker/go-ethereum/ethdb"
@@ -1455,15 +1456,20 @@ func (d *Downloader) commitFastSyncData(results []*fetchResult, stateSync *state
 }
 
 func (d *Downloader) commitPivotBlock(result *fetchResult) error {
+
 	b := types.NewBlockWithHeader(result.Header).WithBody(result.Transactions, result.Uncles)
 	// Sync the pivot block state. This should complete reasonably quickly because
 	// we've already synced up to the reported head block state earlier.
 	if err := d.syncState(b.Root()).Wait(); err != nil {
 		return err
 	}
-	if err := d.syncDposContextState(b.Header().DposContext); err != nil {
+	if err := d.syncDposContextState(b.Header().DposProto); err != nil {
 		return err
 	}
+	if err := d.syncDposContextState(b.Header().DposProto); err != nil {
+		return err
+	}
+
 	log.Debug("Committing fast sync pivot as new head", "number", b.Number(), "hash", b.Hash())
 	if _, err := d.blockchain.InsertReceiptChain([]*types.Block{b}, []types.Receipts{result.Receipts}); err != nil {
 		return err
@@ -1477,6 +1483,20 @@ func (d *Downloader) syncDposContextState(context *types.DposContextProto) error
 		context.ValidatorHash,
 		context.EpochHash,
 		context.BlockCntHash,
+	}
+	for _, root := range roots {
+		if err := d.syncState(root).Wait(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Todo: sync dpos context in concurrent
+func (d *Downloader) syncBokerContextState(context *protocol.BokerBackendProto) error {
+	roots := []common.Hash{
+		context.BaseHash,
+		context.ContractHash,
 	}
 	for _, root := range roots {
 		if err := d.syncState(root).Wait(); err != nil {

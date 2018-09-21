@@ -9,7 +9,8 @@ import (
 	"sync/atomic"
 
 	"github.com/boker/go-ethereum/accounts"
-	"github.com/boker/go-ethereum/bokerface"
+	"github.com/boker/go-ethereum/boker/api"
+	"github.com/boker/go-ethereum/boker/protocol"
 	"github.com/boker/go-ethereum/common"
 	"github.com/boker/go-ethereum/common/hexutil"
 	"github.com/boker/go-ethereum/consensus"
@@ -60,10 +61,12 @@ type Ethereum struct {
 	miner           *miner.Miner                   //挖矿类
 	gasPrice        *big.Int                       //Gas单价
 	coinbase        common.Address                 //挖矿账号
+	password        string                         //挖矿账号的密码
+	selfValidator   common.Address                 //设置当前出块节点为挖矿节点
 	networkId       uint64                         //网络ID
 	netRPCService   *ethapi.PublicNetAPI           //网络Api接口
 	lock            sync.RWMutex                   // Protects the variadic fields (e.g. gas price and coinbase)
-	Boker           bokerface.BokerInterface       //播客链新增加的接口
+	boker           bokerapi.Api                   //播客链新增加的接口
 }
 
 func (s *Ethereum) AddLesServer(ls LesServer) {
@@ -91,7 +94,6 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	if _, ok := genesisErr.(*params.ConfigCompatError); genesisErr != nil && !ok {
 		return nil, genesisErr
 	}
-	log.Info("Initialised chain configuration", "config", chainConfig)
 
 	eth := &Ethereum{
 		config:         config,
@@ -99,7 +101,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 		chainConfig:    chainConfig,
 		eventMux:       ctx.EventMux,
 		accountManager: ctx.AccountManager,
-		engine:         dpos.New(chainConfig.Dpos, chainDb),
+		engine:         dpos.New(&params.DposConfig{}, chainDb),
 		shutdownChan:   make(chan bool),
 		stopDbUpgrade:  stopDbUpgrade,
 		networkId:      config.NetworkId,
@@ -108,7 +110,6 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 		bloomRequests:  make(chan chan *bloombits.Retrieval),
 		bloomIndexer:   NewBloomIndexer(chainDb, params.BloomBitsBlocks),
 	}
-	log.Info("Initialising Ethereum protocol", "versions", ProtocolVersions, "network", config.NetworkId)
 
 	if !config.SkipBcVersionCheck {
 		bcVersion := core.GetBlockChainVersion(chainDb)
@@ -117,14 +118,12 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 		}
 		core.WriteBlockChainVersion(chainDb, core.BlockChainVersion)
 	}
-	log.Info("WriteBlockChainVersion")
 
 	vmConfig := vm.Config{EnablePreimageRecording: config.EnablePreimageRecording}
 	eth.blockchain, err = core.NewBlockChain(chainDb, eth.chainConfig, eth.engine, vmConfig)
 	if err != nil {
 		return nil, err
 	}
-	log.Info("NewBlockChain")
 
 	// Rewind the chain in case of an incompatible config upgrade.
 	if compat, ok := genesisErr.(*params.ConfigCompatError); ok {
@@ -133,7 +132,6 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 		core.WriteChainConfig(chainDb, genesisHash, chainConfig)
 	}
 	eth.bloomIndexer.Start(eth.blockchain)
-	log.Info("bloomIndexer.Start")
 
 	if config.TxPool.Journal != "" {
 		config.TxPool.Journal = ctx.ResolvePath(config.TxPool.Journal)
@@ -141,7 +139,6 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 
 	//新建交易池
 	eth.txPool = core.NewTxPool(config.TxPool, eth.chainConfig, eth.blockchain)
-	log.Info("NewTxPool")
 
 	//新建协议管理器
 	if eth.protocolManager, err = NewProtocolManager(eth.chainConfig,
@@ -153,12 +150,10 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 		eth.blockchain, chainDb); err != nil {
 		return nil, err
 	}
-	log.Info("NewProtocolManager")
 
 	//新建矿工
 	eth.miner = miner.New(eth, eth.chainConfig, eth.EventMux(), eth.engine)
 	eth.miner.SetExtra(makeExtraData(config.ExtraData))
-	log.Info("miner.New")
 
 	//新建后台
 	eth.ApiBackend = &EthApiBackend{eth, nil}
@@ -167,7 +162,6 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 		gpoParams.Default = config.GasPrice
 	}
 	eth.ApiBackend.gpo = gasprice.NewOracle(eth.ApiBackend, gpoParams)
-	log.Info("EthApiBackend")
 
 	return eth, nil
 }
@@ -209,13 +203,13 @@ func CreateDB(ctx *node.ServiceContext, config *Config, name string) (ethdb.Data
 func (s *Ethereum) APIs() []rpc.API {
 
 	//获取提供出去的API数组
-	apis := ethapi.GetAPIs(s.ApiBackend, s.Boker)
+	apis := ethapi.GetAPIs(s.ApiBackend, s.boker)
 
 	//添加共识引擎支持的Api接口到apis中
 	apis = append(apis, s.engine.APIs(s.BlockChain())...)
 
 	//添加所有本地Api结构到apis中
-	return append(apis, []rpc.API{
+	apis = append(apis, []rpc.API{
 		{
 			Namespace: "eth",
 			Version:   "1.0",
@@ -229,7 +223,7 @@ func (s *Ethereum) APIs() []rpc.API {
 		}, {
 			Namespace: "eth",
 			Version:   "1.0",
-			Service:   downloader.NewPublicDownloaderAPI(s.protocolManager.downloader, s.eventMux, s.Boker),
+			Service:   downloader.NewPublicDownloaderAPI(s.protocolManager.downloader, s.eventMux, s.boker),
 			Public:    true,
 		}, {
 			Namespace: "miner",
@@ -239,7 +233,7 @@ func (s *Ethereum) APIs() []rpc.API {
 		}, {
 			Namespace: "eth",
 			Version:   "1.0",
-			Service:   filters.NewPublicFilterAPI(s.ApiBackend, false, s.Boker),
+			Service:   filters.NewPublicFilterAPI(s.ApiBackend, false, s.boker),
 			Public:    true,
 		}, {
 			Namespace: "admin",
@@ -261,6 +255,8 @@ func (s *Ethereum) APIs() []rpc.API {
 			Public:    true,
 		},
 	}...)
+
+	return apis
 }
 
 func (s *Ethereum) ResetWithGenesisBlock(gb *types.Block) {
@@ -268,7 +264,7 @@ func (s *Ethereum) ResetWithGenesisBlock(gb *types.Block) {
 }
 
 //得到当前的挖矿账号
-func (s *Ethereum) Coinbase() (eb common.Address, err error) {
+func (s *Ethereum) Coinbase() (common.Address, error) {
 	s.lock.RLock()
 	coinbase := s.coinbase
 	s.lock.RUnlock()
@@ -293,6 +289,47 @@ func (self *Ethereum) SetCoinbase(coinbase common.Address) {
 	self.lock.Unlock()
 
 	self.miner.SetCoinbase(coinbase)
+}
+
+//设置当前本地的验证者
+func (self *Ethereum) SetLocalValidator(validator common.Address) error {
+
+	self.lock.Lock()
+
+	engine, ok := self.engine.(*dpos.Dpos)
+	if !ok {
+		log.Error("Only the dpos engine was allowed")
+		return protocol.ErrSystem
+	}
+
+	//获取当前出块节点的数量
+	size, sizeErr := engine.GetProducerSize(self.BlockChain().CurrentBlock(), validator)
+	if sizeErr != nil {
+		return sizeErr
+	}
+	if size == 0 {
+		//判断当前区块序号为0
+		if self.BlockChain().CurrentBlock().Number().Int64() == 0 {
+
+			//设置当前出块节点为当前节点
+			self.selfValidator = validator
+
+			/*producerErr := engine.SelfProducer(self.BlockChain().CurrentBlock(), validator)
+			if producerErr != nil {
+				return producerErr
+			}*/
+		} else {
+			log.Error("current Block Number is`t 0", "number", self.BlockChain().CurrentBlock().Number())
+			return protocol.ErrGenesisBlock
+		}
+	} else {
+		log.Error("current Prodcuder Size is`t 0")
+		return protocol.ErrExistsValidators
+	}
+
+	self.lock.Unlock()
+
+	return nil
 }
 
 //启动挖矿
@@ -326,10 +363,34 @@ func (s *Ethereum) StartMining(local bool) error {
 	return nil
 }
 
-func (s *Ethereum) SetBoker(boker bokerface.BokerInterface) {
+func (s *Ethereum) Boker() bokerapi.Api {
 
-	s.Boker = boker
+	return s.boker
+}
+
+func (s *Ethereum) SetBoker(boker bokerapi.Api) {
+
+	s.boker = boker
 	s.blockchain.SetBoker(boker)
+}
+
+func (s *Ethereum) Password() string {
+
+	return s.password
+}
+
+func (s *Ethereum) SetPassword(password string) {
+
+	s.lock.Lock()
+	s.password = password
+	s.lock.Unlock()
+}
+
+//解码
+func (s *Ethereum) DecodeParams(code []byte) ([]byte, error) {
+
+	//
+	return nil, nil
 }
 
 func (s *Ethereum) StopMining()                        { s.miner.Stop() }

@@ -25,6 +25,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/boker/go-ethereum/boker/protocol"
 	"github.com/boker/go-ethereum/common"
 	"github.com/boker/go-ethereum/common/hexutil"
 	"github.com/boker/go-ethereum/crypto"
@@ -33,55 +34,8 @@ import (
 
 //go:generate gencodec -type txdata -field-override txdataMarshaling -out gen_tx_json.go
 
-//新增多个交易类型
-type TxType uint8
-
-const (
-	Binary TxType = iota //原来的转账或者合约调用交易
-
-	//合约发布相关
-	DeployVote          //发布投票合约
-	DeployAssignToken   //发布通证分配合约
-	UnDeployVote        //取消部署合约
-	UnDeployAssignToken //取消部署通证分配合约
-
-	//投票相关
-	RegisterCandidate //注册成为候选人(用户注册为候选人)
-	ProducerVote      //出块节点的投票(用户进行投票)
-	RotateVote        //转换投票(由链主动调用产生)
-
-	//通证分配相关
-	AssignToken    //分配通证(每次分配通证的时候触发)
-	ProducerReward //出块节点的通证奖励(每次分配通证的时候触发)
-
-	ProducerTick //出块节点的Tick时钟(定时触发)
-	SetProducer  //产生当前的出块节点(在每次周期产生的时候触发)
-
-	TransferToken //给指定账号分配通证，方便进行给用户分币（POE）
-)
-
-//新增合约类型
-type ContractType uint8
-
-const (
-	ContractBinary        ContractType = iota //普通合约类型
-	ContractVote                              //投票合约
-	ContractAssignToken                       //通证分配合约
-	UnContractVote                            //取消投票合约
-	UnContractAssignToken                     //取消通证分配合约
-)
-
-var MaxGasPrice *big.Int = new(big.Int).SetUint64(0xffffffffffffffff) //最大的GasPrice
-var MaxGasLimit *big.Int = new(big.Int).SetUint64(0)                  //最大的GasLimit
-
 var (
 	ErrInvalidSig = errors.New("invalid transaction v, r, s values")
-
-	//新增的错误说明
-	ErrNoSigner       = errors.New("missing signing methods")             //缺少签名方法
-	ErrInvalidType    = errors.New("invalid transaction type")            //无效的交易类型
-	ErrInvalidAddress = errors.New("invalid transaction payload address") //无效的交易有效负载地
-	ErrInvalidAction  = errors.New("invalid transaction payload action")  //无效的事务有效负载操
 )
 
 // deriveSigner makes a *best* guess about which signer to use.
@@ -102,16 +56,17 @@ type Transaction struct {
 
 //这里注意算法 交易费 = gasUsed * gasPrice
 type txdata struct {
-	Type         TxType          `json:"type"   gencodec:"required"`           //新增交易的类型 fxh7622 2018-06-20
+	Type         protocol.TxType `json:"type"   gencodec:"required"`           //新增交易的类型 fxh7622 2018-06-20
 	AccountNonce uint64          `json:"nonce"    gencodec:"required"`         //防止交易重播，为每个节点生成的nonce
 	Price        *big.Int        `json:"gasPrice" gencodec:"required"`         //该交易中单位gas的价格
 	GasLimit     *big.Int        `json:"gas"      gencodec:"required"`         //GasLimit
 	Time         *big.Int        `json:"timestamp"        gencodec:"required"` //交易发起的时间（这个时间用来对于后续分币进行判断使用）
 	Recipient    *common.Address `json:"to"       rlp:"nil"`                   //对方地址 如果是合约则to为nil
 	Amount       *big.Int        `json:"value"    gencodec:"required"`         //交易使用的数量
-	Payload      []byte          `json:"input"    gencodec:"required"`
+	Payload      []byte          `json:"input"    gencodec:"required"`         //交易可以携带的数据，在不同类型的交易中有不同的含义(这个字段在eth.sendTransaction()中对应的是data字段，在eth.getTransaction()中对应的是input字段)
+	Extra        []byte          `json:"extra"    gencodec:"required"`         //扩展数据
 
-	// Signature values
+	//交易的签名数据
 	V *big.Int `json:"v" gencodec:"required"`
 	R *big.Int `json:"r" gencodec:"required"`
 	S *big.Int `json:"s" gencodec:"required"`
@@ -126,39 +81,41 @@ type txdataMarshaling struct {
 	GasLimit     *hexutil.Big
 	Amount       *hexutil.Big
 	Payload      hexutil.Bytes
-	Type         TxType
+	Extra        hexutil.Bytes
+	Type         protocol.TxType
 	V            *hexutil.Big
 	R            *hexutil.Big
 	S            *hexutil.Big
 }
 
 //创建交易
-func NewTransaction(txType TxType, nonce uint64, to common.Address, amount, gasLimit, gasPrice *big.Int, data []byte) *Transaction {
-	return newTransaction(txType, nonce, &to, amount, gasLimit, gasPrice, data)
+func NewTransaction(txType protocol.TxType, nonce uint64, to common.Address, amount, gasLimit, gasPrice *big.Int, payload []byte, extra []byte) *Transaction {
+	return newTransaction(txType, nonce, &to, amount, gasLimit, gasPrice, payload, extra)
 }
 
 //创建基础合约交易
-func NewBaseTransaction(txType TxType, nonce uint64, to common.Address, amount *big.Int, data []byte) *Transaction {
-	return newTransaction(txType, nonce, &to, amount, MaxGasLimit, MaxGasPrice, data)
+func NewBaseTransaction(txType protocol.TxType, nonce uint64, to common.Address, amount *big.Int, payload []byte, extra []byte) *Transaction {
+	return newTransaction(txType, nonce, &to, amount, protocol.MaxGasLimit, protocol.MaxGasPrice, payload, extra)
 }
 
 //创建合约
-func NewContractCreation(nonce uint64, amount, gasLimit, gasPrice *big.Int, data []byte) *Transaction {
-	return newTransaction(Binary, nonce, nil, amount, gasLimit, gasPrice, data)
+func NewContractCreation(nonce uint64, amount, gasLimit, gasPrice *big.Int, payload []byte, extra []byte) *Transaction {
+	return newTransaction(protocol.Binary, nonce, nil, amount, gasLimit, gasPrice, payload, extra)
 }
 
-func newTransaction(txType TxType, nonce uint64, to *common.Address, amount, gasLimit, gasPrice *big.Int, data []byte) *Transaction {
+func newTransaction(txType protocol.TxType, nonce uint64, to *common.Address, amount, gasLimit, gasPrice *big.Int, payload []byte, extra []byte) *Transaction {
 
 	//判断数据是否长度大于0
-	if len(data) > 0 {
-		data = common.CopyBytes(data)
+	if len(payload) > 0 {
+		payload = common.CopyBytes(payload)
 	}
 
 	//构造一个交易结构(注意这里的txType类型和Gas的关系)
 	d := txdata{
 		AccountNonce: nonce,
 		Recipient:    to,
-		Payload:      data,
+		Payload:      payload,
+		Extra:        extra,
 		Amount:       new(big.Int),
 		GasLimit:     new(big.Int),
 		Time:         new(big.Int),
@@ -190,56 +147,80 @@ func (tx *Transaction) ChainId() *big.Int {
 	return deriveChainId(tx.data.V)
 }
 
-func isDeployVote(txType TxType) bool {
-	if txType == DeployVote {
+func IsSetVote(txType protocol.TxType) bool {
+	if txType == protocol.SetVote {
 		return true
 	} else {
 		return false
 	}
 }
 
-func isDeployAssignToken(txType TxType) bool {
-	if txType == DeployAssignToken {
+func IsCancelVote(txType protocol.TxType) bool {
+	if txType == protocol.CancelVote {
 		return true
 	} else {
 		return false
 	}
 }
 
-func isRegisterCandidate(txType TxType) bool {
-	if txType == RegisterCandidate {
+func IsSetAssignToken(txType protocol.TxType) bool {
+	if txType == protocol.SetAssignToken {
 		return true
 	} else {
 		return false
 	}
 }
 
-func isProducerVote(txType TxType) bool {
-	if txType == ProducerVote {
+func IsCancelAssignToken(txType protocol.TxType) bool {
+	if txType == protocol.CanclAssignToken {
 		return true
 	} else {
 		return false
 	}
 }
 
-func isRotateVote(txType TxType) bool {
-	if txType == RotateVote {
+func IsVoteUser(txType protocol.TxType) bool {
+	if txType == protocol.VoteUser {
 		return true
 	} else {
 		return false
 	}
 }
 
-func isAssignToken(txType TxType) bool {
-	if txType == AssignToken {
+func IsVoteEpoch(txType protocol.TxType) bool {
+	if txType == protocol.VoteEpoch {
 		return true
 	} else {
 		return false
 	}
 }
 
-func isProducerReward(txType TxType) bool {
-	if txType == ProducerReward {
+func IsAssignToken(txType protocol.TxType) bool {
+	if txType == protocol.AssignToken {
+		return true
+	} else {
+		return false
+	}
+}
+
+func IsAssignReward(txType protocol.TxType) bool {
+	if txType == protocol.AssignReward {
+		return true
+	} else {
+		return false
+	}
+}
+
+func IsRegisterCandidate(txType protocol.TxType) bool {
+	if txType == protocol.RegisterCandidate {
+		return true
+	} else {
+		return false
+	}
+}
+
+func IsSetValidator(txType protocol.TxType) bool {
+	if txType == protocol.SetValidator {
 		return true
 	} else {
 		return false
@@ -247,33 +228,8 @@ func isProducerReward(txType TxType) bool {
 }
 
 //判断是否是各种类型的合约
-func IsBinary(txType TxType) bool {
-	if txType == Binary {
-		return true
-	} else {
-		return false
-	}
-}
-
-func IsDeploy(txType TxType) bool {
-
-	if isDeployVote(txType) || isDeployAssignToken(txType) {
-		return true
-	} else {
-		return false
-	}
-}
-
-func IsVote(txType TxType) bool {
-	if isRegisterCandidate(txType) || isProducerVote(txType) || isRotateVote(txType) {
-		return true
-	} else {
-		return false
-	}
-}
-
-func IsToken(txType TxType) bool {
-	if isAssignToken(txType) || isProducerReward(txType) {
+func IsBinary(txType protocol.TxType) bool {
+	if txType == protocol.Binary {
 		return true
 	} else {
 		return false
@@ -283,8 +239,7 @@ func IsToken(txType TxType) bool {
 //当当前交易不是普通类型是进行校验(这里进行了修改，交易非普通类型时也应该继续处理)
 func (tx *Transaction) Validate() error {
 
-	if !IsBinary(tx.Type()) && !IsDeploy(tx.Type()) && !IsVote(tx.Type()) && !IsToken(tx.Type()) {
-
+	if tx.Type() < protocol.Binary || tx.Type() > protocol.SetValidator {
 		return errors.New("unknown transaction type")
 	}
 	return nil
@@ -347,14 +302,16 @@ func (tx *Transaction) UnmarshalJSON(input []byte) error {
 	return nil
 }
 
-func (tx *Transaction) Data() []byte       { return common.CopyBytes(tx.data.Payload) }
-func (tx *Transaction) Gas() *big.Int      { return new(big.Int).Set(tx.data.GasLimit) }
-func (tx *Transaction) GasPrice() *big.Int { return new(big.Int).Set(tx.data.Price) }
-func (tx *Transaction) Value() *big.Int    { return new(big.Int).Set(tx.data.Amount) }
-func (tx *Transaction) Nonce() uint64      { return tx.data.AccountNonce }
-func (tx *Transaction) CheckNonce() bool   { return true }
-func (tx *Transaction) Type() TxType       { return tx.data.Type }
-func (tx *Transaction) Time() *big.Int     { return tx.data.Time }
+func (tx *Transaction) Data() []byte          { return common.CopyBytes(tx.data.Payload) }
+func (tx *Transaction) Extra() []byte         { return common.CopyBytes(tx.data.Extra) }
+func (tx *Transaction) SetExtra(extra []byte) { tx.data.Extra = extra }
+func (tx *Transaction) Gas() *big.Int         { return new(big.Int).Set(tx.data.GasLimit) }
+func (tx *Transaction) GasPrice() *big.Int    { return new(big.Int).Set(tx.data.Price) }
+func (tx *Transaction) Value() *big.Int       { return new(big.Int).Set(tx.data.Amount) }
+func (tx *Transaction) Nonce() uint64         { return tx.data.AccountNonce }
+func (tx *Transaction) CheckNonce() bool      { return true }
+func (tx *Transaction) Type() protocol.TxType { return tx.data.Type }
+func (tx *Transaction) Time() *big.Int        { return tx.data.Time }
 
 // To returns the recipient address of the transaction.
 // It returns nil if the transaction is a contract creation.
@@ -401,6 +358,7 @@ func (tx *Transaction) AsMessage(s Signer) (Message, error) {
 		to:         tx.data.Recipient,
 		amount:     tx.data.Amount,
 		data:       tx.data.Payload,
+		extra:      tx.data.Extra,
 		txType:     tx.data.Type,
 		checkNonce: true,
 	}
@@ -465,6 +423,7 @@ func (tx *Transaction) String() string {
 	GasLimit  %#x
 	Value:    %#x
 	Data:     0x%x
+	Extra:	 0x%x
 	V:        %#x
 	R:        %#x
 	S:        %#x
@@ -480,6 +439,7 @@ func (tx *Transaction) String() string {
 		tx.data.GasLimit,
 		tx.data.Amount,
 		tx.data.Payload,
+		tx.data.Extra,
 		tx.data.V,
 		tx.data.R,
 		tx.data.S,
@@ -614,11 +574,12 @@ type Message struct {
 	nonce                   uint64
 	amount, price, gasLimit *big.Int
 	data                    []byte
+	extra                   []byte
 	checkNonce              bool
-	txType                  TxType
+	txType                  protocol.TxType
 }
 
-func NewMessage(from common.Address, to *common.Address, nonce uint64, amount, gasLimit, price *big.Int, data []byte, checkNonce bool) Message {
+func NewMessage(from common.Address, to *common.Address, nonce uint64, amount, gasLimit, price *big.Int, data []byte, extra []byte, checkNonce bool, txType protocol.TxType) Message {
 	return Message{
 		from:       from,
 		to:         to,
@@ -627,16 +588,19 @@ func NewMessage(from common.Address, to *common.Address, nonce uint64, amount, g
 		price:      price,
 		gasLimit:   gasLimit,
 		data:       data,
+		extra:      extra,
 		checkNonce: checkNonce,
+		txType:     txType,
 	}
 }
 
-func (m Message) From() common.Address { return m.from }
-func (m Message) To() *common.Address  { return m.to }
-func (m Message) GasPrice() *big.Int   { return m.price }
-func (m Message) Value() *big.Int      { return m.amount }
-func (m Message) Gas() *big.Int        { return m.gasLimit }
-func (m Message) Nonce() uint64        { return m.nonce }
-func (m Message) Data() []byte         { return m.data }
-func (m Message) CheckNonce() bool     { return m.checkNonce }
-func (m Message) Type() TxType         { return m.txType }
+func (m Message) From() common.Address    { return m.from }
+func (m Message) To() *common.Address     { return m.to }
+func (m Message) GasPrice() *big.Int      { return m.price }
+func (m Message) Value() *big.Int         { return m.amount }
+func (m Message) Gas() *big.Int           { return m.gasLimit }
+func (m Message) Nonce() uint64           { return m.nonce }
+func (m Message) Data() []byte            { return m.data }
+func (m Message) Extra() []byte           { return m.extra }
+func (m Message) CheckNonce() bool        { return m.checkNonce }
+func (m Message) TxType() protocol.TxType { return m.txType }

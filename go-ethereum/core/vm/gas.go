@@ -23,13 +23,12 @@ import (
 )
 
 const (
-	GasQuickStep   uint64 = 2
-	GasFastestStep uint64 = 3
-	GasFastStep    uint64 = 5
-	GasMidStep     uint64 = 8
-	GasSlowStep    uint64 = 10
-	GasExtStep     uint64 = 20
-
+	GasQuickStep    uint64 = 2
+	GasFastestStep  uint64 = 3
+	GasFastStep     uint64 = 5
+	GasMidStep      uint64 = 8
+	GasSlowStep     uint64 = 10
+	GasExtStep      uint64 = 20
 	GasReturn       uint64 = 0
 	GasStop         uint64 = 0
 	GasContractByte uint64 = 200

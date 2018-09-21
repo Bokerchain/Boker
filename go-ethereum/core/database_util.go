@@ -233,12 +233,16 @@ func GetBlock(db DatabaseReader, hash common.Hash, number uint64) *types.Block {
 	block := types.NewBlockWithHeader(header).WithBody(body.Transactions, body.Uncles)
 
 	// add dposContext to block
+	//log.Info("Get Block ", "Number", number, "dposHeader", header.DposProto.Root())
 	block.DposContext = getDposContextTrie(db.(ethdb.Database), header)
 	return block
 }
 
 func getDposContextTrie(db ethdb.Database, header *types.Header) *types.DposContext {
-	dposContestProto := header.DposContext
+
+	//log.Info("****getDposContextTrie****")
+
+	dposContestProto := header.DposProto
 	if dposContestProto != nil {
 		dposContext, err := types.NewDposContextFromProto(db, dposContestProto)
 		if err != nil {

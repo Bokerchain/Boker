@@ -9,6 +9,7 @@ import (
 	"math/big"
 	"strings"
 
+	"github.com/boker/go-ethereum/boker/protocol"
 	"github.com/boker/go-ethereum/common"
 	"github.com/boker/go-ethereum/common/hexutil"
 	"github.com/boker/go-ethereum/common/math"
@@ -18,6 +19,7 @@ import (
 	"github.com/boker/go-ethereum/log"
 	"github.com/boker/go-ethereum/params"
 	"github.com/boker/go-ethereum/rlp"
+	"github.com/boker/go-ethereum/trie"
 )
 
 //go:generate gencodec -type Genesis -field-override genesisSpecMarshaling -out gen_genesis.go
@@ -135,8 +137,9 @@ func (e *GenesisMismatchError) Error() string {
 // The returned chain configuration is never nil.
 func SetupGenesisBlock(db ethdb.Database, genesis *Genesis) (*params.ChainConfig, common.Hash, error) {
 
+	log.Info("****SetupGenesisBlock****")
+
 	if genesis != nil && genesis.Config == nil {
-		log.Info("SetupGenesisBlock")
 		return params.DposChainConfig, common.Hash{}, errGenesisNoConfig
 	}
 
@@ -150,23 +153,29 @@ func SetupGenesisBlock(db ethdb.Database, genesis *Genesis) (*params.ChainConfig
 			log.Info("Writing custom genesis block")
 		}
 		block, err := genesis.Commit(db)
+
+		if err != nil {
+			log.Error("Genesis Commit", "error", err)
+		}
+		log.Info("Genesis Commit", "Number", block.Number())
+
 		return genesis.Config, block.Hash(), err
 	}
+	log.Info("GetCanonicalHash")
 
 	// Check whether the genesis block is already written.
 	if genesis != nil {
-		block, _ := genesis.ToBlock()
+		block, _, _, _ := genesis.ToBlock()
 		hash := block.Hash()
 		if hash != stored {
 
-			log.Info("genesis.ToBlock()")
-
+			log.Info("Genesis ToBlock")
 			return genesis.Config, block.Hash(), &GenesisMismatchError{stored, hash}
 		}
 	}
+	log.Info("ToBlock")
 
 	// Get the existing chain configuration.
-	log.Info("genesis.configOrDefault(stored)")
 	newcfg := genesis.configOrDefault(stored)
 	storedcfg, err := GetChainConfig(db, stored)
 	if err != nil {
@@ -177,27 +186,29 @@ func SetupGenesisBlock(db ethdb.Database, genesis *Genesis) (*params.ChainConfig
 		}
 		return newcfg, stored, err
 	}
+	log.Info("GetChainConfig")
+
 	// Special case: don't change the existing config of a non-mainnet chain if no new
 	// config is supplied. These chains would get AllProtocolChanges (and a compat error)
 	// if we just continued here.
-	log.Info("if genesis == nil && stored != params.MainnetGenesisHash {")
 	if genesis == nil && stored != params.MainnetGenesisHash {
 		return storedcfg, stored, nil
 	}
 
 	// Check config compatibility and write the config. Compatibility errors
 	// are returned to the caller unless we're already at block zero.
-	log.Info("height := GetBlockNumber(db, GetHeadHeaderHash(db))")
 	height := GetBlockNumber(db, GetHeadHeaderHash(db))
 	if height == missingNumber {
 		return newcfg, stored, fmt.Errorf("missing block number for head header hash")
 	}
+	log.Info("GetBlockNumber")
 
-	log.Info("compatErr := storedcfg.CheckCompatible(newcfg, height)")
 	compatErr := storedcfg.CheckCompatible(newcfg, height)
 	if compatErr != nil && height != 0 && compatErr.RewindTo != 0 {
 		return newcfg, stored, compatErr
 	}
+	log.Info("CheckCompatible")
+
 	return newcfg, stored, WriteChainConfig(db, stored, newcfg)
 }
 
@@ -211,10 +222,12 @@ func (g *Genesis) configOrDefault(ghash common.Hash) *params.ChainConfig {
 }
 
 //创建一个特定的创世区块状态
-func (g *Genesis) ToBlock() (*types.Block, *state.StateDB) {
+func (g *Genesis) ToBlock() (*types.Block, *state.StateDB, *trie.Trie, *trie.Trie) {
 
 	db, _ := ethdb.NewMemDatabase()
 	statedb, _ := state.New(common.Hash{}, state.NewDatabase(db))
+
+	//创建导入的账号信息
 	for addr, account := range g.Alloc {
 		statedb.AddBalance(addr, account.Balance)
 		statedb.SetCode(addr, account.Code)
@@ -228,19 +241,31 @@ func (g *Genesis) ToBlock() (*types.Block, *state.StateDB) {
 	//添加Dpos配置
 	dposContext := initGenesisDposContext(g, db)
 	dposContextProto := dposContext.ToProto()
+	log.Info("ToProto", "root", dposContextProto.Root().String())
+
+	//添加播客链的设置
+	baseTrie, contractTrie, err := initBoker(db)
+	if err != nil {
+		fmt.Errorf("initGenesisBoker error")
+		return nil, statedb, nil, nil
+	}
+	bokerProto := protocol.ToBokerProto(baseTrie.Hash(), contractTrie.Hash())
+	log.Info("ToBokerProto", "root", bokerProto.Root().String())
+
 	head := &types.Header{
-		Number:      new(big.Int).SetUint64(g.Number),
-		Nonce:       types.EncodeNonce(g.Nonce),
-		Time:        new(big.Int).SetUint64(g.Timestamp),
-		ParentHash:  g.ParentHash,
-		Extra:       g.ExtraData,
-		GasLimit:    new(big.Int).SetUint64(g.GasLimit),
-		GasUsed:     new(big.Int).SetUint64(g.GasUsed),
-		Difficulty:  g.Difficulty,
-		MixDigest:   g.Mixhash,
-		Coinbase:    g.Coinbase,
-		Root:        root,
-		DposContext: dposContextProto,
+		Number:     new(big.Int).SetUint64(g.Number),
+		Nonce:      types.EncodeNonce(g.Nonce),
+		Time:       new(big.Int).SetUint64(g.Timestamp),
+		ParentHash: g.ParentHash,
+		Extra:      g.ExtraData,
+		GasLimit:   new(big.Int).SetUint64(g.GasLimit),
+		GasUsed:    new(big.Int).SetUint64(g.GasUsed),
+		Difficulty: g.Difficulty,
+		MixDigest:  g.Mixhash,
+		Coinbase:   g.Coinbase,
+		Root:       root,
+		DposProto:  dposContextProto,
+		BokerProto: bokerProto,
 	}
 	if g.GasLimit == 0 {
 		head.GasLimit = params.GenesisGasLimit
@@ -252,18 +277,25 @@ func (g *Genesis) ToBlock() (*types.Block, *state.StateDB) {
 	block := types.NewBlock(head, nil, nil, nil)
 	block.DposContext = dposContext
 
-	return block, statedb
+	return block, statedb, baseTrie, contractTrie
 }
 
 // Commit writes the block and state of a genesis specification to the database.
 // The block is committed as the canonical head block.
 func (g *Genesis) Commit(db ethdb.Database) (*types.Block, error) {
-	block, statedb := g.ToBlock()
+
+	block, statedb, baseTrie, contractTrie := g.ToBlock()
 
 	// add dposcontext
 	if _, err := block.DposContext.CommitTo(db); err != nil {
 		return nil, err
 	}
+	//新增播客链数据保存
+	if err := commitBoker(baseTrie, contractTrie, db); err != nil {
+		return nil, err
+	}
+	log.Info("Write Boker ", "baseHash", baseTrie.Hash().String(), "ContractHash", contractTrie.Hash().String())
+
 	if block.Number().Sign() != 0 {
 		return nil, fmt.Errorf("can't commit genesis block with number > 0")
 	}
@@ -342,7 +374,20 @@ func initGenesisDposContext(g *Genesis, db ethdb.Database) *types.DposContext {
 	if err != nil {
 		return nil
 	}
-	if g.Config != nil && g.Config.Dpos != nil && g.Config.Dpos.Validators != nil {
+
+	//由于第一次创建，因此需要提交一次周期树
+	var validators []common.Address = make([]common.Address, 0)
+	dc.SetEpochTrie(validators)
+
+	var producers []common.Address
+	validatorsRLP := dc.EpochTrie().Get(protocol.ValidatorsKey)
+	if err := rlp.DecodeBytes(validatorsRLP, &producers); err != nil {
+
+		log.Info("failed to decode validators", "error", err)
+		return nil
+	}
+
+	/*if g.Config != nil && g.Config.Dpos != nil && g.Config.Dpos.Validators != nil {
 
 		//设置初始化的验证者信息
 		dc.SetEpochTrie(g.Config.Dpos.Validators)
@@ -353,6 +398,56 @@ func initGenesisDposContext(g *Genesis, db ethdb.Database) *types.DposContext {
 			validatorRLP, _ := rlp.EncodeToBytes(votes.String())
 			dc.ValidatorTrie().TryUpdate(key, validatorRLP)
 		}
-	}
+	}*/
 	return dc
+}
+
+//****创建播客链相关Hash树信息****//
+func initBoker(db ethdb.Database) (*trie.Trie, *trie.Trie, error) {
+
+	log.Info("****initBoker****")
+
+	var baseTrie, contractTrie *trie.Trie
+	var err error
+	var root common.Hash
+
+	//创建基础合约树
+	if baseTrie, err = trie.NewTrieWithPrefix(root, protocol.BasePrefix, db); err != nil {
+		return nil, nil, err
+	}
+	var bases []common.Address = make([]common.Address, 0)
+	basesRLP, err := rlp.EncodeToBytes(bases)
+	if err != nil {
+		log.Error("failed to encode bases to rlp", "error", err)
+		return nil, nil, err
+	}
+	baseTrie.Update(protocol.BasePrefix, basesRLP)
+
+	//创建合约总和树
+	if contractTrie, err = trie.NewTrieWithPrefix(root, protocol.ContractPrefix, db); err != nil {
+		return nil, nil, err
+	}
+	var contracts []common.Address = make([]common.Address, 0)
+	contractsRLP, err := rlp.EncodeToBytes(contracts)
+	if err != nil {
+		log.Error("failed to encode contracts to rlp", "error", err)
+		return nil, nil, err
+	}
+	contractTrie.Update(protocol.ContractPrefix, contractsRLP)
+
+	return baseTrie, contractTrie, nil
+}
+
+//****创建播客链相关Hash树信息****//
+func commitBoker(baseTrie *trie.Trie, contractTrie *trie.Trie, db ethdb.Database) error {
+
+	log.Info("****commitBoker****")
+
+	if _, err := baseTrie.CommitTo(db); err != nil {
+		return err
+	}
+	if _, err := contractTrie.CommitTo(db); err != nil {
+		return err
+	}
+	return nil
 }

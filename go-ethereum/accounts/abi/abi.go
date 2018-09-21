@@ -18,8 +18,11 @@ package abi
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+
+	"github.com/boker/go-ethereum/log"
 )
 
 // The ABI holds information about a contract's context and available
@@ -70,13 +73,12 @@ func (abi ABI) Pack(name string, args ...interface{}) ([]byte, error) {
 	return append(method.Id(), arguments...), nil
 }
 
-// Unpack output in v according to the abi specification
 func (abi ABI) Unpack(v interface{}, name string, output []byte) (err error) {
+
 	if err = bytesAreProper(output); err != nil {
 		return err
 	}
-	// since there can't be naming collisions with contracts and events,
-	// we need to decide whether we're calling a method or an event
+
 	var unpack unpacker
 	if method, ok := abi.Methods[name]; ok {
 		unpack = method
@@ -86,11 +88,41 @@ func (abi ABI) Unpack(v interface{}, name string, output []byte) (err error) {
 		return fmt.Errorf("abi: could not locate named method or event.")
 	}
 
-	// requires a struct to unpack into for a tuple return...
 	if unpack.isTupleReturn() {
 		return unpack.tupleUnpack(v, output)
 	}
+
+	log.Info("Unpack", "output", output)
 	return unpack.singleUnpack(v, output)
+}
+
+func (abi ABI) InputUnpack(v []interface{}, name string, input []byte) (err error) {
+
+	//判断输入数据是否正确
+	if len(input) == 0 {
+		return errors.New("abi: unmarshalling empty input")
+	} else if len(input)%32 != 0 {
+		return errors.New("abi: improperly formatted input")
+	}
+
+	//得到abi的方法信息
+	if method, ok := abi.Methods[name]; ok {
+
+		//判断输入接口是否和参数数量一致
+		if len(v) != len(abi.Methods[name].Inputs) {
+			return errors.New("abi: methods count not equal to interface")
+		}
+
+		//根据参数数量判断解码方式
+		if len(method.Inputs) <= 1 {
+			//单参数解码
+			return method.singleInputUnpack(v[0], input)
+		} else {
+			//多参数解码
+			return method.multInputUnpack(v, input)
+		}
+	}
+	return errors.New("abi: could not locate named method")
 }
 
 func (abi *ABI) UnmarshalJSON(data []byte) error {

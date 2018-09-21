@@ -392,14 +392,16 @@ func archiveBasename(arch string, env build.Environment) string {
 }
 
 func archiveVersion(env build.Environment) string {
-	version := build.VERSION()
+
+	ethereum, boker := build.VERSION()
+	ethereum = ethereum + ";" + boker
 	if isUnstableBuild(env) {
-		version += "-unstable"
+		ethereum += "-unstable"
 	}
 	if env.Commit != "" {
-		version += "-" + env.Commit[:8]
+		ethereum += "-" + env.Commit[:8]
 	}
-	return version
+	return ethereum
 }
 
 func archiveUpload(archive string, blobstore string, signer string) error {
@@ -513,13 +515,9 @@ func isUnstableBuild(env build.Environment) bool {
 }
 
 type debMetadata struct {
-	Env build.Environment
-
-	// go-ethereum version being built. Note that this
-	// is not the debian package version. The package version
-	// is constructed by VersionString.
-	Version string
-
+	Env          build.Environment
+	Ethereum     string
+	Boker        string
 	Author       string // "name <email>", also selects signing key
 	Distro, Time string
 	Executables  []debExecutable
@@ -534,11 +532,14 @@ func newDebMetadata(distro, author string, env build.Environment, t time.Time) d
 		// No signing key, use default author.
 		author = "Ethereum Builds <fjl@ethereum.org>"
 	}
+
+	ethereumVer, bokerVer := build.VERSION()
 	return debMetadata{
 		Env:         env,
 		Author:      author,
 		Distro:      distro,
-		Version:     build.VERSION(),
+		Ethereum:    ethereumVer,
+		Boker:       bokerVer,
 		Time:        t.Format(time.RFC1123Z),
 		Executables: debExecutables,
 	}
@@ -555,7 +556,8 @@ func (meta debMetadata) Name() string {
 
 // VersionString returns the debian version of the packages.
 func (meta debMetadata) VersionString() string {
-	vsn := meta.Version
+	vsn := "Ethereum " + meta.Ethereum
+	vsn += "; Boker " + meta.Boker
 	if meta.Env.Buildnum != "" {
 		vsn += "+build" + meta.Env.Buildnum
 	}
@@ -678,7 +680,9 @@ func doWindowsInstaller(cmdline []string) {
 	// Build the installer. This assumes that all the needed files have been previously
 	// built (don't mix building and packaging to keep cross compilation complexity to a
 	// minimum).
-	version := strings.Split(build.VERSION(), ".")
+	ethereumVer, bokerVer := build.VERSION()
+	ver := ethereumVer + ";" + bokerVer
+	version := strings.Split(ver, ".")
 	if env.Commit != "" {
 		version[2] += "-" + env.Commit[:8]
 	}
@@ -813,7 +817,8 @@ func newMavenMetadata(env build.Environment) mavenMetadata {
 		}
 	}
 	// Render the version and package strings
-	version := build.VERSION()
+	ethereumVer, bokerVer := build.VERSION()
+	version := ethereumVer + ";" + bokerVer
 	if isUnstableBuild(env) {
 		version += "-SNAPSHOT"
 	}
@@ -904,7 +909,8 @@ func newPodMetadata(env build.Environment, archive string) podMetadata {
 			}
 		}
 	}
-	version := build.VERSION()
+	ethereumVer, bokerVer := build.VERSION()
+	version := ethereumVer + ";" + bokerVer
 	if isUnstableBuild(env) {
 		version += "-unstable." + env.Buildnum
 	}

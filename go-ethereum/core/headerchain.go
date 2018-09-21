@@ -106,7 +106,7 @@ func NewHeaderChain(chainDb ethdb.Database, config *params.ChainConfig, engine c
 		}
 	}
 	hc.currentHeaderHash = hc.currentHeader.Hash()
-	log.Info("GetHeaderByNumber")
+	log.Info("GetHeadBlockHash")
 
 	return hc, nil
 }

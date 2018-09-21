@@ -20,7 +20,8 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/boker/go-ethereum/bokerface"
+	"github.com/boker/go-ethereum/boker/api"
+	"github.com/boker/go-ethereum/boker/protocol"
 	"github.com/boker/go-ethereum/common"
 	"github.com/boker/go-ethereum/consensus"
 	"github.com/boker/go-ethereum/consensus/misc"
@@ -28,15 +29,16 @@ import (
 	"github.com/boker/go-ethereum/core/types"
 	"github.com/boker/go-ethereum/core/vm"
 	"github.com/boker/go-ethereum/crypto"
+	"github.com/boker/go-ethereum/log"
 	"github.com/boker/go-ethereum/params"
 )
 
 //状态处理器，负责一个从一个节点到另一个节点
 type StateProcessor struct {
-	config *params.ChainConfig      //链配置选项
-	bc     *BlockChain              //规范块链
-	engine consensus.Engine         //共识引擎
-	boker  bokerface.BokerInterface //播客链的接口
+	config *params.ChainConfig //链配置选项
+	bc     *BlockChain         //规范块链
+	engine consensus.Engine    //共识引擎
+	boker  bokerapi.Api        //播客链的接口
 }
 
 //初始化一个新的状态处理器。
@@ -48,9 +50,6 @@ func NewStateProcessor(config *params.ChainConfig, bc *BlockChain, engine consen
 	}
 }
 
-func (p *StateProcessor) SetBoker(boker bokerface.BokerInterface) { p.boker = boker }
-
-//根据以太坊的规则计算statedb的变化，并且将对应的收益转给coinbase和uncles，返回转账的收据，对应的日志和是否成功
 func (p *StateProcessor) Process(block *types.Block,
 	statedb *state.StateDB,
 	cfg vm.Config) (types.Receipts, []*types.Log, *big.Int, error) {
@@ -78,259 +77,22 @@ func (p *StateProcessor) Process(block *types.Block,
 			return nil, nil, nil, err
 		}
 
+		log.Info("****Process****", "tx.extra", tx.Extra())
+
 		//执行完毕的交易回执放入到回执数组中
 		receipts = append(receipts, receipt)
 		allLogs = append(allLogs, receipt.Logs...)
 	}
 
 	//执行完块中所有的交易，应用任何共识引擎特定的附加功能（例如块奖励）
-	p.engine.Finalize(p.bc, header, statedb, block.Transactions(), block.Uncles(), receipts, block.DposCtx())
+	p.engine.Finalize(p.bc, header, statedb, block.Transactions(), block.Uncles(), receipts, block.DposCtx(), p.boker)
 
 	//返回执行成功的回执数组/日志/以及总的使用Gas的数量
 	return receipts, allLogs, totalUsedGas, nil
 }
 
-//基础合约类型执行
-func baseApplyTransaction(config *params.ChainConfig,
-	dposContext *types.DposContext,
-	bc *BlockChain,
-	author *common.Address,
-	gp *GasPool,
-	statedb *state.StateDB,
-	header *types.Header,
-	tx *types.Transaction,
-	usedGas *big.Int,
-	cfg vm.Config,
-	msg types.Message,
-	boker bokerface.BokerInterface) (*types.Receipt, *big.Int, error) {
-
-	msg, err := tx.AsMessage(types.MakeSigner(config, header.Number))
-	if err != nil {
-		return nil, nil, err
-	}
-
-	context := NewEVMContext(msg, header, bc, author)
-	vmenv := vm.NewEVM(context, statedb, config, cfg)
-	_, gas, failed, err := ApplyBaseMessage(vmenv, msg, gp)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	if err = applyDposMessage(dposContext, msg); err != nil {
-		return nil, nil, err
-	}
-
-	var root []byte
-	if config.IsByzantium(header.Number) {
-		statedb.Finalise(true)
-	} else {
-
-		root = statedb.IntermediateRoot(config.IsEIP158(header.Number)).Bytes()
-	}
-	usedGas.Add(usedGas, gas)
-
-	receipt := types.NewReceipt(root, failed, usedGas)
-	receipt.TxHash = tx.Hash()
-	receipt.GasUsed = new(big.Int).Set(gas)
-	if msg.To() == nil {
-		receipt.ContractAddress = crypto.CreateAddress(vmenv.Context.Origin, tx.Nonce())
-	}
-
-	receipt.Logs = statedb.GetLogs(tx.Hash())
-	receipt.Bloom = types.CreateBloom(types.Receipts{receipt})
-	return receipt, gas, err
-}
-
-//设置部署基础交易
-func setDeployTransaction(config *params.ChainConfig,
-	dposContext *types.DposContext,
-	bc *BlockChain,
-	author *common.Address,
-	gp *GasPool,
-	statedb *state.StateDB,
-	header *types.Header,
-	tx *types.Transaction,
-	usedGas *big.Int,
-	cfg vm.Config,
-	msg types.Message,
-	boker bokerface.BokerInterface) (*types.Receipt, *big.Int, error) {
-
-	msg, err := tx.AsMessage(types.MakeSigner(config, header.Number))
-	if err != nil {
-		return nil, nil, err
-	}
-
-	context := NewEVMContext(msg, header, bc, author)
-	vmenv := vm.NewEVM(context, statedb, config, cfg)
-	_, gas, failed, err := setDeployMessage(vmenv, msg, gp, msg.Type(), boker)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	var root []byte
-	if config.IsByzantium(header.Number) {
-		statedb.Finalise(true)
-	} else {
-
-		root = statedb.IntermediateRoot(config.IsEIP158(header.Number)).Bytes()
-	}
-	usedGas.Add(usedGas, gas)
-
-	receipt := types.NewReceipt(root, failed, usedGas)
-	receipt.TxHash = tx.Hash()
-	receipt.GasUsed = new(big.Int).Set(gas)
-	if msg.To() == nil {
-		receipt.ContractAddress = crypto.CreateAddress(vmenv.Context.Origin, tx.Nonce())
-	}
-
-	receipt.Logs = statedb.GetLogs(tx.Hash())
-	receipt.Bloom = types.CreateBloom(types.Receipts{receipt})
-	return receipt, gas, err
-}
-
-//取消设置部署基础交易
-func cancelDeployTransaction(config *params.ChainConfig,
-	dposContext *types.DposContext,
-	bc *BlockChain,
-	author *common.Address,
-	gp *GasPool,
-	statedb *state.StateDB,
-	header *types.Header,
-	tx *types.Transaction,
-	usedGas *big.Int,
-	cfg vm.Config,
-	msg types.Message,
-	boker bokerface.BokerInterface) (*types.Receipt, *big.Int, error) {
-
-	msg, err := tx.AsMessage(types.MakeSigner(config, header.Number))
-	if err != nil {
-		return nil, nil, err
-	}
-
-	context := NewEVMContext(msg, header, bc, author)
-	vmenv := vm.NewEVM(context, statedb, config, cfg)
-	_, gas, failed, err := cancelDeployMessage(vmenv, msg, gp, msg.Type(), boker)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	var root []byte
-	if config.IsByzantium(header.Number) {
-		statedb.Finalise(true)
-	} else {
-
-		root = statedb.IntermediateRoot(config.IsEIP158(header.Number)).Bytes()
-	}
-	usedGas.Add(usedGas, gas)
-
-	receipt := types.NewReceipt(root, failed, usedGas)
-	receipt.TxHash = tx.Hash()
-	receipt.GasUsed = new(big.Int).Set(gas)
-	if msg.To() == nil {
-		receipt.ContractAddress = crypto.CreateAddress(vmenv.Context.Origin, tx.Nonce())
-	}
-
-	receipt.Logs = statedb.GetLogs(tx.Hash())
-	receipt.Bloom = types.CreateBloom(types.Receipts{receipt})
-	return receipt, gas, err
-}
-
-//投票合约合约
-func voteTransaction(config *params.ChainConfig,
-	dposContext *types.DposContext,
-	bc *BlockChain,
-	author *common.Address,
-	gp *GasPool,
-	statedb *state.StateDB,
-	header *types.Header,
-	tx *types.Transaction,
-	usedGas *big.Int,
-	cfg vm.Config,
-	msg types.Message,
-	boker bokerface.BokerInterface) (*types.Receipt, *big.Int, error) {
-
-	msg, err := tx.AsMessage(types.MakeSigner(config, header.Number))
-	if err != nil {
-		return nil, nil, err
-	}
-
-	context := NewEVMContext(msg, header, bc, author)
-	vmenv := vm.NewEVM(context, statedb, config, cfg)
-	_, gas, failed, err := voteMessage(vmenv, msg, gp, msg.Type(), boker)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	var root []byte
-	if config.IsByzantium(header.Number) {
-		statedb.Finalise(true)
-	} else {
-
-		root = statedb.IntermediateRoot(config.IsEIP158(header.Number)).Bytes()
-	}
-	usedGas.Add(usedGas, gas)
-
-	receipt := types.NewReceipt(root, failed, usedGas)
-	receipt.TxHash = tx.Hash()
-	receipt.GasUsed = new(big.Int).Set(gas)
-	if msg.To() == nil {
-		receipt.ContractAddress = crypto.CreateAddress(vmenv.Context.Origin, tx.Nonce())
-	}
-
-	receipt.Logs = statedb.GetLogs(tx.Hash())
-	receipt.Bloom = types.CreateBloom(types.Receipts{receipt})
-	return receipt, gas, err
-}
-
-//通证分配相关合约类型执行
-func tokenTransaction(config *params.ChainConfig,
-	dposContext *types.DposContext,
-	bc *BlockChain,
-	author *common.Address,
-	gp *GasPool,
-	statedb *state.StateDB,
-	header *types.Header,
-	tx *types.Transaction,
-	usedGas *big.Int,
-	cfg vm.Config,
-	msg types.Message,
-	boker bokerface.BokerInterface) (*types.Receipt, *big.Int, error) {
-
-	context := NewEVMContext(msg, header, bc, author)
-	vmenv := vm.NewEVM(context, statedb, config, cfg)
-	tokenNoder, err := dposContext.GetCurrentTokenNoder()
-	if tokenNoder != msg.From() {
-		return nil, nil, errors.New("from address not assign token producer")
-	}
-
-	_, gas, failed, err := tokenMessage(vmenv, msg, gp, msg.Type(), boker)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	var root []byte
-	if config.IsByzantium(header.Number) {
-		statedb.Finalise(true)
-	} else {
-		root = statedb.IntermediateRoot(config.IsEIP158(header.Number)).Bytes()
-	}
-	usedGas.Add(usedGas, gas)
-
-	receipt := types.NewReceipt(root, failed, usedGas)
-	receipt.TxHash = tx.Hash()
-	receipt.GasUsed = new(big.Int).Set(gas)
-	if msg.To() == nil {
-		receipt.ContractAddress = crypto.CreateAddress(vmenv.Context.Origin, tx.Nonce())
-	}
-
-	receipt.Logs = statedb.GetLogs(tx.Hash())
-	receipt.Bloom = types.CreateBloom(types.Receipts{receipt})
-
-	return receipt, gas, err
-}
-
 //处理普通交易
-func binaryApplyTransaction(config *params.ChainConfig,
+func binaryTransaction(config *params.ChainConfig,
 	dposContext *types.DposContext,
 	bc *BlockChain,
 	author *common.Address,
@@ -341,7 +103,7 @@ func binaryApplyTransaction(config *params.ChainConfig,
 	usedGas *big.Int,
 	cfg vm.Config,
 	msg types.Message,
-	boker bokerface.BokerInterface) (*types.Receipt, *big.Int, error) {
+	boker bokerapi.Api) (*types.Receipt, *big.Int, error) {
 
 	msg, err := tx.AsMessage(types.MakeSigner(config, header.Number))
 	if err != nil {
@@ -350,10 +112,12 @@ func binaryApplyTransaction(config *params.ChainConfig,
 
 	context := NewEVMContext(msg, header, bc, author)
 	vmenv := vm.NewEVM(context, statedb, config, cfg)
-	_, gas, failed, err := ApplyMessage(vmenv, msg, gp)
+	_, extra, gas, failed, err := BinaryMessage(vmenv, msg, gp, boker)
 	if err != nil {
 		return nil, nil, err
 	}
+	tx.SetExtra(extra)
+	log.Info("****binaryTransaction****", "tx.extra", tx.Extra(), "extra", extra)
 
 	//用待处理的更改更新状态
 	var root []byte
@@ -372,12 +136,245 @@ func binaryApplyTransaction(config *params.ChainConfig,
 	//如果交易创建了合同，则将创建地址存储在收据中
 	if msg.To() == nil {
 		receipt.ContractAddress = crypto.CreateAddress(vmenv.Context.Origin, tx.Nonce())
+		log.Info("binaryTransaction", "address", receipt.ContractAddress.String())
 	}
 
 	//设置收据日志并创建一个用于过滤的布尔值
 	receipt.Logs = statedb.GetLogs(tx.Hash())
 	receipt.Bloom = types.CreateBloom(types.Receipts{receipt})
 
+	return receipt, gas, err
+}
+
+//设置部署基础交易
+func contractSetTransaction(config *params.ChainConfig,
+	dposContext *types.DposContext,
+	bc *BlockChain,
+	author *common.Address,
+	gp *GasPool,
+	statedb *state.StateDB,
+	header *types.Header,
+	tx *types.Transaction,
+	usedGas *big.Int,
+	cfg vm.Config,
+	msg types.Message,
+	boker bokerapi.Api) (*types.Receipt, *big.Int, error) {
+
+	log.Info("****contractSetTransaction****")
+
+	msg, err := tx.AsMessage(types.MakeSigner(config, header.Number))
+	if err != nil {
+		return nil, nil, err
+	}
+
+	context := NewEVMContext(msg, header, bc, author)
+	vmenv := vm.NewEVM(context, statedb, config, cfg)
+	_, extra, gas, failed, err := contractMessage(vmenv, msg, gp, msg.TxType(), boker)
+	if err != nil {
+		return nil, nil, err
+	}
+	tx.SetExtra(extra)
+	log.Info("contractSetTransaction", "tx.extra", tx.Extra(), "extra", extra)
+
+	var root []byte
+	if config.IsByzantium(header.Number) {
+		statedb.Finalise(true)
+	} else {
+		root = statedb.IntermediateRoot(config.IsEIP158(header.Number)).Bytes()
+	}
+	usedGas.Add(usedGas, gas)
+
+	receipt := types.NewReceipt(root, failed, usedGas)
+	receipt.TxHash = tx.Hash()
+	receipt.GasUsed = new(big.Int).Set(gas)
+	receipt.Logs = statedb.GetLogs(tx.Hash())
+	receipt.Bloom = types.CreateBloom(types.Receipts{receipt})
+	return receipt, gas, err
+}
+
+//用户投票合约
+func baseTransaction(config *params.ChainConfig,
+	dposContext *types.DposContext,
+	bc *BlockChain,
+	author *common.Address,
+	gp *GasPool,
+	statedb *state.StateDB,
+	header *types.Header,
+	tx *types.Transaction,
+	usedGas *big.Int,
+	cfg vm.Config,
+	msg types.Message,
+	boker bokerapi.Api) (*types.Receipt, *big.Int, error) {
+
+	log.Info("****baseTransaction****")
+
+	msg, err := tx.AsMessage(types.MakeSigner(config, header.Number))
+	if err != nil {
+		return nil, nil, err
+	}
+
+	context := NewEVMContext(msg, header, bc, author)
+	vmenv := vm.NewEVM(context, statedb, config, cfg)
+	_, extra, gas, failed, err := baseMessage(vmenv, msg, gp, boker)
+	if err != nil {
+		return nil, nil, err
+	}
+	tx.SetExtra(extra)
+	log.Info("baseTransaction", "tx.extra", tx.Extra(), "extra", extra)
+
+	var root []byte
+	if config.IsByzantium(header.Number) {
+		statedb.Finalise(true)
+	} else {
+		root = statedb.IntermediateRoot(config.IsEIP158(header.Number)).Bytes()
+	}
+	usedGas.Add(usedGas, gas)
+
+	receipt := types.NewReceipt(root, failed, usedGas)
+	receipt.TxHash = tx.Hash()
+	receipt.GasUsed = new(big.Int).Set(gas)
+	receipt.Logs = statedb.GetLogs(tx.Hash())
+	receipt.Bloom = types.CreateBloom(types.Receipts{receipt})
+	return receipt, gas, err
+}
+
+//通证分配相关合约类型执行
+func tokenTransaction(config *params.ChainConfig,
+	dposContext *types.DposContext,
+	bc *BlockChain,
+	author *common.Address,
+	gp *GasPool,
+	statedb *state.StateDB,
+	header *types.Header,
+	tx *types.Transaction,
+	usedGas *big.Int,
+	cfg vm.Config,
+	msg types.Message,
+	boker bokerapi.Api) (*types.Receipt, *big.Int, error) {
+
+	log.Info("****tokenTransaction****")
+
+	msg, err := tx.AsMessage(types.MakeSigner(config, header.Number))
+	if err != nil {
+		return nil, nil, err
+	}
+
+	tokenNoder, err := dposContext.GetCurrentTokenNoder()
+	if tokenNoder != msg.From() {
+		return nil, nil, errors.New("from address not assign token producer")
+	}
+
+	context := NewEVMContext(msg, header, bc, author)
+	vmenv := vm.NewEVM(context, statedb, config, cfg)
+	_, extra, gas, failed, err := baseMessage(vmenv, msg, gp, boker)
+	if err != nil {
+		return nil, nil, err
+	}
+	tx.SetExtra(extra)
+	log.Info("tokenTransaction", "tx.extra", tx.Extra(), "extra", extra)
+
+	var root []byte
+	if config.IsByzantium(header.Number) {
+		statedb.Finalise(true)
+	} else {
+		root = statedb.IntermediateRoot(config.IsEIP158(header.Number)).Bytes()
+	}
+	usedGas.Add(usedGas, gas)
+
+	receipt := types.NewReceipt(root, failed, usedGas)
+	receipt.TxHash = tx.Hash()
+	receipt.GasUsed = new(big.Int).Set(gas)
+	receipt.Logs = statedb.GetLogs(tx.Hash())
+	receipt.Bloom = types.CreateBloom(types.Receipts{receipt})
+	return receipt, gas, err
+}
+
+//设置设置验证人
+func validatorTransaction(config *params.ChainConfig,
+	dposContext *types.DposContext,
+	bc *BlockChain,
+	author *common.Address,
+	gp *GasPool,
+	statedb *state.StateDB,
+	header *types.Header,
+	tx *types.Transaction,
+	usedGas *big.Int,
+	cfg vm.Config,
+	msg types.Message,
+	boker bokerapi.Api) (*types.Receipt, *big.Int, error) {
+
+	log.Info("****validatorTransaction****")
+
+	msg, err := tx.AsMessage(types.MakeSigner(config, header.Number))
+	if err != nil {
+		return nil, nil, err
+	}
+
+	context := NewEVMContext(msg, header, bc, author)
+	vmenv := vm.NewEVM(context, statedb, config, cfg)
+
+	producer, err := dposContext.GetCurrentProducer()
+	if protocol.ErrEpochTrieNil == err {
+
+		if bc.CurrentBlock().Number().Int64() == 0 {
+
+			log.Info("validatorTransaction validatorMessage", "txType", msg.TxType())
+			_, extra, gas, failed, err := validatorMessage(vmenv, msg, gp, msg.TxType(), boker)
+			if err != nil {
+				return nil, nil, err
+			}
+			tx.SetExtra(extra)
+			log.Info("validatorTransaction", "tx.extra", tx.Extra(), "extra", extra)
+
+			//设置验证者
+			dposContext.Clean()
+			dposContext.InsertValidator(*msg.To(), protocol.SetValidatorVotes)
+			log.Info("validatorTransaction InsertValidator", "root", dposContext.Root().String())
+
+			root := statedb.IntermediateRoot(false).Bytes()
+			usedGas.Add(usedGas, gas)
+			log.Info("validatorTransaction Add", "gas", gas, "usedGas", usedGas, "root", root)
+
+			receipt := types.NewReceipt(root, failed, usedGas)
+			receipt.TxHash = tx.Hash()
+			receipt.GasUsed = new(big.Int).Set(gas)
+			receipt.Logs = statedb.GetLogs(tx.Hash())
+			receipt.Bloom = types.CreateBloom(types.Receipts{receipt})
+			log.Info("validatorTransaction CreateBloom")
+
+			return receipt, gas, err
+		}
+		return nil, nil, errors.New("current block number is`t zero")
+	}
+
+	if producer != msg.From() {
+		return nil, nil, errors.New("from address not assign token producer")
+	}
+
+	_, extra, gas, failed, err := validatorMessage(vmenv, msg, gp, msg.TxType(), boker)
+	if err != nil {
+		return nil, nil, err
+	}
+	tx.SetExtra(extra)
+	log.Info("validatorTransaction", "tx.extra", tx.Extra(), "extra", extra)
+
+	//设置验证者
+	log.Info("validatorTransaction validatorMessage", "txType", msg.TxType())
+	dposContext.Clean()
+	dposContext.InsertValidator(*msg.To(), protocol.SetValidatorVotes)
+
+	var root []byte
+	if config.IsByzantium(header.Number) {
+		statedb.Finalise(true)
+	} else {
+		root = statedb.IntermediateRoot(config.IsEIP158(header.Number)).Bytes()
+	}
+	usedGas.Add(usedGas, gas)
+	receipt := types.NewReceipt(root, failed, usedGas)
+	receipt.TxHash = tx.Hash()
+	receipt.GasUsed = new(big.Int).Set(gas)
+	receipt.Logs = statedb.GetLogs(tx.Hash())
+	receipt.Bloom = types.CreateBloom(types.Receipts{receipt})
 	return receipt, gas, err
 }
 
@@ -392,49 +389,46 @@ func ApplyTransaction(config *params.ChainConfig,
 	tx *types.Transaction,
 	usedGas *big.Int,
 	cfg vm.Config,
-	boker bokerface.BokerInterface) (*types.Receipt, *big.Int, error) {
+	boker bokerapi.Api) (*types.Receipt, *big.Int, error) {
 
 	msg, err := tx.AsMessage(types.MakeSigner(config, header.Number))
 	if err != nil {
 		return nil, nil, err
 	}
+	log.Info("****ApplyTransaction****", "nonce", header.Nonce, "number", header.Number, "txType", msg.TxType(), "from", msg.From(), "to", msg.To())
 
-	//根据交易类型来区分
-	switch msg.Type() {
+	if msg.TxType() == protocol.Binary {
 
-	case types.Binary: //普通交易
+		return binaryTransaction(config, dposContext, bc, author, gp, statedb, header, tx, usedGas, cfg, msg, boker)
+	} else {
 
-		return binaryApplyTransaction(config, dposContext, bc, author, gp, statedb, header, tx, usedGas, cfg, msg, boker)
-	case types.DeployVote, types.DeployAssignToken: //设置部署基础交易
+		if msg.To() == nil {
+			return nil, nil, protocol.ErrToIsNil
+		}
 
-		return setDeployTransaction(config, dposContext, bc, author, gp, statedb, header, tx, usedGas, cfg, msg, boker)
+		//根据交易类型来区分
+		switch msg.TxType() {
 
-	case types.UnDeployVote, types.UnDeployAssignToken: //取消设置部署基础交易
+		case protocol.SetVote, protocol.CancelVote, protocol.SetAssignToken, protocol.CanclAssignToken:
 
-		return cancelDeployTransaction(config, dposContext, bc, author, gp, statedb, header, tx, usedGas, cfg, msg, boker)
-	case types.RegisterCandidate, types.ProducerVote, types.RotateVote: //投票交易
+			return contractSetTransaction(config, dposContext, bc, author, gp, statedb, header, tx, usedGas, cfg, msg, boker)
+		case protocol.VoteUser, protocol.VoteEpoch: //投票交易
 
-		return voteTransaction(config, dposContext, bc, author, gp, statedb, header, tx, usedGas, cfg, msg, boker)
-	case types.AssignToken, types.ProducerReward: //通证分配交易
+			return baseTransaction(config, dposContext, bc, author, gp, statedb, header, tx, usedGas, cfg, msg, boker)
+		case protocol.AssignToken, protocol.AssignReward: //通证分配交易
 
-		return tokenTransaction(config, dposContext, bc, author, gp, statedb, header, tx, usedGas, cfg, msg, boker)
-	default:
+			return tokenTransaction(config, dposContext, bc, author, gp, statedb, header, tx, usedGas, cfg, msg, boker)
+		case protocol.RegisterCandidate: //注册成为候选人
 
-		return nil, nil, types.ErrInvalidType
+			return baseTransaction(config, dposContext, bc, author, gp, statedb, header, tx, usedGas, cfg, msg, boker)
+		case protocol.SetValidator: //设置验证人(已经测试)
+
+			return validatorTransaction(config, dposContext, bc, author, gp, statedb, header, tx, usedGas, cfg, msg, boker)
+		default:
+
+			return nil, nil, protocol.ErrInvalidType
+		}
 	}
 }
 
-//这里是将两个基础合约的信息写入到基础链的Hash树中
-func applyDposMessage(dposContext *types.DposContext, msg types.Message) error {
-
-	//根据基础合约类型来进行区分
-	/*switch msg.Type() {
-	case types.RegisterCandidate: //成为候选人
-		dposContext.BecomeCandidate(msg.From())
-	case types.VoteCandidate: //投票（授权）
-		dposContext.Delegate(msg.From(), *(msg.To()))
-	default:
-		return types.ErrInvalidType
-	}*/
-	return nil
-}
+func (p *StateProcessor) SetBoker(boker bokerapi.Api) { p.boker = boker }

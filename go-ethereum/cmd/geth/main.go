@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "bytes"
 	"fmt"
 	"os"
 	"runtime"
@@ -16,13 +17,14 @@ import (
 
 	"github.com/boker/go-ethereum/accounts/abi/bind"
 	"github.com/boker/go-ethereum/boker"
-	//"github.com/boker/go-ethereum/contracts"
+	"github.com/boker/go-ethereum/boker/protocol"
 	"github.com/boker/go-ethereum/eth"
 	"github.com/boker/go-ethereum/ethclient"
 	"github.com/boker/go-ethereum/internal/debug"
 	"github.com/boker/go-ethereum/log"
 	"github.com/boker/go-ethereum/metrics"
 	"github.com/boker/go-ethereum/node"
+	_ "github.com/boker/go-ethereum/rlp"
 	"gopkg.in/urfave/cli.v1"
 )
 
@@ -150,7 +152,7 @@ func init() {
 		accountCommand,
 		walletCommand,
 
-		//注册控制台CMD指令，可以查看consolecmd.go
+		//注册控制台CMD指令，可以查看consolecmd.go()
 		consoleCommand,
 		attachCommand,
 		javascriptCommand,
@@ -202,18 +204,15 @@ func main() {
 func geth(ctx *cli.Context) error {
 
 	//生成一个*node.Node对象stack
-	log.Info("Start geth With Context", "ctx", ctx)
+	log.Info("****geth****")
 
 	//这里的gethNode是一个全局变量
 	bind.GethNode = makeFullNode(ctx)
-	log.Info("Full Node Create:", "Node", bind.GethNode)
+	log.Info("Full Node Create Completed")
 
 	//启动这个节点
-	log.Info("Start Node Begin")
 	startNode(ctx, bind.GethNode)
-	log.Info("Start Node End")
-
-	//
+	log.Info("Start Node Completed")
 
 	//节点进入等待
 	bind.GethNode.Wait()
@@ -221,104 +220,29 @@ func geth(ctx *cli.Context) error {
 }
 
 //启动系统节点和所有已注册的协议，之后它解锁任何请求的帐户，并启动RPC / IPC接口和矿工
-/*func startNode(ctx *cli.Context, stack *node.Node) {
-
-	//启动节点
-	log.Info("startNode")
-	utils.StartNode(stack)
-
-	//解锁一些特定需求的账户
-	log.Info("stack.AccountManager().Backends")
-	ks := stack.AccountManager().Backends(keystore.KeyStoreType)[0].(*keystore.KeyStore)
-
-	//加载相应的密码信息
-	passwords := utils.MakePasswordList(ctx)
-	unlocks := strings.Split(ctx.GlobalString(utils.UnlockedAccountFlag.Name), ",")
-	for i, account := range unlocks {
-		if trimmed := strings.TrimSpace(account); trimmed != "" {
-			unlockAccount(ctx, ks, trimmed, i, passwords)
-		}
-	}
-	//注册钱包事件处理程序以打开和自动派生钱包
-	events := make(chan accounts.WalletEvent, 16)
-	stack.AccountManager().Subscribe(events)
-
-	go func() {
-
-		//创建一个rpcclient
-		log.Info("stack.Attach()")
-		rpcClient, err := stack.Attach()
-		if err != nil {
-			utils.Fatalf("Failed to attach to self: %v", err)
-		}
-		stateReader := ethclient.NewClient(rpcClient)
-
-		//打开已经附上的钱包
-		log.Info("range stack.AccountManager().Wallets()")
-		for _, wallet := range stack.AccountManager().Wallets() {
-			if err := wallet.Open(""); err != nil {
-				log.Warn("Failed to open wallet", "url", wallet.URL(), "err", err)
-			}
-		}
-
-		//监听钱包活动直到终止
-		log.Info("range events {")
-		for event := range events {
-			switch event.Kind {
-			case accounts.WalletArrived:
-				if err := event.Wallet.Open(""); err != nil {
-					log.Warn("New wallet appeared, failed to open", "url", event.Wallet.URL(), "err", err)
-				}
-			case accounts.WalletOpened:
-				status, _ := event.Wallet.Status()
-				log.Info("New wallet appeared", "url", event.Wallet.URL(), "status", status)
-
-				if event.Wallet.URL().Scheme == "ledger" {
-					event.Wallet.SelfDerive(accounts.DefaultLedgerBaseDerivationPath, stateReader)
-				} else {
-					event.Wallet.SelfDerive(accounts.DefaultBaseDerivationPath, stateReader)
-				}
-
-			case accounts.WalletDropped:
-				log.Info("Old wallet dropped", "url", event.Wallet.URL())
-				event.Wallet.Close()
-			}
-		}
-	}()
-
-	//这里查看一下读取的配置信息
-	//chainConfig := ethereum.BlockChain().Config()
-	//log.Info("Dpos Validators ", "Size", len(chainConfig.Dpos.Validators))
-	//log.Info("Contract Bases ", "Size", len(chainConfig.Contracts.Bases))
-
-	//如果设置为可用，则启动辅助Services
-	if ctx.GlobalBool(utils.MiningEnabledFlag.Name) {
-
-		//挖矿只有在运行完整的以太坊节点时才是有意义的
-		var ethereum *eth.Ethereum
-		if err := stack.Service(&ethereum); err != nil {
-			utils.Fatalf("ethereum service not running: %v", err)
-		}
-
-		//从CLI和开始挖矿中设置GasPrice的限制
-		ethereum.TxPool().SetGasPrice(utils.GlobalBig(ctx, utils.GasPriceFlag.Name))
-
-		if err := ethereum.StartMining(true); err != nil {
-
-			utils.Fatalf("Failed to start mining: %v", err)
-		}
-	}
-}
-*/
-
-//启动系统节点和所有已注册的协议，之后它解锁任何请求的帐户，并启动RPC / IPC接口和矿工
 func startNode(ctx *cli.Context, stack *node.Node) {
 
+	log.Info("****startNode****")
+
+	protocol.DecodeAbi("", "", "")
+
+	/*var test []byte = []byte("2000000000000000000000000000000000000000000000000000000000000000046861686100000000000000000000000000000000000000000000000000000000")
+	r := bytes.NewReader(test)
+	s := rlp.NewStream(r, 0)
+	kind, size, err := s.Kind()
+	log.Info("****startNode****", "kind", kind, "size", size, "err", err, "test", test)
+	*/
+	/*k, content, rest, err := rlp.Split(test)
+	length, _ := rlp.CountValues(test)
+	log.Info("****startNode****", "k", k, "content", content, "rest", rest, "err", err, "length", length)
+	*/
 	//启动节点
 	utils.StartNode(stack)
+	log.Info("Start Node")
 
 	//解锁一些特定需求的账户
 	ks := stack.AccountManager().Backends(keystore.KeyStoreType)[0].(*keystore.KeyStore)
+	log.Info("Account Manager Backends")
 
 	//加载相应的密码信息
 	passwords := utils.MakePasswordList(ctx)
@@ -328,9 +252,12 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 			unlockAccount(ctx, ks, trimmed, i, passwords)
 		}
 	}
+	log.Info("PasswordList unlockAccount")
+
 	//注册钱包事件处理程序以打开和自动派生钱包
 	events := make(chan accounts.WalletEvent, 16)
 	stack.AccountManager().Subscribe(events)
+	log.Info("Account Manager Subscribe")
 
 	go func() {
 		//创建一个rpcclient
@@ -339,6 +266,7 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 			utils.Fatalf("Failed to attach to self: %v", err)
 		}
 		stateReader := ethclient.NewClient(rpcClient)
+		log.Info("Stack Attach and New Client")
 
 		//打开已经附上的钱包
 		for _, wallet := range stack.AccountManager().Wallets() {
@@ -346,6 +274,8 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 				log.Warn("Failed to open wallet", "url", wallet.URL(), "err", err)
 			}
 		}
+		log.Info("Open Account Manager Wallets")
+
 		//监听钱包活动直到终止
 		for event := range events {
 			switch event.Kind {
@@ -370,21 +300,33 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 		}
 	}()
 
+	//挖矿只有在运行完整的以太坊节点时才是有意义的
+	var ethereum *eth.Ethereum
+	if err := stack.Service(&ethereum); err != nil {
+		utils.Fatalf("ethereum service not running: %v", err)
+	}
+	if ethereum == nil {
+		utils.Fatalf("ethereum service is nil")
+	}
+
+	block := ethereum.BlockChain().GetBlockByNumber(0)
+	bokerChain := boker.New()
+	bokerChain.Init(ethereum, block.Header().BokerProto)
+	ethereum.SetBoker(bokerChain)
+	log.Info("Set BokerChain Pointer")
+
+	//在这里启动worker的createNewWork，由于之前启动有可能ETH还没有启动完成
+	log.Info("Get Worker and CreateNewWork")
+	ethereum.Miner().GetWorker().CreateNewWork()
+
 	//如果设置为可用，则启动辅助Services
 	if ctx.GlobalBool(utils.MiningEnabledFlag.Name) {
-
-		//挖矿只有在运行完整的以太坊节点时才是有意义的
-		var ethereum *eth.Ethereum
-		if err := stack.Service(&ethereum); err != nil {
-			utils.Fatalf("ethereum service not running: %v", err)
-		}
-		bokerChain := boker.New(ethereum)
-		ethereum.SetBoker(bokerChain)
 
 		//从CLI和开始挖矿中设置GasPrice的限制
 		ethereum.TxPool().SetGasPrice(utils.GlobalBig(ctx, utils.GasPriceFlag.Name))
 		if err := ethereum.StartMining(true); err != nil {
 			utils.Fatalf("Failed to start mining: %v", err)
 		}
+		log.Info("Set Gas Price and Start Mining")
 	}
 }

@@ -17,11 +17,13 @@
 package abi
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
 
 	"github.com/boker/go-ethereum/crypto"
+	"github.com/boker/go-ethereum/log"
 )
 
 // Callable method given a `Name` and whether the method is a constant.
@@ -40,6 +42,7 @@ type Method struct {
 }
 
 func (method Method) pack(args ...interface{}) ([]byte, error) {
+
 	// Make sure arguments match up and pack them
 	if len(args) != len(method.Inputs) {
 		return nil, fmt.Errorf("argument count mismatch: %d for %d", len(args), len(method.Inputs))
@@ -81,6 +84,9 @@ func (method Method) pack(args ...interface{}) ([]byte, error) {
 //
 // Unpacking can be done into a struct or a slice/array.
 func (method Method) tupleUnpack(v interface{}, output []byte) error {
+
+	log.Info("****(method Method) tupleUnpack****")
+
 	// make sure the passed value is a pointer
 	valueOf := reflect.ValueOf(v)
 	if reflect.Ptr != valueOf.Kind() {
@@ -138,21 +144,134 @@ func (method Method) tupleUnpack(v interface{}, output []byte) error {
 func (method Method) isTupleReturn() bool { return len(method.Outputs) > 1 }
 
 func (method Method) singleUnpack(v interface{}, output []byte) error {
+
+	log.Info("singleUnpack")
+
 	// make sure the passed value is a pointer
 	valueOf := reflect.ValueOf(v)
+	log.Info("ValueOf")
+
 	if reflect.Ptr != valueOf.Kind() {
 		return fmt.Errorf("abi: Unpack(non-pointer %T)", v)
 	}
+	log.Info("Kind")
 
 	value := valueOf.Elem()
+	log.Info("Elem", "outputs", len(method.Outputs))
 
 	marshalledValue, err := toGoType(0, method.Outputs[0].Type, output)
 	if err != nil {
 		return err
 	}
+	log.Info("toGoType")
+
 	if err := set(value, reflect.ValueOf(marshalledValue), method.Outputs[0]); err != nil {
 		return err
 	}
+	log.Info("set")
+
+	return nil
+}
+
+//播客链新增
+
+func (method Method) multInputUnpack(v []interface{}, input []byte) error {
+
+	j := 0
+	for i := 0; i < len(method.Inputs); i++ {
+
+		log.Info("multInputUnpack", "i", i)
+		//v[i]必须是指针类型
+		valueOf := reflect.ValueOf(v[i])
+		if reflect.Ptr != valueOf.Kind() {
+
+			log.Info("multInputUnpack", "valueOf.Kind()", valueOf.Kind())
+			s := fmt.Sprintf("abi: Unpack(non-pointer %T)", v)
+			return errors.New(s)
+		}
+
+		toUnpack := method.Inputs[i]
+		if toUnpack.Type.T == ArrayTy {
+			j += toUnpack.Type.Size
+		}
+
+		marshalledValue, err := toGoType((i+j)*32, toUnpack.Type, input)
+		if err != nil {
+			return err
+		}
+
+		if err := set(valueOf.Elem(), reflect.ValueOf(marshalledValue), method.Inputs[i]); err != nil {
+			return err
+		}
+		log.Info("multInputUnpack", "value", valueOf.Elem().Interface())
+
+		/*switch value.Kind() {
+
+		case reflect.Struct:
+
+			for j := 0; j < typ.NumField(); j++ {
+
+				field := typ.Field(j)
+				if field.Name == strings.ToUpper(method.Inputs[i].Name[:1])+method.Inputs[i].Name[1:] {
+
+					if err := set(value.Field(j), reflectValue, method.Inputs[i]); err != nil {
+						return err
+					}
+				}
+			}
+		case reflect.Slice, reflect.Array:
+
+			if value.Len() < i {
+
+				s := fmt.Sprintf("abi: insufficient number of arguments for unpack, want %d, got %d", len(method.Inputs), value.Len())
+				return errors.New(s)
+			}
+
+			w := value.Index(i)
+
+			if w.Kind() != reflect.Ptr && w.Kind() != reflect.Interface {
+
+				s := fmt.Sprintf("abi: cannot unmarshal %v in to %v", w.Type(), reflectValue.Type())
+				return errors.New(s)
+			}
+
+			if err := set(w.Elem(), reflect.ValueOf(marshalledValue), method.Inputs[i]); err != nil {
+				return err
+			}
+		default:
+
+			if err := set(value, reflect.ValueOf(marshalledValue), method.Inputs[i]); err != nil {
+
+				log.Info("multInputUnpack", "set", err)
+				return err
+			}
+			log.Info("multInputUnpack", "value", value)
+		}*/
+	}
+	return nil
+}
+
+func (method Method) singleInputUnpack(v interface{}, input []byte) error {
+
+	log.Info("singleInputUnpack")
+
+	valueOf := reflect.ValueOf(v)
+	if reflect.Ptr != valueOf.Kind() {
+
+		s := fmt.Sprintf("abi: Unpack(non-pointer %T)", v)
+		return errors.New(s)
+	}
+
+	value := valueOf.Elem()
+	marshalledValue, err := toGoType(0, method.Inputs[0].Type, input)
+	if err != nil {
+		return err
+	}
+
+	if err := set(value, reflect.ValueOf(marshalledValue), method.Inputs[0]); err != nil {
+		return err
+	}
+
 	return nil
 }
 

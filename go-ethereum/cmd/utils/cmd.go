@@ -60,12 +60,10 @@ func Fatalf(format string, args ...interface{}) {
 
 func StartNode(stack *node.Node) {
 
-	log.Info("stack.Start() begin")
 	if err := stack.Start(); err != nil {
-		log.Error("Error starting protocol stack: %v", err)
-		//Fatalf("Error starting protocol stack: %v", err)
+		Fatalf("Error starting protocol stack: %v", err)
 	}
-	log.Info("stack.Start() end")
+	log.Info("Stack Start Finished")
 
 	go func() {
 		sigc := make(chan os.Signal, 1)

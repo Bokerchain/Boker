@@ -87,8 +87,9 @@ type TxRelayBackend interface {
 // NewTxPool creates a new light transaction pool
 func NewTxPool(config *params.ChainConfig, chain *LightChain, relay TxRelayBackend) *TxPool {
 	pool := &TxPool{
-		config:      config,
-		signer:      types.NewEIP155Signer(config.ChainId),
+		config: config,
+		//signer:      types.NewEIP155Signer(config.ChainId),
+		signer:      types.HomesteadSigner{},
 		nonce:       make(map[common.Address]uint64),
 		pending:     make(map[common.Hash]*types.Transaction),
 		mined:       make(map[common.Hash][]*types.Transaction),
@@ -308,7 +309,8 @@ func (pool *TxPool) setNewHead(head *types.Header) {
 	m, r := txc.getLists()
 	pool.relay.NewHead(pool.head, m, r)
 	pool.homestead = pool.config.IsHomestead(head.Number)
-	pool.signer = types.MakeSigner(pool.config, head.Number)
+	//pool.signer = types.MakeSigner(pool.config, head.Number)
+	pool.signer = types.HomesteadSigner{}
 }
 
 // Stop stops the light transaction pool
@@ -346,9 +348,12 @@ func (pool *TxPool) validateTx(ctx context.Context, tx *types.Transaction) error
 
 	// Validate the transaction sender and it's sig. Throw
 	// if the from fields is invalid.
-	if from, err = types.Sender(pool.signer, tx); err != nil {
+	//if from, err = types.Sender(pool.signer, tx); err != nil {
+	if from, err = types.Sender(types.HomesteadSigner{}, tx); err != nil {
 		return core.ErrInvalidSender
 	}
+	log.Info("validateTx tx", "Type", tx.Type(), "time", tx.Time(), "from", from.String())
+
 	// Last but not least check for nonce errors
 	currentState := pool.currentState(ctx)
 	if n := currentState.GetNonce(from); n > tx.Nonce() {
@@ -372,6 +377,8 @@ func (pool *TxPool) validateTx(ctx context.Context, tx *types.Transaction) error
 	// Transactor should have enough funds to cover the costs
 	// cost == V + GP * GL
 	if b := currentState.GetBalance(from); b.Cmp(tx.Cost()) < 0 {
+
+		log.Error("validateTx", "balance", currentState.GetBalance(from), "cost", tx.Cost(), "from", from)
 		return core.ErrInsufficientFunds
 	}
 

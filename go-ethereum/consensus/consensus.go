@@ -4,6 +4,7 @@ package consensus
 import (
 	"errors"
 
+	"github.com/boker/go-ethereum/boker/api"
 	"github.com/boker/go-ethereum/common"
 	"github.com/boker/go-ethereum/core/state"
 	"github.com/boker/go-ethereum/core/types"
@@ -44,7 +45,15 @@ type Engine interface {
 	VerifyUncles(chain ChainReader, block *types.Block) error
 	VerifySeal(chain ChainReader, header *types.Header) error
 	Prepare(chain ChainReader, header *types.Header) error
-	Finalize(chain ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt, dposContext *types.DposContext) (*types.Block, error)
+	Finalize(chain ChainReader,
+		header *types.Header,
+		state *state.StateDB,
+		txs []*types.Transaction,
+		uncles []*types.Header,
+		receipts []*types.Receipt,
+		dposContext *types.DposContext,
+		boker bokerapi.Api) (*types.Block, error)
+
 	Seal(chain ChainReader, block *types.Block, stop <-chan struct{}) (*types.Block, error)
 	APIs(chain ChainReader) []rpc.API
 }

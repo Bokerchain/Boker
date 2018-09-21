@@ -135,3 +135,14 @@ func (e Event) singleUnpack(v interface{}, output []byte) error {
 	}
 	return nil
 }
+
+//播客链新增
+func (e Event) multInputUnpack(v []interface{}, input []byte) error {
+
+	return nil
+}
+
+func (e Event) singleInputUnpack(v interface{}, input []byte) error {
+
+	return nil
+}

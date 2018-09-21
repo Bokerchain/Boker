@@ -73,7 +73,7 @@ func NewReleaseService(ctx *node.ServiceContext, config Config) (node.Service, e
 		}
 	}
 	// Construct the release service
-	contract, err := NewReleaseOracle(config.Oracle, eth.NewContractBackend(apiBackend, ethereum.Boker))
+	contract, err := NewReleaseOracle(config.Oracle, eth.NewContractBackend(apiBackend))
 	if err != nil {
 		return nil, err
 	}

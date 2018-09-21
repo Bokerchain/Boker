@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/gob"
 	"errors"
+
+	_ "github.com/boker/go-ethereum/log"
 )
 
 var ErrVersion = errors.New("version mismatch")
@@ -27,6 +29,9 @@ type Script struct {
 //      vm.Run(script)
 //
 func (self *Otto) Compile(filename string, src interface{}) (*Script, error) {
+
+	//log.Info("(self *Otto) Compile", "filename", filename)
+
 	return self.CompileWithSourceMap(filename, src, nil)
 }
 

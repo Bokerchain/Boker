@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/boker/go-ethereum/accounts"
+	"github.com/boker/go-ethereum/boker/api"
+	"github.com/boker/go-ethereum/boker/protocol"
 	"github.com/boker/go-ethereum/common"
 	"github.com/boker/go-ethereum/consensus"
 	"github.com/boker/go-ethereum/consensus/misc"
@@ -18,7 +20,6 @@ import (
 	"github.com/boker/go-ethereum/crypto"
 	"github.com/boker/go-ethereum/crypto/sha3"
 	"github.com/boker/go-ethereum/ethdb"
-	"github.com/boker/go-ethereum/include"
 	"github.com/boker/go-ethereum/log"
 	"github.com/boker/go-ethereum/params"
 	"github.com/boker/go-ethereum/rlp"
@@ -41,17 +42,18 @@ var (
 	ErrInvalidBlockProducer       = errors.New("invalid block producer")                      //这个区块不应该由这个验证者出（出块有顺序，不能乱出块的）
 	ErrInvalidTokenNoder          = errors.New("invalid block token noder")                   //这个区块不应该由这个验证者出（出块有顺序，不能乱出块的）
 	ErrNilBlockHeader             = errors.New("nil block header returned")                   //区块头为空
+
 )
 var (
 	uncleHash = types.CalcUncleHash(nil) // Always Keccak256(RLP([])) as uncles are meaningless outside of PoW.
 )
 
 type Dpos struct {
-	config               *params.DposConfig //共识引擎的配置参数
-	db                   ethdb.Database     //数据库对象
-	signer               common.Address     //签名者地址
-	signFn               SignerFn           //签名处理函数
-	signatures           *lru.ARCCache      //最近的块签名加快采矿
+	//config               *params.DposConfig //共识引擎的配置参数
+	db                   ethdb.Database //数据库对象
+	signer               common.Address //签名者地址
+	signFn               SignerFn       //签名处理函数
+	signatures           *lru.ARCCache  //最近的块签名加快采矿
 	confirmedBlockHeader *types.Header
 	mu                   sync.RWMutex
 	stop                 chan bool
@@ -61,6 +63,8 @@ type SignerFn func(accounts.Account, []byte) ([]byte, error)
 
 func sigHash(header *types.Header) (hash common.Hash) {
 	hasher := sha3.NewKeccak256()
+
+	//log.Info("****sigHash****", "header.DposProto", header.DposProto.Root().String(), "header.BokerProto", header.BokerProto.Root().String())
 
 	rlp.Encode(hasher, []interface{}{
 		header.ParentHash,
@@ -79,7 +83,8 @@ func sigHash(header *types.Header) (hash common.Hash) {
 		header.Extra[:len(header.Extra)-65], // Yes, this will panic if extra is too short
 		header.MixDigest,
 		header.Nonce,
-		header.DposContext.Root(),
+		header.DposProto.Root(),
+		header.BokerProto.Root(),
 	})
 	hasher.Sum(hash[:0])
 	return hash
@@ -87,9 +92,9 @@ func sigHash(header *types.Header) (hash common.Hash) {
 
 //创建一个新的Dpos对象
 func New(config *params.DposConfig, db ethdb.Database) *Dpos {
-	signatures, _ := lru.NewARC(include.InmemorySignatures)
+	signatures, _ := lru.NewARC(protocol.InmemorySignatures)
 	return &Dpos{
-		config:     config,
+		//config:     config,
 		db:         db,
 		signatures: signatures,
 	}
@@ -119,17 +124,16 @@ func (d *Dpos) verifyHeader(chain consensus.ChainReader, header *types.Header, p
 	}
 
 	//检测区块头中的扩展数据长度是否大于扩展签名头长度（32）
-	if len(header.Extra) < include.ExtraVanity {
+	if len(header.Extra) < protocol.ExtraVanity {
 		return errMissingVanity
 	}
 
 	//检测区块头中的扩展数据长度是否大于扩展签名长度头+扩展签名长度尾 = 32 + 65 = 97
-	if len(header.Extra) < include.ExtraVanity+include.ExtraSeal {
+	if len(header.Extra) < protocol.ExtraVanity+protocol.ExtraSeal {
 		return errMissingSignature
 	}
 
-	// Ensure that the mix digest is zero as we don't have fork protection currently
-	// 确保混合摘要为零，因为我们目前没有叉保护
+	//确保混合摘要为零，因为我们目前没有叉保护
 	if header.MixDigest != (common.Hash{}) {
 		return errInvalidMixDigest
 	}
@@ -159,7 +163,7 @@ func (d *Dpos) verifyHeader(chain consensus.ChainReader, header *types.Header, p
 	if parent == nil || parent.Number.Uint64() != number-1 || parent.Hash() != header.ParentHash {
 		return consensus.ErrUnknownAncestor
 	}
-	if parent.Time.Uint64()+uint64(include.ProducerInterval) > header.Time.Uint64() {
+	if parent.Time.Uint64()+uint64(protocol.ProducerInterval) > header.Time.Uint64() {
 		return ErrInvalidTimestamp
 	}
 	return nil
@@ -192,11 +196,12 @@ func (d *Dpos) VerifyUncles(chain consensus.ChainReader, block *types.Block) err
 }
 
 func (d *Dpos) VerifySeal(chain consensus.ChainReader, header *types.Header) error {
-
 	return d.verifySeal(chain, header, nil)
 }
 
 func (d *Dpos) verifySeal(chain consensus.ChainReader, header *types.Header, parents []*types.Header) error {
+
+	log.Info("****verifySeal****")
 
 	//判断是否是创始区块
 	number := header.Number.Uint64()
@@ -213,7 +218,8 @@ func (d *Dpos) verifySeal(chain consensus.ChainReader, header *types.Header, par
 	}
 
 	//根据父区块创建一个新的Dpos对象
-	dposContext, err := types.NewDposContextFromProto(d.db, parent.DposContext)
+	log.Info("NewDposContextFromProto")
+	dposContext, err := types.NewDposContextFromProto(d.db, parent.DposProto)
 	if err != nil {
 		return err
 	}
@@ -274,7 +280,7 @@ func (d *Dpos) updateConfirmedBlockHeader(chain consensus.ChainReader) error {
 	for d.confirmedBlockHeader.Hash() != curHeader.Hash() && d.confirmedBlockHeader.Number.Uint64() < curHeader.Number.Uint64() {
 
 		//得到当前的周期循环数
-		curEpoch := curHeader.Time.Int64() / include.EpochInterval
+		curEpoch := curHeader.Time.Int64() / protocol.EpochInterval
 
 		//当前周期不等于初始-1的周期
 		if curEpoch != epoch {
@@ -283,19 +289,25 @@ func (d *Dpos) updateConfirmedBlockHeader(chain consensus.ChainReader) error {
 		}
 
 		//当前区块头序号-已经确认的区块头序号 < 共识确认验证者数量 - 当前验证者数量 (此处用于处理重复确认)
-		if curHeader.Number.Int64()-d.confirmedBlockHeader.Number.Int64() < int64(include.ConsensusSize-len(validatorMap)) {
-			log.Debug("Dpos fast return", "current", curHeader.Number.String(), "confirmed", d.confirmedBlockHeader.Number.String(), "witnessCount", len(validatorMap))
+		if curHeader.Number.Int64()-d.confirmedBlockHeader.Number.Int64() < int64(protocol.ConsensusSize-len(validatorMap)) {
+			log.Debug("Dpos fast return",
+				"current", curHeader.Number.String(),
+				"confirmed", d.confirmedBlockHeader.Number.String(),
+				"witnessCount", len(validatorMap))
+
 			return nil
 		}
 
 		//
 		validatorMap[curHeader.Validator] = true
-		if len(validatorMap) >= include.ConsensusSize {
+		if len(validatorMap) >= protocol.ConsensusSize {
 			d.confirmedBlockHeader = curHeader
 			if err := d.storeConfirmedBlockHeader(d.db); err != nil {
 				return err
 			}
-			log.Debug("Dpos set confirmed block header success", "currentHeader", curHeader.Number.String())
+			log.Debug("Dpos set confirmed block header success",
+				"currentHeader", curHeader.Number.String())
+
 			return nil
 		}
 		curHeader = chain.GetHeaderByHash(curHeader.ParentHash)
@@ -308,7 +320,8 @@ func (d *Dpos) updateConfirmedBlockHeader(chain consensus.ChainReader) error {
 
 //加载确认区块头
 func (s *Dpos) loadConfirmedBlockHeader(chain consensus.ChainReader) (*types.Header, error) {
-	key, err := s.db.Get(include.ConfirmedBlockHead)
+
+	key, err := s.db.Get(protocol.ConfirmedBlockHead)
 	if err != nil {
 		return nil, err
 	}
@@ -321,7 +334,7 @@ func (s *Dpos) loadConfirmedBlockHeader(chain consensus.ChainReader) (*types.Hea
 
 //确认区块头放入数据库池中
 func (s *Dpos) storeConfirmedBlockHeader(db ethdb.Database) error {
-	return db.Put(include.ConfirmedBlockHead, s.confirmedBlockHeader.Hash().Bytes())
+	return db.Put(protocol.ConfirmedBlockHead, s.confirmedBlockHeader.Hash().Bytes())
 }
 
 //拼接区块头信息
@@ -330,13 +343,13 @@ func (d *Dpos) Prepare(chain consensus.ChainReader, header *types.Header) error 
 	//设置区块头中的Nonce字段，防止双花攻击
 	header.Nonce = types.BlockNonce{}
 	number := header.Number.Uint64()
-	if len(header.Extra) < include.ExtraVanity {
-		header.Extra = append(header.Extra, bytes.Repeat([]byte{0x00}, include.ExtraVanity-len(header.Extra))...)
+	if len(header.Extra) < protocol.ExtraVanity {
+		header.Extra = append(header.Extra, bytes.Repeat([]byte{0x00}, protocol.ExtraVanity-len(header.Extra))...)
 	}
 
 	//设置区块头的扩展字段信息
-	header.Extra = header.Extra[:include.ExtraVanity]
-	header.Extra = append(header.Extra, make([]byte, include.ExtraSeal)...)
+	header.Extra = header.Extra[:protocol.ExtraVanity]
+	header.Extra = append(header.Extra, make([]byte, protocol.ExtraSeal)...)
 
 	//根据区块头得到父区块的信息
 	parent := chain.GetHeader(header.ParentHash, number-1)
@@ -357,7 +370,7 @@ func AccumulateRewards(config *params.ChainConfig, state *state.StateDB, header 
 
 	//Bobby的出块奖励数量（11Bobby）
 	blockReward := big.NewInt(1)
-	blockReward.Mul(include.BobbyUnit, include.BobbyMultiple)
+	blockReward.Mul(protocol.BobbyUnit, protocol.BobbyMultiple)
 
 	//设置区块奖励数量并累积到帐号中
 	reward := new(big.Int).Set(blockReward)
@@ -365,7 +378,7 @@ func AccumulateRewards(config *params.ChainConfig, state *state.StateDB, header 
 
 	//给指定账号奖励，此账号用于分配通证给其它用户(16.5Bobby)
 	blockTransfer := big.NewInt(1)
-	blockTransfer.Mul(include.TransferUnit, include.TransferMultiple)
+	blockTransfer.Mul(protocol.TransferUnit, protocol.TransferMultiple)
 
 	//给矿工奖励
 	transferReward := new(big.Int).Set(blockTransfer)
@@ -379,16 +392,17 @@ func (d *Dpos) Finalize(chain consensus.ChainReader,
 	txs []*types.Transaction,
 	uncles []*types.Header,
 	receipts []*types.Receipt,
-	dposContext *types.DposContext) (*types.Block, error) {
+	dposContext *types.DposContext,
+	boker bokerapi.Api) (*types.Block, error) {
 
 	//累计奖励奖励并修改帐号中的币数量
 	AccumulateRewards(chain.Config(), state, header, uncles)
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 
 	parent := chain.GetHeaderByHash(header.ParentHash)
-	if include.TimeOfFirstBlock == 0 {
+	if protocol.TimeOfFirstBlock == 0 {
 		if firstBlockHeader := chain.GetHeaderByNumber(1); firstBlockHeader != nil {
-			include.TimeOfFirstBlock = firstBlockHeader.Time.Int64()
+			protocol.TimeOfFirstBlock = firstBlockHeader.Time.Int64()
 		}
 	}
 
@@ -403,7 +417,13 @@ func (d *Dpos) Finalize(chain consensus.ChainReader,
 
 	//更新MintCnt的默克尔树，并返回一个新区块
 	updateMintCnt(parent.Time.Int64(), header.Time.Int64(), header.Validator, dposContext)
-	header.DposContext = dposContext.ToProto()
+	header.DposProto = dposContext.ToProto()
+	//log.Info("Get Dpos Trie", "DposProto", header.DposProto.Root().String())
+
+	baseTrie, contractTrie := boker.GetContractTrie()
+	header.BokerProto = protocol.ToBokerProto(baseTrie.Hash(), contractTrie.Hash())
+	//log.Info("Get Boker Trie", "BokerProto", header.BokerProto.Root().String(), "baseTrie", baseTrie.Hash().String(), "contractTrie", contractTrie.Hash().String())
+
 	return types.NewBlock(header, txs, uncles, receipts), nil
 }
 
@@ -419,9 +439,9 @@ func (d *Dpos) CheckDeadline(lastBlock *types.Block, now int64) error {
 		return ErrMintFutureBlock
 	}
 
-	offset := now % include.EpochInterval
-	if offset%include.ProducerInterval != 0 {
-		return include.ErrInvalidMintBlockTime
+	offset := now % protocol.EpochInterval
+	if offset%protocol.ProducerInterval != 0 {
+		return protocol.ErrInvalidMintBlockTime
 	}
 
 	//当前区块是上一个区块，并且下一个出块时间减当前时间小于1秒（说明可以进行出块了）
@@ -434,7 +454,9 @@ func (d *Dpos) CheckDeadline(lastBlock *types.Block, now int64) error {
 //检测当前区块头中是否是当前的打包节点
 func (d *Dpos) CheckProducer(lastBlock *types.Block, now int64) error {
 
-	dposContext, err := types.NewDposContextFromProto(d.db, lastBlock.Header().DposContext)
+	//log.Info("****CheckProducer****", lastBlock.Header().Number, "hash", "now", now)
+
+	dposContext, err := types.NewDposContextFromProto(d.db, lastBlock.Header().DposProto)
 	if err != nil {
 		return err
 	}
@@ -449,42 +471,58 @@ func (d *Dpos) CheckProducer(lastBlock *types.Block, now int64) error {
 }
 
 //检测当前区块头中是否是当前的打包节点
-func (d *Dpos) UpdateProducer(lastBlock *types.Block, producer common.Address) error {
+func (d *Dpos) SelfProducer(lastBlock *types.Block, producer common.Address) error {
 
-	dposContext, err := types.NewDposContextFromProto(d.db, lastBlock.Header().DposContext)
+	log.Info("****SelfProducer****", "number", lastBlock.Header().Number, "hash", lastBlock.Header().Hash().String())
+
+	if lastBlock.Header().Number.Int64() != 0 {
+		return protocol.ErrGenesisBlock
+	}
+	dposContext, err := types.NewDposContextFromProto(d.db, lastBlock.Header().DposProto)
 	if err != nil {
 		return err
+	}
+	//清空所有验证者
+	log.Info("SelfProducer Epoch and Validators")
+	dposContext.Clean()
+
+	//插入节点信息到DposContext中
+	log.Info("SelfProducer InsertValidator", "producer", producer.String())
+	resultErr := dposContext.InsertValidator(producer, big.NewInt(10000))
+
+	producers, err := dposContext.GetEpochTrie()
+	log.Info("SelfProducer InsertValidator Get", "size", len(producers))
+
+	return resultErr
+}
+
+//得到当前出块节点的数量
+func (d *Dpos) GetProducerSize(lastBlock *types.Block, producer common.Address) (uint64, error) {
+
+	//log.Info("****GetProducerSize****", "number", lastBlock.Header().Number, "hash", lastBlock.Header().Hash().String())
+
+	dposContext, err := types.NewDposContextFromProto(d.db, lastBlock.Header().DposProto)
+	if err != nil {
+		return uint64(0), err
 	}
 	producers, err := dposContext.GetEpochTrie()
 	if err != nil {
-		return err
+
+		log.Error("get current producer ", "error", err)
+		return uint64(0), err
 	}
-
-	//判断当前节点是否在打包节点中
-	for _, validator := range producers {
-		if validator == producer {
-			return nil
-		}
-	}
-
-	//将出块节点写入
-	/*producers = append(producers, producer)
-	dposContext.SetValidators(producers)
-	for _, validator := range producers {
-		dposContext.DelegateTrie().TryUpdate(append(validator.Bytes(), validator.Bytes()...), validator.Bytes())
-		dposContext.CandidateTrie().TryUpdate(validator.Bytes(), validator.Bytes())
-	}*/
-
-	return nil
+	return uint64(len(producers)), nil
 }
 
 //检查当前的验证者是否为当前节点
 func (d *Dpos) CheckTokenNoder(lastBlock *types.Block, now int64) error {
 
+	log.Info("****CheckTokenNoder****")
+
 	if err := d.CheckDeadline(lastBlock, now); err != nil {
 		return err
 	}
-	dposContext, err := types.NewDposContextFromProto(d.db, lastBlock.Header().DposContext)
+	dposContext, err := types.NewDposContextFromProto(d.db, lastBlock.Header().DposProto)
 	if err != nil {
 		return err
 	}
@@ -524,7 +562,7 @@ func (d *Dpos) Seal(chain consensus.ChainReader, block *types.Block, stop <-chan
 	if err != nil {
 		return nil, err
 	}
-	copy(header.Extra[len(header.Extra)-include.ExtraSeal:], sighash)
+	copy(header.Extra[len(header.Extra)-protocol.ExtraSeal:], sighash)
 	return block.WithSeal(header), nil
 }
 
@@ -561,12 +599,12 @@ func ecrecover(header *types.Header, sigcache *lru.ARCCache) (common.Address, er
 	}
 
 	//判断包头扩展字段的长度是否小于扩展字段后缀长度（65）
-	if len(header.Extra) < include.ExtraSeal {
+	if len(header.Extra) < protocol.ExtraSeal {
 		return common.Address{}, errMissingSignature
 	}
 
 	//得到公钥
-	signature := header.Extra[len(header.Extra)-include.ExtraSeal:]
+	signature := header.Extra[len(header.Extra)-protocol.ExtraSeal:]
 	pubkey, err := crypto.Ecrecover(sigHash(header).Bytes(), signature)
 	if err != nil {
 		return common.Address{}, err
@@ -581,11 +619,11 @@ func ecrecover(header *types.Header, sigcache *lru.ARCCache) (common.Address, er
 
 //得到区块的上一次生成时间和下一次生成时间
 func PrevSlot(now int64) int64 {
-	return int64((now-1)/include.ProducerInterval) * include.ProducerInterval
+	return int64((now-1)/protocol.ProducerInterval) * protocol.ProducerInterval
 }
 
 func NextSlot(now int64) int64 {
-	return int64((now+include.ProducerInterval-1)/include.ProducerInterval) * include.ProducerInterval
+	return int64((now+protocol.ProducerInterval-1)/protocol.ProducerInterval) * protocol.ProducerInterval
 }
 
 //修改出块节点出块的数量
@@ -593,11 +631,11 @@ func updateMintCnt(parentBlockTime, currentBlockTime int64, validator common.Add
 
 	//得到上一个区块的周期数量
 	blockCntTrie := dposContext.BlockCntTrie()
-	currentEpoch := parentBlockTime / include.EpochInterval
+	currentEpoch := parentBlockTime / protocol.EpochInterval
 	currentEpochBytes := make([]byte, 8)
 	binary.BigEndian.PutUint64(currentEpochBytes, uint64(currentEpoch))
 	cnt := int64(1)
-	newEpoch := currentBlockTime / include.EpochInterval
+	newEpoch := currentBlockTime / protocol.EpochInterval
 
 	//如果新周期和当前周期相同（属于同一个周期中）
 	if currentEpoch == newEpoch {

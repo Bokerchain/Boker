@@ -1018,7 +1018,8 @@ func MakeChain(ctx *cli.Context, stack *node.Node) (chain *core.BlockChain, chai
 	if err != nil {
 		Fatalf("%v", err)
 	}
-	engine := dpos.New(config.Dpos, chainDb)
+	//engine := dpos.New(config.Dpos, chainDb)
+	engine := dpos.New(&params.DposConfig{}, chainDb)
 	vmcfg := vm.Config{EnablePreimageRecording: ctx.GlobalBool(VMEnableDebugFlag.Name)}
 
 	var ethereum *eth.Ethereum
@@ -1030,7 +1031,7 @@ func MakeChain(ctx *cli.Context, stack *node.Node) (chain *core.BlockChain, chai
 	if err != nil {
 		Fatalf("Can't create BlockChain: %v", err)
 	}
-	chain.SetBoker(ethereum.Boker)
+	chain.SetBoker(ethereum.Boker())
 	return chain, chainDb
 }
 
