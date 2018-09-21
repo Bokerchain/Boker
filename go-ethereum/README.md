@@ -2,6 +2,20 @@
 
 Official golang implementation of Boker Chain.
 
+## Contact us
+
+* Whitepaper: [blkV2.1.pdf](http://yibokeclips.otvcloud.com/uploads/apks/blkV2.1.pdf)
+* Website: [播客链](http://www.videoblkchain.com/)
+* Telegram: [Bobbyglobal](https://t.me/Bobbyglobal)
+* Twitter： [BokerChain](https://twitter.com/BokerBobby)
+		
+### Boker Chain CTO
+* WeChat: [区什么块什么链啊](Blockchain_fxh7622) 
+* Twitter: [区什么块什么链啊](https://twitter.com/chain_fxh7622) 
+
+### Smart Contract
+* Twitter: [后青春期的诗](https://twitter.com/chain_stayreal)
+
 ## Building the source
 
 Building Boker Chain requires both a Go (version 1.7.3 or later) and a C compiler. You can install them using your favourite package manager. Once the dependencies are installed, run
@@ -143,17 +157,3 @@ subvert locally available APIs!**
 The Boker Chain binaries (i.e. all code inside of the `cmd` directory) is licensed under the
 [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html), also included
 in our repository in the `COPYING` file.
-
-## Contact us
-
-* Whitepaper: [blkV2.1.pdf](http://yibokeclips.otvcloud.com/uploads/apks/blkV2.1.pdf)
-* Website: [播客链](http://www.videoblkchain.com/)
-* Telegram: [Bobbyglobal](https://t.me/Bobbyglobal)
-* Twitter： [BokerChain](https://twitter.com/BokerBobby)
-		
-### Boker Chain CTO
-* WeChat: [区什么块什么链啊](Blockchain_fxh7622) 
-* Twitter: [区什么块什么链啊](https://twitter.com/chain_fxh7622) 
-
-### Smart Contract
-* Twitter: [后青春期的诗](https://twitter.com/chain_stayreal)
