@@ -13,7 +13,7 @@ Official golang implementation of Boker Chain.
 * Twitter： [BokerChain](https://twitter.com/BokerBobby)
 		
 ### Boker Chain CTO
-* WeChat: [区什么块什么链啊](Blockchain_fxh7622) 
+* WeChat: 区什么块什么链啊(Blockchain_fxh7622) 
 * Twitter: [区什么块什么链啊](https://twitter.com/chain_fxh7622) 
 
 ### Smart Contract
