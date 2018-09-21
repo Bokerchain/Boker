@@ -1,3 +1,6 @@
+## Boker Chain Logo
+![Image text](t](https://github.com/Bokerchain/Boker/blob/master/Boker.png)
+
 ## Boker Chain
 
 Official golang implementation of Boker Chain.
