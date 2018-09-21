@@ -1,9 +1,9 @@
-## Boker Chain Logo
+## Bokerchain Logo
 ![Image text](https://github.com/Bokerchain/Boker/blob/master/Boker.png)
 
-## Boker Chain
+## Bokerchain
 
-Official golang implementation of Boker Chain.
+Official golang implementation of Bokerchain.
 
 ## Contact us
 
@@ -12,7 +12,7 @@ Official golang implementation of Boker Chain.
 * Telegram: [Bobbyglobal](https://t.me/Bobbyglobal)
 * Twitter： [BokerChain](https://twitter.com/BokerBobby)
 		
-### Boker Chain CTO
+### Co-Founder Of Bokerchain, R & D Director
 * WeChat: 区什么块什么链啊(Blockchain_fxh7622) 
 * Twitter: [区什么块什么链啊](https://twitter.com/chain_fxh7622) 
 
@@ -21,7 +21,7 @@ Official golang implementation of Boker Chain.
 
 ## Building the source
 
-Building Boker Chain requires both a Go (version 1.7.3 or later) and a C compiler. You can install them using your favourite package manager. Once the dependencies are installed, run
+Building Bokerchain requires both a Go (version 1.7.4 or later) and a C compiler. You can install them using your favourite package manager. Once the dependencies are installed, run
 
     make geth
 
@@ -31,7 +31,7 @@ or, to build the full suite of utilities:
 
 ## Executables
 
-The Boker Chain project comes with several wrappers/executables found in the `cmd` directory.
+The Bokerchain project comes with several wrappers/executables found in the `cmd` directory.
 
 | Command    | Description |
 |:----------:|-------------|
@@ -39,7 +39,7 @@ The Boker Chain project comes with several wrappers/executables found in the `cm
 | `abigen` | Source code generator to convert Ethereum contract definitions into easy to use, compile-time type-safe Go packages. It operates on plain [Ethereum contract ABIs](https://github.com/ethereum/wiki/wiki/Ethereum-Contract-ABI) with expanded functionality if the contract bytecode is also available. However it also accepts Solidity source files, making development much more streamlined. Please see our [Native DApps](https://github.com/ethereum/go-ethereum/wiki/Native-DApps:-Go-bindings-to-Ethereum-contracts) wiki page for details. |
 
 
-## Starting up your Boker Chain nodes
+## Starting up your Bokerchain nodes
 
 ### 1、Initialize with genesis.json
 	geth --datadir "/projects/ethereum/geth/node" init genesis.json
@@ -118,10 +118,10 @@ The Boker Chain project comes with several wrappers/executables found in the `cm
 }
 ```
 
-### Programatically interfacing Geth nodes
+### Programatically interfacing Bokerchain nodes
 
-As a developer, sooner rather than later you'll want to start interacting with Boker Chain 
-network via your own programs and not manually through the console. To aid this, Boker Chain has built in
+As a developer, sooner rather than later you'll want to start interacting with Bokerchain 
+network via your own programs and not manually through the console. To aid this, Bokerchain has built in
 support for a JSON-RPC based APIs. These can be
 exposed via HTTP, WebSockets and IPC (unix sockets on unix based platforms, and named pipes on Windows).
 
@@ -150,7 +150,7 @@ via HTTP, WS or IPC to a Boker Chain node configured with the above flags and yo
 on all transports. You can reuse the same connection for multiple requests!
 
 **Note: Please understand the security implications of opening up an HTTP/WS based transport before
-doing so! Hackers on the internet are actively trying to subvert Boker Chain nodes with exposed APIs!
+doing so! Hackers on the internet are actively trying to subvert Bokerchain nodes with exposed APIs!
 Further, all browser tabs can access locally running webservers, so malicious webpages could try to
 subvert locally available APIs!**
 
