@@ -1,4 +1,3 @@
-## Bokerchain Logo
 ![Image text](https://github.com/Bokerchain/Boker/blob/master/Boker.png)
 
 ## Bokerchain
