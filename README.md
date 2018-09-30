@@ -1,4 +1,4 @@
-![Image text](https://github.com/Bokerchain/Boker/blob/master/Boker.png)
+![Image text](https://github.com/Bokerchain/Boker/blob/master/image/Boker.png)
 
 ## 播客链（Bokerchain）
 播客链是一个服务于音视频垂直领域的区块链公链平台，对于个智能终端设备都能很方便的接入。我们在应用层以SDK的方式植入各视频类APP，实现视频应用联盟，满足联盟中各应用间的版权保护、数据共享及利益保护。使播客、广告主、用户之间的数据的透明，各应用的利益最大化。<br/>
