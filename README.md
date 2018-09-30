@@ -44,7 +44,7 @@ The Bokerchain project comes with several wrappers/executables found in the `cmd
 {
 	"config": {
 		"chainId": 0,
-		"homesteadBlock": 0,
+		"byzantiumBlock": 0,
 		"eip155Block": 0,
 		"eip158Block": 0
 	},
