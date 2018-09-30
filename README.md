@@ -17,3 +17,12 @@ Bokerchain is a public blockchain platform that serves the vertical area of audi
 
 ### Smart Contract
 * Twitter: [后青春期的诗](https://twitter.com/chain_stayreal)
+
+
+## Files
+
+### chain
+Main chain code, implementing DPOS.
+
+### contracts
+Basic contract code in solidity.
