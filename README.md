@@ -55,6 +55,7 @@ The Bokerchain project comes with several wrappers/executables found in the `cmd
 }
 
 ```
+**Note: `"byzantiumBlock": 0` should be the config value, otherwise contract call may malfunction!**
 
 ### boker.json
 ```json
