@@ -83,7 +83,9 @@ The Bokerchain project comes with several wrappers/executables found in the `cmd
 ## Starting up your Bokerchain nodes
 ### Prerequisit
 Before start up your Bokerchain node, make sure the time is up to date. You can acheive this by adding crontab task as follows:
-`*/10 * * * * /usr/sbin/ntpdate 1.cn.pool.ntp.org`
+```
+*/10 * * * * /usr/sbin/ntpdate 1.cn.pool.ntp.org
+```
 It means synchronize time with 1.cn.pool.ntp.org every 10 minutes. You can adjust the code according to your demand.
 
 ### 1、Initialize with genesis.json
