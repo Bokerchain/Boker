@@ -22,9 +22,9 @@ Bokerchain is a public blockchain platform that serves the vertical area of audi
 ## Folders
 
 ### chain
-基础链代码，实现DPOS
+基础链代码，实现DPOS<br/>
 Main chain code, implementing DPOS.
 
 ### contracts
-用Solidity写的基础合约代码
+用Solidity写的基础合约代码<br/>
 Basic contract code in solidity.
