@@ -84,9 +84,13 @@ The Bokerchain project comes with several wrappers/executables found in the `cmd
 ### Prerequisit
 Before start up your Bokerchain node, make sure the time is up to date. You can acheive this by adding crontab task as follows:
 ```
+crontab -e
+```
+add commond:
+```
 */10 * * * * /usr/sbin/ntpdate 1.cn.pool.ntp.org
 ```
-It means synchronize time with 1.cn.pool.ntp.org every 10 minutes. You can adjust the code according to your demand.
+It means synchronize time with 1.cn.pool.ntp.org every 10 minutes. You can adjust the commond according to your demand.
 
 ### 1、Initialize with genesis.json
 	geth --datadir "/projects/ethereum/geth/node" init genesis.json
