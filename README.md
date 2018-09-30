@@ -1,7 +1,7 @@
-## Boker Chain Logo
+## Bokerchain Logo
 ![Image text](https://github.com/Bokerchain/Boker/blob/master/Boker.png)
 
-## Boker Chain
+## Bokerchain
 
 Bokerchain is a public blockchain platform that serves the vertical area of audio & video. It is convenient for different intelligent terminal devices to access to Bokerchain. We can form a Video Application Union by providing SDK for various video APP, meeting the need for copyright protection, data sharing and benefit protection among all apps in Video Application Union. In this situation, we may make data among podcasts, advertisers and users more transparent, also maximizing the benefits.<br/>Our goal is to acheive video sharing, benefits sharing and user resources sharing, benefiting podcasts, advertisers and our users while providing entertainment.
 
@@ -12,7 +12,7 @@ Bokerchain is a public blockchain platform that serves the vertical area of audi
 * Telegram: [Bobbyglobal](https://t.me/Bobbyglobal)
 * Twitter： [BokerChain](https://twitter.com/BokerBobby)
 		
-### Boker Chain CTO
+### Bokerchain Co-Founder
 * WeChat: [区什么块什么链啊](Blockchain_fxh7622) 
 * Twitter: [区什么块什么链啊](https://twitter.com/chain_fxh7622) 
 
@@ -21,7 +21,7 @@ Bokerchain is a public blockchain platform that serves the vertical area of audi
 
 ## Building the source
 
-Building Boker Chain requires both a Go (version 1.7.3 or later) and a C compiler. You can install them using your favourite package manager. Once the dependencies are installed, run
+Building Bokerchain requires both a Go (version 1.7.3 or later) and a C compiler. You can install them using your favourite package manager. Once the dependencies are installed, run
 
     make geth
 
@@ -31,7 +31,7 @@ or, to build the full suite of utilities:
 
 ## Executables
 
-The Boker Chain project comes with several wrappers/executables found in the `cmd` directory.
+The Bokerchain project comes with several wrappers/executables found in the `cmd` directory.
 
 | Command    | Description |
 |:----------:|-------------|
@@ -81,7 +81,7 @@ The Boker Chain project comes with several wrappers/executables found in the `cm
 }
 ```
 
-## Starting up your Boker Chain nodes
+## Starting up your Bokerchain nodes
 
 ### 1、Initialize with genesis.json
 	geth --datadir "/projects/ethereum/geth/node" init genesis.json
@@ -118,8 +118,8 @@ The Boker Chain project comes with several wrappers/executables found in the `cm
 
 ## Programatically interfacing Geth nodes
 
-As a developer, sooner rather than later you'll want to start interacting with Boker Chain 
-network via your own programs and not manually through the console. To aid this, Boker Chain has built in
+As a developer, sooner rather than later you'll want to start interacting with Bokerchain 
+network via your own programs and not manually through the console. To aid this, Bokerchain has built in
 support for a JSON-RPC based APIs. These can be
 exposed via HTTP, WebSockets and IPC (unix sockets on unix based platforms, and named pipes on Windows).
 
@@ -144,17 +144,17 @@ HTTP based JSON-RPC API options:
   * `--ipcpath` Filename for IPC socket/pipe within the datadir (explicit paths escape it)
 
 You'll need to use your own programming environments' capabilities (libraries, tools, etc) to connect
-via HTTP, WS or IPC to a Boker Chain node configured with the above flags and you'll need to speak [JSON-RPC](http://www.jsonrpc.org/specification)
+via HTTP, WS or IPC to a Bokerchain node configured with the above flags and you'll need to speak [JSON-RPC](http://www.jsonrpc.org/specification)
 on all transports. You can reuse the same connection for multiple requests!
 
 **Note: Please understand the security implications of opening up an HTTP/WS based transport before
-doing so! Hackers on the internet are actively trying to subvert Boker Chain nodes with exposed APIs!
+doing so! Hackers on the internet are actively trying to subvert Bokerchain nodes with exposed APIs!
 Further, all browser tabs can access locally running webservers, so malicious webpages could try to
 subvert locally available APIs!**
 
 
 ## License
 
-The Boker Chain binaries (i.e. all code inside of the `cmd` directory) is licensed under the
+The Bokerchain binaries (i.e. all code inside of the `cmd` directory) is licensed under the
 [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html), also included
 in our repository in the `COPYING` file.
