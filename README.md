@@ -38,43 +38,6 @@ The Boker Chain project comes with several wrappers/executables found in the `cm
 | **`geth`** | Our main Ethereum CLI client. It is the entry point into the Ethereum network (main-, test- or private net), capable of running as a full node (default) archive node (retaining all historical state) or a light node (retrieving data live). It can be used by other processes as a gateway into the Ethereum network via JSON RPC endpoints exposed on top of HTTP, WebSocket and/or IPC transports. `geth --help` and the [CLI Wiki page](https://github.com/ethereum/chain/wiki/Command-Line-Options) for command line options. |
 | `abigen` | Source code generator to convert Ethereum contract definitions into easy to use, compile-time type-safe Go packages. It operates on plain [Ethereum contract ABIs](https://github.com/ethereum/wiki/wiki/Ethereum-Contract-ABI) with expanded functionality if the contract bytecode is also available. However it also accepts Solidity source files, making development much more streamlined. Please see our [Native DApps](https://github.com/ethereum/chain/wiki/Native-DApps:-Go-bindings-to-Ethereum-contracts) wiki page for details. |
 
-
-## Starting up your Boker Chain nodes
-
-### 1、Initialize with genesis.json
-	geth --datadir "/projects/ethereum/geth/node" init genesis.json
-* `--datadir` flag specify the data directory of your node
-
-### 2、Run
-	nohup geth --nodiscover --maxpeers 3 --identity "bokerchain" --rpc --rpcaddr 0.0.0.0 --rpccorsdomain "*" --rpcvhosts '*' --datadir "/projects/ethereum/geth/node" --port 30303 --rpcapi "db,eth,net,web3" --networkid 96579 &
-	
-* `--rpc` Enable the HTTP-RPC server
-* `--rpcaddr` HTTP-RPC server listening interface (default: "localhost"). If you want to access RPC from other containers and/or hosts, it should be set to `--rpcaddr 0.0.0.0`.
-* `--rpcapi` API's offered over the HTTP-RPC interface (default: "eth,net,web3")
-* `--rpccorsdomain` Comma separated list of domains from which to accept cross origin requests (browser enforced)
-* `--datadir`		flag should be idential to that in first step
-* `--networkid`	flag specify your private net id
-
-### 3、Enter console mode
-	geth attach ipc:/projects/ethereum/geth/node/geth.ipc
-
-
-### 4、Create new account
-	personal.newAccount()
-
-### 5、Unlock account
-	personal.unlockAccount("0x1d4443a3eff8a5df88ecd9d91a58037585289be0", "123456", 0)
-
-### 6、Set current account as first validator to process first transaction
-	miner.setLocalValidator()
-
-### 7、Set new validator
-	eth.addValidator("0x1d4443a3eff8a5df88ecd9d91a58037585289be0", 10000)
-
-### 8、Start mining
-	miner.start()
-
-
 ## Configuration
 
 ### genesis.json
@@ -118,7 +81,42 @@ The Boker Chain project comes with several wrappers/executables found in the `cm
 }
 ```
 
-### Programatically interfacing Geth nodes
+## Starting up your Boker Chain nodes
+
+### 1、Initialize with genesis.json
+	geth --datadir "/projects/ethereum/geth/node" init genesis.json
+* `--datadir` flag specify the data directory of your node
+
+### 2、Run
+	nohup geth --nodiscover --maxpeers 3 --identity "bokerchain" --rpc --rpcaddr 0.0.0.0 --rpccorsdomain "*" --rpcvhosts '*' --datadir "/projects/ethereum/geth/node" --port 30303 --rpcapi "db,eth,net,web3" --networkid 96579 &
+	
+* `--rpc` Enable the HTTP-RPC server
+* `--rpcaddr` HTTP-RPC server listening interface (default: "localhost"). If you want to access RPC from other containers and/or hosts, it should be set to `--rpcaddr 0.0.0.0`.
+* `--rpcapi` API's offered over the HTTP-RPC interface (default: "eth,net,web3")
+* `--rpccorsdomain` Comma separated list of domains from which to accept cross origin requests (browser enforced)
+* `--datadir`		flag should be idential to that in first step
+* `--networkid`	flag specify your private net id
+
+### 3、Enter console mode
+	geth attach ipc:/projects/ethereum/geth/node/geth.ipc
+
+
+### 4、Create new account
+	personal.newAccount()
+
+### 5、Unlock account
+	personal.unlockAccount("0x1d4443a3eff8a5df88ecd9d91a58037585289be0", "123456", 0)
+
+### 6、Set current account as first validator to process first transaction
+	miner.setLocalValidator()
+
+### 7、Set new validator
+	eth.addValidator("0x1d4443a3eff8a5df88ecd9d91a58037585289be0", 10000)
+
+### 8、Start mining
+	miner.start()
+
+## Programatically interfacing Geth nodes
 
 As a developer, sooner rather than later you'll want to start interacting with Boker Chain 
 network via your own programs and not manually through the console. To aid this, Boker Chain has built in
