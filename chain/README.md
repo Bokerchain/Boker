@@ -1,4 +1,4 @@
-![Image text](https://github.com/Bokerchain/Boker/blob/master/Boker.png)
+![Image text](https://github.com/Bokerchain/Boker/blob/master/image/Boker.png)
 
 ## Bokerchain
 
