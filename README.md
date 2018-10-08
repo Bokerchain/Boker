@@ -23,10 +23,10 @@ Our goal is to acheive video sharing, benefits sharing and user resources sharin
 
 ## 目录（Folders）
 
-### chain
+### [chain](https://github.com/Bokerchain/Boker/tree/master/chain)
 基础链代码，实现DPOS<br/>
 Main chain code, implementing DPOS.
 
-### contracts
+### [contracts](https://github.com/Bokerchain/Boker/tree/master/contracts)
 用Solidity写的基础合约代码<br/>
 Basic contract code in solidity.
