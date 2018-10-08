@@ -6,6 +6,9 @@
 Bokerchain is a public blockchain platform that serves the vertical area of audio & video. It is convenient for different intelligent terminal devices to access to Bokerchain. We can form a Video Application Union by providing SDK for various video APP, meeting the need for copyright protection, data sharing and benefit protection among all apps in Video Application Union. In this situation, we may make data among podcasts, advertisers and users more transparent, also maximizing the benefits.<br/>
 Our goal is to acheive video sharing, benefits sharing and user resources sharing, benefiting podcasts, advertisers and our users while providing entertainment.
 
+## 播客链系统架构（System architecture）
+![Image text](https://github.com/Bokerchain/Boker/blob/master/image/Architecture.jpg)
+
 ## 关于我们（About us）
 
 * Whitepaper: [blkV2.1.pdf](http://yibokeclips.otvcloud.com/uploads/apks/blkV2.1.pdf)
