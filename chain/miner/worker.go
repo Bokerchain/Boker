@@ -584,7 +584,6 @@ func (self *worker) createNewWork() (*Work, error) {
 	}
 
 	log.Info("createNewWork self.engine.Finalize")
-
 	if work.Block, err = self.engine.Finalize(self.chain, header, work.state, work.txs, uncles, work.receipts, work.dposContext, self.eth.Boker()); err != nil {
 		return nil, fmt.Errorf("got error when finalize block for sealing, err: %s", err)
 	}

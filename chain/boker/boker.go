@@ -152,8 +152,8 @@ func (boker *BokerBackend) GetContract(address common.Address) (protocol.Contrac
 }
 
 //SetContract 回写合约信息
-func (boker *BokerBackend) SetContract(address common.Address, contractType protocol.ContractType, abiJson string) error {
-	return boker.contracts.SetContract(address, contractType, abiJson)
+func (boker *BokerBackend) SetContract(address common.Address, contractType protocol.ContractType, isCancel bool, abiJson string) error {
+	return boker.contracts.SetContract(address, contractType, isCancel, abiJson)
 }
 
 func (boker *BokerBackend) GetContractAddr(contractType protocol.ContractType) (common.Address, error) {
@@ -193,7 +193,7 @@ func (boker *BokerBackend) GetContractTrie() (*trie.Trie, *trie.Trie, *trie.Trie
 
 func (boker *BokerBackend) GetMethodName(txType protocol.TxType) (string, string, error) {
 
-	if txType < protocol.SetVote {
+	if txType < protocol.SetValidator {
 		return "", "", protocol.ErrTxType
 	}
 

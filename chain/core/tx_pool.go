@@ -603,11 +603,13 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 		return ErrNegativeValue
 	}
 
-	if types.IsBinary(tx.Type()) { //普通交易类型
+	if types.IsBinary(tx.Type()) {
 
+		//普通交易类型
 		return pool.normalValidateTx(tx, local)
-	} else if (tx.Type() >= protocol.SetVote) && (tx.Type() <= protocol.AssignReward) { //基础合约交易类型
+	} else if (tx.Type() >= protocol.SetValidator) && (tx.Type() <= protocol.AssignReward) {
 
+		//基础合约交易类型
 		return pool.baseValidateTx(tx, local)
 	} else {
 

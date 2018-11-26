@@ -56,12 +56,12 @@ type Transaction struct {
 
 //这里注意算法 交易费 = gasUsed * gasPrice
 type txdata struct {
-	Type         protocol.TxType `json:"type"   gencodec:"required"`           //新增交易的类型 fxh7622 2018-06-20
-	AccountNonce uint64          `json:"nonce"    gencodec:"required"`         //防止交易重播，为每个节点生成的nonce
-	Price        *big.Int        `json:"gasPrice" gencodec:"required"`         //该交易中单位gas的价格
+	Type         protocol.TxType `json:"type"   gencodec:"required"`           //交易类型
+	AccountNonce uint64          `json:"nonce"    gencodec:"required"`         //交易Nonce
+	Price        *big.Int        `json:"gasPrice" gencodec:"required"`         //Gas单价
 	GasLimit     *big.Int        `json:"gas"      gencodec:"required"`         //GasLimit
-	Time         *big.Int        `json:"timestamp"        gencodec:"required"` //交易发起的时间（这个时间用来对于后续分币进行判断使用）
-	Recipient    *common.Address `json:"to"       rlp:"nil"`                   //对方地址 如果是合约则to为nil
+	Time         *big.Int        `json:"timestamp"        gencodec:"required"` //交易发起时间
+	Recipient    *common.Address `json:"to"       rlp:"nil"`                   //接收地址，可以为nil
 	Amount       *big.Int        `json:"value"    gencodec:"required"`         //交易使用的数量
 	Payload      []byte          `json:"input"    gencodec:"required"`         //交易可以携带的数据，在不同类型的交易中有不同的含义(这个字段在eth.sendTransaction()中对应的是data字段，在eth.getTransaction()中对应的是input字段)
 	Extra        []byte          `json:"extra"    gencodec:"required"`         //扩展数据
@@ -93,7 +93,7 @@ func NewTransaction(txType protocol.TxType, nonce uint64, to common.Address, amo
 	return newTransaction(txType, nonce, &to, amount, gasLimit, gasPrice, payload)
 }
 
-//创建基础合约交易
+//创建基础交易
 func NewBaseTransaction(txType protocol.TxType, nonce uint64, to common.Address, amount *big.Int, payload []byte) *Transaction {
 	return newTransaction(txType, nonce, &to, amount, protocol.MaxGasLimit, protocol.MaxGasPrice, payload)
 }
@@ -147,32 +147,32 @@ func (tx *Transaction) ChainId() *big.Int {
 	return deriveChainId(tx.data.V)
 }
 
-func IsSetVote(txType protocol.TxType) bool {
-	if txType == protocol.SetVote {
+func IsSetPersonalContract(txType protocol.TxType) bool {
+	if txType == protocol.SetPersonalContract {
 		return true
 	} else {
 		return false
 	}
 }
 
-func IsCancelVote(txType protocol.TxType) bool {
-	if txType == protocol.CancelVote {
+func IsCancelPersonalContract(txType protocol.TxType) bool {
+	if txType == protocol.CancelPersonalContract {
 		return true
 	} else {
 		return false
 	}
 }
 
-func IsSetAssignToken(txType protocol.TxType) bool {
-	if txType == protocol.SetAssignToken {
+func IsSetSystemContract(txType protocol.TxType) bool {
+	if txType == protocol.SetSystemContract {
 		return true
 	} else {
 		return false
 	}
 }
 
-func IsCancelAssignToken(txType protocol.TxType) bool {
-	if txType == protocol.CanclAssignToken {
+func IsCancelSystemContract(txType protocol.TxType) bool {
+	if txType == protocol.CancelSystemContract {
 		return true
 	} else {
 		return false

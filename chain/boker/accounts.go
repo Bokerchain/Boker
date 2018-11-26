@@ -7,19 +7,17 @@ import (
 	"github.com/boker/chain/log"
 )
 
+//帐号常量
+const DeloyAddress = "0xd7fd311c8f97349670963d87f37a68794dfa80ff"
+const SystemAddress = "0xd7fd311c8f97349670963d87f37a68794dfa80ff"
+
 var (
-	//发布投票合约账户
-	VoteDeployAddress = common.HexToAddress("0xd7fd311c8f97349670963d87f37a68794dfa80ff")
-	//发布分布合约账户
-	TokenDeployAddress = common.HexToAddress("0xd7fd311c8f97349670963d87f37a68794dfa80ff")
-	//设置验证人账户
-	SetValidatorAddress = common.HexToAddress("0x97da0c2f933ff6aad55a0b9eb1933f5b0ae3cd9b")
-	//社区账户
-	CommunityAddress = common.HexToAddress("0xd7fd311c8f97349670963d87f37a68794dfa80ff")
-	//基金账户
-	FoundationAddress = common.HexToAddress("0xd7fd311c8f97349670963d87f37a68794dfa80ff")
-	//团队账户
-	TeamAddress = common.HexToAddress("0xd7fd311c8f97349670963d87f37a68794dfa80ff")
+	DeployPersonalContractAddress = common.HexToAddress(DeloyAddress)  //部署用户基础合约帐号
+	DeploySystemContractAddress   = common.HexToAddress(DeloyAddress)  //部署系统基础合约帐号
+	SetValidatorAddress           = common.HexToAddress(SystemAddress) //设置验证人账户
+	CommunityAddress              = common.HexToAddress(SystemAddress) //社区账户
+	FoundationAddress             = common.HexToAddress(SystemAddress) //基金账户
+	TeamAddress                   = common.HexToAddress(SystemAddress) //团队账户
 )
 
 //播客链的账号管理
@@ -36,12 +34,12 @@ func NewAccount() *BokerAccount {
 	bokerAccount.accounts = make(map[common.Address]AcccountLevel)
 
 	//加载发布投票合约账户
-	log.Info("loadVoteDeployAccount")
-	bokerAccount.loadVoteDeployAccount()
+	log.Info("deployPersonalContractAccount")
+	bokerAccount.deployPersonalContractAccount()
 
 	//加载发布分币合约账户
-	log.Info("loadTokenDeployAccount")
-	bokerAccount.loadTokenDeployAccount()
+	log.Info("deploySystemContractAccount")
+	bokerAccount.deploySystemContractAccount()
 
 	//加载设置验证人账户
 	log.Info("loadSetValidator")
@@ -54,24 +52,24 @@ func NewAccount() *BokerAccount {
 	return bokerAccount
 }
 
-func (a *BokerAccount) loadVoteDeployAccount() {
+func (a *BokerAccount) deployPersonalContractAccount() {
 
 	accountLevel := AcccountLevel{
 		level: make([]protocol.TxType, 0, 0),
 	}
-	accountLevel.level = append(accountLevel.level, protocol.SetVote)
-	accountLevel.level = append(accountLevel.level, protocol.CancelVote)
-	a.accounts[VoteDeployAddress] = accountLevel
+	accountLevel.level = append(accountLevel.level, protocol.SetPersonalContract)
+	accountLevel.level = append(accountLevel.level, protocol.CancelPersonalContract)
+	a.accounts[DeployPersonalContractAddress] = accountLevel
 }
 
-func (a *BokerAccount) loadTokenDeployAccount() {
+func (a *BokerAccount) deploySystemContractAccount() {
 
 	accountLevel := AcccountLevel{
 		level: make([]protocol.TxType, 0, 0),
 	}
-	accountLevel.level = append(accountLevel.level, protocol.SetAssignToken)
-	accountLevel.level = append(accountLevel.level, protocol.CanclAssignToken)
-	a.accounts[TokenDeployAddress] = accountLevel
+	accountLevel.level = append(accountLevel.level, protocol.SetSystemContract)
+	accountLevel.level = append(accountLevel.level, protocol.CancelSystemContract)
+	a.accounts[DeploySystemContractAddress] = accountLevel
 }
 
 func (a *BokerAccount) loadSetValidator() {

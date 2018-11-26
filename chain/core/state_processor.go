@@ -51,9 +51,7 @@ func NewStateProcessor(config *params.ChainConfig, bc *BlockChain, engine consen
 	}
 }
 
-func (p *StateProcessor) Process(block *types.Block,
-	statedb *state.StateDB,
-	cfg vm.Config) (types.Receipts, []*types.Log, *big.Int, error) {
+func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB, cfg vm.Config) (types.Receipts, []*types.Log, *big.Int, error) {
 
 	var (
 		receipts     types.Receipts
@@ -374,8 +372,8 @@ func ApplyTransaction(config *params.ChainConfig,
 		//根据交易类型来区分
 		switch msg.TxType() {
 
-		case protocol.SetVote, protocol.CancelVote, protocol.SetAssignToken, protocol.CanclAssignToken: //设置合约(已经测试)
-
+		case protocol.SetPersonalContract, protocol.CancelPersonalContract, protocol.SetSystemContract, protocol.CancelSystemContract:
+			//设置合约(已经测试)
 			return contractSetTransaction(config, dposContext, bc, author, gp, statedb, header, tx, usedGas, cfg, msg, boker)
 		case protocol.VoteUser, protocol.VoteEpoch, protocol.AssignToken, protocol.AssignReward, protocol.RegisterCandidate: //基础交易(已经测试)
 

@@ -535,7 +535,7 @@ func (ethash *Ethash) Finalize(chain consensus.ChainReader,
 func AccumulateRewards(config *params.ChainConfig, state *state.StateDB, header *types.Header, uncles []*types.Header, boker bokerapi.Api) {
 
 	//得到合约的账号地址
-	addr, err := boker.GetContractAddr(protocol.ContractAssignToken)
+	addr, err := boker.GetContractAddr(protocol.SystemContract)
 	if err != nil {
 		return
 	}

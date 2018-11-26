@@ -691,15 +691,14 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 	return nil
 }
 
-// BroadcastBlock will either propagate a block to a subset of it's peers, or
-// will only announce it's availability (depending what's requested).
-//BroadcastBlock会将一个块传播到它的对等体的节点，或者只会宣布它的可用性（取决于所要求的）。
+//BroadcastBlock会将一个块传播到它的其它节点，或者通知这个区块的可用性。
 func (pm *ProtocolManager) BroadcastBlock(block *types.Block, propagate bool) {
 	hash := block.Hash()
 	peers := pm.peers.PeersWithoutBlock(hash)
 
-	// If propagation is requested, send to a subset of the peer
+	//如何是要求将区块信息发送给其它节点
 	if propagate {
+
 		// Calculate the TD of the block (it's not imported yet, so block.Td is not valid)
 		var td *big.Int
 		if parent := pm.blockchain.GetBlock(block.ParentHash(), block.NumberU64()-1); parent != nil {
@@ -716,6 +715,7 @@ func (pm *ProtocolManager) BroadcastBlock(block *types.Block, propagate bool) {
 		log.Trace("Propagated block", "hash", hash, "recipients", len(transfer), "duration", common.PrettyDuration(time.Since(block.ReceivedAt)))
 		return
 	}
+
 	// Otherwise if the block is indeed in out own chain, announce it
 	if pm.blockchain.HasBlock(hash, block.NumberU64()) {
 		for _, peer := range peers {

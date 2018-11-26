@@ -200,33 +200,30 @@ func (c *BoundContract) Transact(opts *TransactOpts, method string, params ...in
 		return nil, err
 	}
 
+	//得到合约类型
 	contractType, err := e.Boker().GetContract(c.address)
 	if err != nil {
 		return nil, err
 	}
 
-	if contractType == protocol.ContractVote { //当前调用的是投票基础合约
+	//判断合约类型是否是基础合约
+	if contractType == protocol.PersonalContract {
 
+		//用户触发的基础合约（用户触发，但是不收取Gas费用）
 		if method == protocol.RegisterCandidateMethod {
-
-			//候选人注册方法名
 			return c.transact(opts, &c.address, input, extra, protocol.RegisterCandidate)
 		} else if method == protocol.VoteCandidateMethod {
-
-			//投票方法名
 			return c.transact(opts, &c.address, input, extra, protocol.VoteUser)
-		} else if method == protocol.RotateVoteMethod {
-
-			//转换投票方法名
-			return c.transact(opts, &c.address, input, extra, protocol.VoteEpoch)
+		} else if method == protocol.CancelVoteMethod {
+			return c.transact(opts, &c.address, input, extra, protocol.VoteCancel)
+		} else if method == protocol.FireEventMethod {
+			return c.transact(opts, &c.address, input, extra, protocol.UserEvent)
 		}
-		return nil, errors.New("vote contract unknown method")
+		return nil, errors.New("unknown personal contract method name")
 
-	} else if contractType == protocol.ContractAssignToken {
+	} else if contractType == protocol.SystemContract {
 
-		//log.Info("Transact", "contractType", contractType, "method", method)
-
-		//判断是否是通证分配协议
+		//由基础链触发的基础合约，不收取Gas费用
 		if method == protocol.AssignTokenMethod {
 
 			//得到当前的分币节点
@@ -234,18 +231,15 @@ func (c *BoundContract) Transact(opts *TransactOpts, method string, params ...in
 			if err != nil {
 				return nil, errors.New("get assign token error")
 			}
-
-			//判断是否一致
 			if tokennoder != opts.From {
 				return nil, errors.New("current assign token not is from account")
 			}
 			return c.transact(opts, &c.address, input, extra, protocol.AssignToken)
-		}
-		return nil, errors.New("assign token contract unknown method")
 
+		}
+		return nil, errors.New("unknown system contract method name")
 	}
 	return c.transact(opts, &c.address, input, extra, protocol.Binary)
-
 }
 
 func (c *BoundContract) Transfer(opts *TransactOpts) (*types.Transaction, error) {
@@ -410,7 +404,7 @@ func (c *BoundContract) transact(opts *TransactOpts, contract *common.Address, p
 
 		//普通交易
 		return c.normalTransact(opts, contract, payload, extra, transactTypes)
-	} else if (transactTypes >= protocol.SetVote) && (transactTypes <= protocol.AssignReward) {
+	} else if (transactTypes >= protocol.SetValidator) && (transactTypes <= protocol.AssignReward) {
 
 		//基础合约交易
 		return c.baseTransact(opts, contract, payload, extra, transactTypes)

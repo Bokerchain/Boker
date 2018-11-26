@@ -608,28 +608,22 @@ func (s *PublicBlockChainAPI) GetNextTokenNoder(ctx context.Context) (common.Add
 //播客链新增函数处理，设置当前基础合约
 func (s *PublicBlockChainAPI) SetBaseContracts(ctx context.Context, address common.Address, contractType protocol.ContractType, abiJson string) error {
 
-	//log.Info("****SetBaseContracts****", "address", address.String(), "contractType", contractType, "abiJson", abiJson)
-
 	//检测节点信息
-	//log.Info("SetBaseContracts checkContract")
 	if err := s.checkContract(); err != nil {
 		log.Error("SetBaseContracts checkContract", "err", err)
 		return err
 	}
 
 	//检测交易类型
-	//log.Info("SetBaseContracts isExitsTxType")
-	if err := s.isExitsTxType(contractType, protocol.ContractVote, protocol.ContractAssignToken); err != nil {
+	if err := s.isExitsTxType(contractType, protocol.SystemContract, protocol.PersonalContract); err != nil {
 		log.Error("SetBaseContracts isExitsTxType", "err", err)
 		return err
 	}
 
 	//类型转换
-	//log.Info("SetBaseContracts txTypeRotate")
-	txType := s.txTypeRotate(contractType)
+	txType := s.txTypeRotate(contractType, false)
 
 	//产生一个交易
-	//log.Info("SetBaseContracts SubmitBokerTransaction", "txType", txType)
 	return s.b.Boker().SubmitBokerTransaction(ctx, txType, address, abiJson)
 }
 
@@ -639,40 +633,43 @@ func (s *PublicBlockChainAPI) CancelBaseContracts(ctx context.Context, address c
 	log.Info("****CancelBaseContracts****", "address", address.String(), "contractType", contractType)
 
 	//检测节点信息
-	log.Info("CancelBaseContracts checkContract")
 	if err := s.checkContract(); err != nil {
 		log.Error("CancelBaseContracts checkContract", "err", err)
 		return err
 	}
 
 	//检测交易类型
-	log.Info("CancelBaseContracts isExitsTxType")
-	if err := s.isExitsTxType(contractType, protocol.UnContractVote, protocol.UnContractAssignToken); err != nil {
+	if err := s.isExitsTxType(contractType, protocol.SystemContract, protocol.PersonalContract); err != nil {
 		log.Error("CancelBaseContracts isExitsTxType", "err", err)
 		return err
 	}
 
 	//类型转换
-	log.Info("CancelBaseContracts txTypeRotate")
-	txType := s.txTypeRotate(contractType)
+	txType := s.txTypeRotate(contractType, true)
 
 	//产生一个交易
-	log.Info("CancelBaseContracts SubmitBokerTransaction", "txType", txType)
 	return s.b.Boker().SubmitBokerTransaction(ctx, txType, address, "")
 }
 
-func (s *PublicBlockChainAPI) txTypeRotate(contractType protocol.ContractType) protocol.TxType {
+func (s *PublicBlockChainAPI) txTypeRotate(contractType protocol.ContractType, isCancel bool) protocol.TxType {
 
-	if contractType == protocol.ContractVote {
-		return protocol.SetVote
-	} else if contractType == protocol.ContractAssignToken {
-		return protocol.SetAssignToken
-	} else if contractType == protocol.UnContractVote {
-		return protocol.CancelVote
-	} else if contractType == protocol.UnContractAssignToken {
-		return protocol.CanclAssignToken
+	if isCancel {
+
+		if contractType == protocol.SystemContract {
+			return protocol.CancelSystemContract
+		} else if contractType == protocol.PersonalContract {
+			return protocol.CancelPersonalContract
+		}
+		return protocol.Binary
+
+	} else {
+		if contractType == protocol.SystemContract {
+			return protocol.SetSystemContract
+		} else if contractType == protocol.PersonalContract {
+			return protocol.SetPersonalContract
+		}
+		return protocol.Binary
 	}
-	return protocol.Binary
 }
 
 func (s *PublicBlockChainAPI) isExitsTxType(contractType protocol.ContractType, needTypes ...protocol.ContractType) error {
@@ -727,7 +724,7 @@ func (s *PublicBlockChainAPI) checkContract() error {
 	return nil
 }
 
-func (s *PublicBlockChainAPI) baseContractsDeal(ctx context.Context, address common.Address, abiJson string, contractType protocol.ContractType, needTypes ...protocol.ContractType) error {
+/*func (s *PublicBlockChainAPI) baseContractsDeal(ctx context.Context, address common.Address, abiJson string, contractType protocol.ContractType, needTypes ...protocol.ContractType) error {
 
 	//判断是否属于要求的类型
 	var judge bool = false
@@ -762,10 +759,10 @@ func (s *PublicBlockChainAPI) baseContractsDeal(ctx context.Context, address com
 			return err
 		}
 
-		if !bokerapi.ExistsTxType(protocol.SetVote, txLevel) &&
-			!bokerapi.ExistsTxType(protocol.CancelVote, txLevel) &&
-			!bokerapi.ExistsTxType(protocol.SetAssignToken, txLevel) &&
-			!bokerapi.ExistsTxType(protocol.CanclAssignToken, txLevel) {
+		if !bokerapi.ExistsTxType(protocol.SetPersonalContract, txLevel) &&
+			!bokerapi.ExistsTxType(protocol.SetSystemContract, txLevel) &&
+			!bokerapi.ExistsTxType(protocol.CancelPersonalContract, txLevel) &&
+			!bokerapi.ExistsTxType(protocol.CancelSystemContract, txLevel) {
 
 			return errors.New("CoinBase Not`s Set Base Contracts Account")
 		}
@@ -784,7 +781,7 @@ func (s *PublicBlockChainAPI) baseContractsDeal(ctx context.Context, address com
 	}
 	return errors.New("failed baseContractsDeal")
 }
-
+*/
 //播客链新增函数处理，添加一个验证者信息
 func (s *PublicBlockChainAPI) AddValidator(ctx context.Context, address common.Address, votes *big.Int) error {
 
@@ -1437,12 +1434,10 @@ func (args *SendTxArgs) SetDefaults(ctx context.Context, b Backend) error {
 //这里需要进行判断
 func (args *SendTxArgs) ToTransaction() (*types.Transaction, error) {
 
-	//log.Info("****SendTxArgs ToTransaction****")
-
 	//判断交易地址是否为空
 	if args.To == nil {
 
-		if (args.Type >= protocol.SetVote) && (args.Type <= protocol.AssignReward) {
+		if (args.Type >= protocol.SetValidator) && (args.Type <= protocol.AssignReward) {
 
 			//return types.NewBaseContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), args.Data), nil
 			return nil, errors.New("base contract transaction type not found contract address")

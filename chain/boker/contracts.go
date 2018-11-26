@@ -45,10 +45,7 @@ type BokerContracts struct {
 	services      ContractService                          //合约服务类
 }
 
-func NewContract(db ethdb.Database,
-	ethereum *eth.Ethereum,
-	transactions *BokerTransaction,
-	bokerProto *protocol.BokerBackendProto) (*BokerContracts, error) {
+func NewContract(db ethdb.Database, ethereum *eth.Ethereum, transactions *BokerTransaction, bokerProto *protocol.BokerBackendProto) (*BokerContracts, error) {
 
 	log.Info("****NewContract****")
 
@@ -91,7 +88,7 @@ func NewContract(db ethdb.Database,
 	//创建投票合约服务
 	log.Info("Check Bokerchain Vote Contract Exists")
 	var address common.Address
-	address, err = base.getContractAddress(protocol.ContractVote)
+	address, err = base.getContractAddress(protocol.PersonalContract)
 	if err != nil {
 
 		log.Debug("Bokerchain Vote Contract is`t Exists")
@@ -109,7 +106,7 @@ func NewContract(db ethdb.Database,
 
 	//创建分配通证合约服务
 	log.Info("Check Bokerchain Assign Token Contract Exists")
-	address, err = base.getContractAddress(protocol.ContractAssignToken)
+	address, err = base.getContractAddress(protocol.SystemContract)
 	if err != nil {
 		return base, nil
 	}
@@ -142,7 +139,7 @@ func NewContractAbiTrie(root common.Hash, db ethdb.Database) (*trie.Trie, error)
 }
 
 //设置合约到Hash树中
-func (c *BokerContracts) SetContract(address common.Address, contractType protocol.ContractType, abiJson string) error {
+func (c *BokerContracts) SetContract(address common.Address, contractType protocol.ContractType, isCancel bool, abiJson string) error {
 
 	//设置基础合约
 	//log.Info("****SetContract****", "address", address.String(), "contractType", contractType)
@@ -175,7 +172,7 @@ func (c *BokerContracts) SetContract(address common.Address, contractType protoc
 	}
 
 	//判断是否需要启动合约
-	if contractType == protocol.ContractVote {
+	if contractType == protocol.PersonalContract {
 
 		//log.Info("SetContract Start NewVerifyVotesService")
 		c.services.votesContract, err = votes.NewVerifyVotesService(c.ethereum, address)
@@ -186,7 +183,7 @@ func (c *BokerContracts) SetContract(address common.Address, contractType protoc
 
 		//log.Info("SetContract Start votesContract")
 		c.services.votesContract.Start()
-	} else if contractType == protocol.ContractAssignToken {
+	} else if contractType == protocol.SystemContract {
 
 		//log.Info("SetContract Start NewAssignTokenService")
 		c.services.tokenContract, err = assigntoken.NewAssignTokenService(c.ethereum, address)
@@ -223,12 +220,12 @@ func (c *BokerContracts) CancelContract(address common.Address) error {
 	}
 
 	//终止合约运行
-	if contractType == protocol.ContractVote {
+	if contractType == protocol.PersonalContract {
 
 		if (c.services.votesContract != nil) && c.services.votesContract.IsStart() {
 
 		}
-	} else if contractType == protocol.ContractAssignToken {
+	} else if contractType == protocol.SystemContract {
 
 		if (c.services.tokenContract != nil) && c.services.tokenContract.IsStart() {
 
@@ -290,7 +287,7 @@ func (c *BokerContracts) readContractType(address common.Address) (protocol.Cont
 	key := address.Bytes()
 	v, err := c.singleTrie.TryGet(key)
 	if err != nil {
-		return protocol.ContractBinary, err
+		return protocol.BinaryContract, err
 	}
 
 	//转换成交易类型
@@ -321,7 +318,7 @@ func (c *BokerContracts) getContractType(address common.Address) (protocol.Contr
 	if exist {
 		return contractType, nil
 	} else {
-		return protocol.ContractBinary, protocol.ErrNotFoundContract
+		return protocol.BinaryContract, nil
 	}
 }
 
@@ -360,7 +357,7 @@ func (c *BokerContracts) GetContract(address common.Address) (protocol.ContractT
 			return value, nil
 		}
 	}
-	return protocol.ContractBinary, protocol.ErrNotFoundContract
+	return protocol.BinaryContract, nil
 }
 
 //判断此合约是否已经存在

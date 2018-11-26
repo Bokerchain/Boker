@@ -265,7 +265,7 @@ func (st *StateTransition) getExtra(boker bokerapi.Api) string {
 	}
 
 	//判断合约是否是普通合约
-	if contractType <= protocol.ContractBinary {
+	if contractType <= protocol.BinaryContract {
 		return ""
 	}
 
@@ -408,14 +408,14 @@ func (st *StateTransition) ContractTransitionDb(txType protocol.TxType, boker bo
 		return nil, nil, nil, false, []byte(""), protocol.ErrLevel
 	}*/
 
-	if txType == protocol.SetVote {
-		boker.SetContract(*st.msg.To(), protocol.ContractVote, string(st.extra))
-	} else if txType == protocol.SetAssignToken {
-		boker.SetContract(*st.msg.To(), protocol.ContractAssignToken, string(st.extra))
-	} else if txType == protocol.CancelVote {
-		boker.SetContract(*st.msg.To(), protocol.UnContractVote, "")
-	} else if txType == protocol.CanclAssignToken {
-		boker.SetContract(*st.msg.To(), protocol.UnContractAssignToken, "")
+	if txType == protocol.SetPersonalContract {
+		boker.SetContract(*st.msg.To(), protocol.PersonalContract, false, string(st.extra))
+	} else if txType == protocol.SetSystemContract {
+		boker.SetContract(*st.msg.To(), protocol.SystemContract, false, string(st.extra))
+	} else if txType == protocol.CancelPersonalContract {
+		boker.SetContract(*st.msg.To(), protocol.PersonalContract, true, "")
+	} else if txType == protocol.CancelSystemContract {
+		boker.SetContract(*st.msg.To(), protocol.SystemContract, true, "")
 	}
 
 	extra = st.extra

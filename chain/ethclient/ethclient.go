@@ -485,7 +485,7 @@ func (ec *Client) GetNextTokenNoderAt(ctx context.Context) ([]byte, error) {
 }
 
 //设置基础合约
-func (ec *Client) SetBaseContracts(ctx context.Context, address common.Address, abiJson string, contractType uint64) error {
+func (ec *Client) SetBaseContracts(ctx context.Context, address common.Address, contractType uint64, abiJson string) error {
 
 	var result hexutil.Bytes
 	err := ec.c.CallContext(ctx, &result, "eth_setBaseContracts", address, contractType, abiJson)

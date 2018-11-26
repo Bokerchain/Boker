@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/boker/chain/common/math"
+	_ "github.com/boker/chain/common/math"
 	"github.com/boker/chain/consensus"
 	"github.com/boker/chain/core/state"
 	"github.com/boker/chain/core/types"
@@ -16,6 +16,12 @@ type BlockValidator struct {
 	bc     *BlockChain         //规范块链
 	engine consensus.Engine    //验证采用的共识机制
 }
+
+var (
+	curGaslimit = big.NewFloat(0)
+	rtts        = big.NewFloat(0)
+	rttd        = big.NewFloat(0)
+)
 
 func NewBlockValidator(config *params.ChainConfig,
 	blockchain *BlockChain,
@@ -99,18 +105,8 @@ func (v *BlockValidator) ValidateDposState(block *types.Block) error {
 	return nil
 }
 
-//计算Gaslimit(使用父节点) 此处可以采用TCP的慢门限阀值方式来处理
-func CalcGasLimit(parent *types.Block) *big.Int {
+/*func CalcGasLimit11(parent *types.Block) *big.Int {
 
-	/*
-		parent.GasUsed() 父交易消耗的总gas数量
-			以下代码实现功能为：
-			contrib = (parentGasUsed * 3 / 2) / 1024
-			contrib :=((parent.GasUsed() * 3) / 2) / params.GasLimitBoundDivisor
-
-			原码为：contrib := (parent.GasUsed() + parent.GasUsed()/2) / params.GasLimitBoundDivisor
-
-	*/
 	contrib := new(big.Int).Mul(parent.GasUsed(), big.NewInt(3))
 	contrib = contrib.Div(contrib, big.NewInt(2))
 	contrib = contrib.Div(contrib, params.GasLimitBoundDivisor)
@@ -119,37 +115,87 @@ func CalcGasLimit(parent *types.Block) *big.Int {
 	decay := new(big.Int).Div(parent.GasLimit(), params.GasLimitBoundDivisor)
 	decay.Sub(decay, big.NewInt(1))
 
-	/*
-		当父节点使用的Gas大于父节点的GasLimit的2/3的时候，则加大GasLimit，否则减小GasLimit
-	*/
-
-	//limit := parent.GasLimit() - decay + contrib
 	gl := new(big.Int).Sub(parent.GasLimit(), decay)
 	gl = gl.Add(gl, contrib)
 
-	/*
-		if limit < params.MinGasLimit {
-			limit = params.MinGasLimit
-		}
-	*/
 	gl.Set(math.BigMax(gl, params.MinGasLimit))
-
-	/*
-		however, if we're now below the target (TargetGasLimit) we increase the
-		 limit as much as we can (parentGasLimit / 1024 -1)
-		但是，如果我们现在低于目标（TargetGasLimit），我们会增加尽可能多地限制（parentGasLimit / 1024 -1）
-
-		if limit < params.TargetGasLimit {
-			limit = parent.GasLimit() + decay
-			if limit > params.TargetGasLimit {
-				limit = params.TargetGasLimit
-			}
-		}
-	*/
 
 	if gl.Cmp(params.TargetGasLimit) < 0 {
 		gl.Add(parent.GasLimit(), decay)
 		gl.Set(math.BigMin(gl, params.TargetGasLimit))
 	}
 	return gl
+}*/
+
+//
+func bound(lower *big.Float, middle *big.Float, upper *big.Float) *big.Float {
+
+	if lower.Cmp(middle) == -1 {
+
+		//lower < middle
+		if middle.Cmp(upper) == -1 {
+
+			//middle < upper
+			return middle
+		} else {
+
+			//middle > upper
+			return upper
+		}
+	} else if lower.Cmp(middle) == 0 {
+
+		//lower == middle
+		if middle.Cmp(upper) == -1 {
+
+			//middle < upper
+			return middle
+		} else {
+
+			//middle > upper
+			return upper
+		}
+
+	} else {
+
+		//lower > middle
+		if lower.Cmp(upper) == -1 {
+
+			//lower < upper
+			return lower
+		} else {
+
+			//lower > upper
+			return upper
+		}
+	}
+}
+
+//计算门限阀值均值
+func calcSsthresh(gas *big.Int) *big.Int {
+
+	//求均值
+	gasFloat := new(big.Float).SetInt(gas)
+	if curGaslimit.Cmp(big.NewFloat(0)) == 0 {
+
+		rtts = gasFloat
+		rttd = rttd.Quo(rtts, big.NewFloat(2.0))
+	} else {
+
+		rtts = rtts.Add(rtts.Mul(rtts, big.NewFloat(0.875)), rtts.Mul(gasFloat, big.NewFloat(0.125)))
+		absFloat := new(big.Float).Mul(big.NewFloat(0.25), new(big.Float).Abs(new(big.Float).Sub(gasFloat, rtts)))
+		rttd = rttd.Add(rttd.Mul(rttd, big.NewFloat(0.75)), absFloat)
+	}
+	curGaslimit = curGaslimit.Add(rtts, new(big.Float).Mul(rttd, big.NewFloat(4.0)))
+	curGaslimit = bound(params.MinGasLimitFloat, curGaslimit, params.GasLimitSsthresh)
+
+	//转换成big.Int类型
+	ssthreshInt := new(big.Int)
+	curGaslimit.Int(ssthreshInt)
+	return ssthreshInt
+}
+
+//计算Gaslimit
+func CalcGasLimit(parent *types.Block) *big.Int {
+
+	return calcSsthresh(parent.GasUsed())
 }

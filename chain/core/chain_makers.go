@@ -65,7 +65,7 @@ func (b *BlockGen) AddTx(tx *types.Transaction, boker bokerapi.Api) {
 		b.SetCoinbase(common.Address{})
 	}
 
-	//
+	//进行交易准备
 	b.statedb.Prepare(tx.Hash(), common.Hash{}, len(b.txs))
 
 	//应用交易，并返回回执

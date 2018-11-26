@@ -37,21 +37,25 @@ type TxType uint8
 const (
 	Binary TxType = iota //原来的转账或者合约调用交易
 
-	//设置和取消设置合约交易，这种交易是由播客链自动产生，因此不需要扩展字段内容
-	SetVote          //发布投票合约
-	CancelVote       //取消部署合约
-	SetAssignToken   //发布通证分配合约
-	CanclAssignToken //取消部署通证分配合约
+	//设置验证者
+	SetValidator
 
-	//基础合约目前的交易类型，每一种交易类型都对应着一个方法名，因此可以根据交易类型获取方法名称
-	SetValidator      //设置验证者
+	/****设置和取消用户基础合约交易类型****/
+	SetPersonalContract
+	CancelPersonalContract
+
+	/****设置和取消系统基础合约交易类型****/
+	SetSystemContract
+	CancelSystemContract
+
+	/****用户基础合约交易类型****/
 	RegisterCandidate //注册成为候选人(用户注册为候选人)
+	VoteUser          //用户投票
+	VoteCancel        //用户取消投票
+	VoteEpoch         //产生当前的出块节点(在每次周期产生的时候触发)
+	UserEvent         //用户数据上传
 
-	VoteUser   //用户投票
-	VoteEpoch  //产生当前的出块节点(在每次周期产生的时候触发)
-	VoteCancel //用户取消投票
-
-	UserEvent    //用户数据上传
+	/****系统基础合约交易类型****/
 	AssignToken  //分配通证(每次分配通证的时候触发)
 	AssignReward //出块节点的通证奖励(每次分配通证的时候触发)
 )
@@ -60,12 +64,16 @@ const (
 type ContractType uint8
 
 const (
-	ContractBinary        ContractType = iota //普通合约类型
-	ContractVote                              //投票合约
+	BinaryContract   ContractType = iota //普通合约类型
+	SystemContract                       //系统基础合约
+	PersonalContract                     //个人基础合约
+)
+
+/*	ContractVote                              //投票合约
 	ContractAssignToken                       //通证分配合约
 	UnContractVote                            //取消投票合约
 	UnContractAssignToken                     //取消通证分配合约
-)
+)*/
 
 var (
 	BobbyUnit          *big.Int = big.NewInt(1e+17) //Bobby的单位
@@ -80,11 +88,15 @@ var (
 )
 
 var (
-	RegisterCandidateMethod = "registerCandidate" //候选人注册方法名
-	VoteCandidateMethod     = "voteCandidate"     //用户投票方法名
-	RotateVoteMethod        = "rotateVote"        //产生当前的出块节点(在每次周期产生的时候触发)
-	AssignTokenMethod       = "assignToken"       //分配通证
+	//用户触发的合约方法名（用户触发，但是不收取Gas费用）
+	RegisterCandidateMethod = "registerCandidate" //申请候选节点
+	VoteCandidateMethod     = "voteCandidate"     //投票候选节点
+	CancelVoteMethod        = "cancelAllVotes"    //取消所有投票
+	FireEventMethod         = "fireUserEvent"     //用户行为数据上报
 
+	//基础链触发的基础合约
+	AssignTokenMethod   = "assignToken"   //分配通证
+	RotateVoteMethod    = "rotateVote"    //产生当前的出块节点(在每次周期产生的时候触发)
 	TickCandidateMethod = "tickVote"      //投票时钟
 	GetCandidateMethod  = "getCandidates" //获取候选人结果
 )

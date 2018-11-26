@@ -413,7 +413,8 @@ func (srv *Server) Start() (err error) {
 	for _, p := range srv.Protocols {
 		srv.ourHandshake.Caps = append(srv.ourHandshake.Caps, p.cap())
 	}
-	// listen/dial
+
+	//侦听TCP端口（用于业务数据传输，基于RLPx协议）
 	if srv.ListenAddr != "" {
 		if err := srv.startListening(); err != nil {
 			return err
@@ -424,6 +425,8 @@ func (srv *Server) Start() (err error) {
 	}
 
 	srv.loopWG.Add(1)
+
+	//启动新线程发起TCP连接请求
 	go srv.run(dialer)
 	srv.running = true
 	return nil

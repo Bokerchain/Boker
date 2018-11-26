@@ -280,11 +280,8 @@ func (d *Dpos) updateConfirmedBlockHeader(chain consensus.ChainReader) error {
 
 		//当前区块头序号-已经确认的区块头序号 < 共识确认验证者数量 - 当前验证者数量 (此处用于处理重复确认)
 		if curHeader.Number.Int64()-d.confirmedBlockHeader.Number.Int64() < int64(protocol.ConsensusSize-len(validatorMap)) {
-			log.Debug("Dpos fast return",
-				"current", curHeader.Number.String(),
-				"confirmed", d.confirmedBlockHeader.Number.String(),
-				"witnessCount", len(validatorMap))
 
+			log.Info("Dpos fast return", "current", curHeader.Number.String(), "confirmed", d.confirmedBlockHeader.Number.String(), "witnessCount", len(validatorMap))
 			return nil
 		}
 
@@ -296,9 +293,8 @@ func (d *Dpos) updateConfirmedBlockHeader(chain consensus.ChainReader) error {
 			if err := d.storeConfirmedBlockHeader(d.db); err != nil {
 				return err
 			}
-			log.Debug("Dpos set confirmed block header success",
-				"currentHeader", curHeader.Number.String())
 
+			log.Info("Dpos set confirmed block header success", "currentHeader", curHeader.Number.String())
 			return nil
 		}
 		curHeader = chain.GetHeaderByHash(curHeader.ParentHash)
@@ -396,15 +392,6 @@ func (d *Dpos) Finalize(chain consensus.ChainReader, header *types.Header, state
 			protocol.TimeOfFirstBlock = firstBlockHeader.Time.Int64()
 		}
 	}
-
-	//判断当前出块节点情况
-
-	//得到创世区块
-	/*genesis := chain.GetHeaderByNumber(0)
-	err := epochContext.tryElect(genesis, parent)
-	if err != nil {
-		return nil, fmt.Errorf("got error when elect next epoch, err: %s", err)
-	}*/
 
 	//更新MintCnt的默克尔树，并返回一个新区块
 	updateMintCnt(parent.Time.Int64(), header.Time.Int64(), header.Validator, dposContext)
