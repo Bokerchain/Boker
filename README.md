@@ -33,3 +33,7 @@ Main chain code, implementing DPOS.
 ### [contracts](https://github.com/Bokerchain/Boker/tree/master/contracts)
 用Solidity写的基础合约代码<br/>
 Basic contract code in solidity.
+
+### [go-ipfs](https://github.com/Bokerchain/Boker/tree/master/go-ipfs)
+播客链使用的ipfs实现<br/>
+IPFS implementation used in Bokerchain
