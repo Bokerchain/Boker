@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/params"
 )
 
 // This table defines supported forks and their chain config.

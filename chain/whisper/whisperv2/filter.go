@@ -21,7 +21,7 @@ package whisperv2
 import (
 	"crypto/ecdsa"
 
-	"github.com/boker/chain/event/filter"
+	"github.com/Bokerchain/Boker/chain/event/filter"
 )
 
 // Filter is used to subscribe to specific types of whisper messages.

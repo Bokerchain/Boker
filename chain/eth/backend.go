@@ -8,30 +8,30 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/boker/chain/accounts"
-	"github.com/boker/chain/boker/api"
-	"github.com/boker/chain/boker/protocol"
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/common/hexutil"
-	"github.com/boker/chain/consensus"
-	"github.com/boker/chain/consensus/dpos"
-	"github.com/boker/chain/core"
-	"github.com/boker/chain/core/bloombits"
-	"github.com/boker/chain/core/types"
-	"github.com/boker/chain/core/vm"
-	"github.com/boker/chain/eth/downloader"
-	"github.com/boker/chain/eth/filters"
-	"github.com/boker/chain/eth/gasprice"
-	"github.com/boker/chain/ethdb"
-	"github.com/boker/chain/event"
-	"github.com/boker/chain/internal/ethapi"
-	"github.com/boker/chain/log"
-	"github.com/boker/chain/miner"
-	"github.com/boker/chain/node"
-	"github.com/boker/chain/p2p"
-	"github.com/boker/chain/params"
-	"github.com/boker/chain/rlp"
-	"github.com/boker/chain/rpc"
+	"github.com/Bokerchain/Boker/chain/accounts"
+	"github.com/Bokerchain/Boker/chain/boker/api"
+	"github.com/Bokerchain/Boker/chain/boker/protocol"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/common/hexutil"
+	"github.com/Bokerchain/Boker/chain/consensus"
+	"github.com/Bokerchain/Boker/chain/consensus/dpos"
+	"github.com/Bokerchain/Boker/chain/core"
+	"github.com/Bokerchain/Boker/chain/core/bloombits"
+	"github.com/Bokerchain/Boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/core/vm"
+	"github.com/Bokerchain/Boker/chain/eth/downloader"
+	"github.com/Bokerchain/Boker/chain/eth/filters"
+	"github.com/Bokerchain/Boker/chain/eth/gasprice"
+	"github.com/Bokerchain/Boker/chain/ethdb"
+	"github.com/Bokerchain/Boker/chain/event"
+	"github.com/Bokerchain/Boker/chain/internal/ethapi"
+	"github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/miner"
+	"github.com/Bokerchain/Boker/chain/node"
+	"github.com/Bokerchain/Boker/chain/p2p"
+	"github.com/Bokerchain/Boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/rlp"
+	"github.com/Bokerchain/Boker/chain/rpc"
 )
 
 type LesServer interface {
@@ -141,6 +141,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	eth.txPool = core.NewTxPool(config.TxPool, eth.chainConfig, eth.blockchain)
 
 	//新建协议管理器
+	log.Info("NewProtocolManager", "NetworkId", config.NetworkId, "SyncMode", config.SyncMode)
 	if eth.protocolManager, err = NewProtocolManager(eth.chainConfig,
 		config.SyncMode,
 		config.NetworkId,
@@ -423,6 +424,7 @@ func (s *Ethereum) Start(srvr *p2p.Server) error {
 	s.startBloomHandlers()
 
 	//启动RPC服务
+	log.Info("Start NewPublicNetAPI")
 	s.netRPCService = ethapi.NewPublicNetAPI(srvr, s.NetVersion())
 
 	// Figure out a max peers count based on the server limits
@@ -435,6 +437,7 @@ func (s *Ethereum) Start(srvr *p2p.Server) error {
 	}
 
 	//启动P2P网络
+	log.Info("Start P2P")
 	s.protocolManager.Start(maxPeers)
 	if s.lesServer != nil {
 		s.lesServer.Start(srvr)

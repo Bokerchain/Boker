@@ -21,9 +21,9 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/crypto"
-	"github.com/boker/chain/ethdb"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/ethdb"
 	checker "gopkg.in/check.v1"
 )
 

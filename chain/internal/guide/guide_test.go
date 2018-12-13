@@ -30,8 +30,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/boker/chain/accounts/keystore"
-	"github.com/boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/accounts/keystore"
+	"github.com/Bokerchain/Boker/chain/core/types"
 )
 
 // Tests that the account management snippets work correctly.

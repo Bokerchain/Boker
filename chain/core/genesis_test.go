@@ -22,11 +22,11 @@ import (
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/consensus/ethash"
-	"github.com/boker/chain/core/vm"
-	"github.com/boker/chain/ethdb"
-	"github.com/boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/consensus/ethash"
+	"github.com/Bokerchain/Boker/chain/core/vm"
+	"github.com/Bokerchain/Boker/chain/ethdb"
+	"github.com/Bokerchain/Boker/chain/params"
 )
 
 func TestSetupGenesis(t *testing.T) {

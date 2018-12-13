@@ -26,8 +26,8 @@ import (
 
 	"bazil.org/fuse"
 	"bazil.org/fuse/fs"
-	"github.com/boker/chain/log"
-	"github.com/boker/chain/swarm/storage"
+	"github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/swarm/storage"
 	"golang.org/x/net/context"
 )
 

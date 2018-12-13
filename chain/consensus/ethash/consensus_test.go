@@ -23,9 +23,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/boker/chain/common/math"
-	"github.com/boker/chain/core/types"
-	"github.com/boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/common/math"
+	"github.com/Bokerchain/Boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/params"
 )
 
 type diffTest struct {

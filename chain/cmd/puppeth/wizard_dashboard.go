@@ -19,7 +19,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/log"
 )
 
 // deployDashboard queries the user for various input on deploying a web-service

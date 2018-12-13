@@ -20,9 +20,9 @@ import (
 	"container/list"
 	"fmt"
 
-	"github.com/boker/chain/core/types"
-	"github.com/boker/chain/ethdb"
-	"github.com/boker/chain/event"
+	"github.com/Bokerchain/Boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/ethdb"
+	"github.com/Bokerchain/Boker/chain/event"
 )
 
 // Implement our EthTest Manager

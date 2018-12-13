@@ -19,9 +19,9 @@ package misc
 import (
 	"fmt"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/core/types"
-	"github.com/boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/params"
 )
 
 // VerifyForkHashes verifies that blocks conforming to network hard-forks do have

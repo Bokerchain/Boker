@@ -19,7 +19,7 @@ package vm
 import (
 	"math/big"
 
-	"github.com/boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/common"
 )
 
 // ContractRef is a reference to the contract's backing object

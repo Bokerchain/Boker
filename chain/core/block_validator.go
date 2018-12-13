@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"math/big"
 
-	_ "github.com/boker/chain/common/math"
-	"github.com/boker/chain/consensus"
-	"github.com/boker/chain/core/state"
-	"github.com/boker/chain/core/types"
-	"github.com/boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/common/math"
+	"github.com/Bokerchain/Boker/chain/consensus"
+	"github.com/Bokerchain/Boker/chain/core/state"
+	"github.com/Bokerchain/Boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/params"
 )
 
 type BlockValidator struct {
@@ -105,7 +105,7 @@ func (v *BlockValidator) ValidateDposState(block *types.Block) error {
 	return nil
 }
 
-/*func CalcGasLimit11(parent *types.Block) *big.Int {
+func CalcGasLimit(parent *types.Block) *big.Int {
 
 	contrib := new(big.Int).Mul(parent.GasUsed(), big.NewInt(3))
 	contrib = contrib.Div(contrib, big.NewInt(2))
@@ -125,7 +125,7 @@ func (v *BlockValidator) ValidateDposState(block *types.Block) error {
 		gl.Set(math.BigMin(gl, params.TargetGasLimit))
 	}
 	return gl
-}*/
+}
 
 //
 func bound(lower *big.Float, middle *big.Float, upper *big.Float) *big.Float {
@@ -195,7 +195,7 @@ func calcSsthresh(gas *big.Int) *big.Int {
 }
 
 //计算Gaslimit
-func CalcGasLimit(parent *types.Block) *big.Int {
+/*func CalcGasLimit(parent *types.Block) *big.Int {
 
 	return calcSsthresh(parent.GasUsed())
-}
+}*/

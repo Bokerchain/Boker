@@ -20,10 +20,10 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/boker/chain/consensus/ethash"
-	"github.com/boker/chain/core/vm"
-	"github.com/boker/chain/ethdb"
-	"github.com/boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/consensus/ethash"
+	"github.com/Bokerchain/Boker/chain/core/vm"
+	"github.com/Bokerchain/Boker/chain/ethdb"
+	"github.com/Bokerchain/Boker/chain/params"
 )
 
 // Tests that DAO-fork enabled clients can properly filter out fork-commencing

@@ -7,15 +7,15 @@ import (
 	"math/big"
 	_ "reflect"
 
-	"github.com/boker/chain"
-	"github.com/boker/chain/accounts/abi"
-	"github.com/boker/chain/boker/protocol"
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/core/types"
-	"github.com/boker/chain/crypto"
-	"github.com/boker/chain/eth"
-	"github.com/boker/chain/log"
-	"github.com/boker/chain/node"
+	"github.com/Bokerchain/Boker/chain"
+	"github.com/Bokerchain/Boker/chain/accounts/abi"
+	"github.com/Bokerchain/Boker/chain/boker/protocol"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/eth"
+	"github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/node"
 )
 
 // SignerFn is a signer function callback when a contract requires a method to
@@ -194,52 +194,56 @@ func (c *BoundContract) Transact(opts *TransactOpts, method string, params ...in
 		return nil, err
 	}
 
-	extra := []byte("")
-	var e *eth.Ethereum
-	if err := GethNode.Service(&e); err != nil {
-		return nil, err
-	}
+	//判断节点是否已经启动
+	if GethNode != nil {
 
-	//得到合约类型
-	contractType, err := e.Boker().GetContract(c.address)
-	if err != nil {
-		return nil, err
-	}
-
-	//判断合约类型是否是基础合约
-	if contractType == protocol.PersonalContract {
-
-		//用户触发的基础合约（用户触发，但是不收取Gas费用）
-		if method == protocol.RegisterCandidateMethod {
-			return c.transact(opts, &c.address, input, extra, protocol.RegisterCandidate)
-		} else if method == protocol.VoteCandidateMethod {
-			return c.transact(opts, &c.address, input, extra, protocol.VoteUser)
-		} else if method == protocol.CancelVoteMethod {
-			return c.transact(opts, &c.address, input, extra, protocol.VoteCancel)
-		} else if method == protocol.FireEventMethod {
-			return c.transact(opts, &c.address, input, extra, protocol.UserEvent)
+		var e *eth.Ethereum
+		if err := GethNode.Service(&e); err != nil {
+			return nil, err
 		}
-		return nil, errors.New("unknown personal contract method name")
 
-	} else if contractType == protocol.SystemContract {
-
-		//由基础链触发的基础合约，不收取Gas费用
-		if method == protocol.AssignTokenMethod {
-
-			//得到当前的分币节点
-			tokennoder, err := c.getTokenNoder(opts)
-			if err != nil {
-				return nil, errors.New("get assign token error")
-			}
-			if tokennoder != opts.From {
-				return nil, errors.New("current assign token not is from account")
-			}
-			return c.transact(opts, &c.address, input, extra, protocol.AssignToken)
-
+		//得到合约类型
+		contractType, err := e.Boker().GetContract(c.address)
+		if err != nil {
+			return nil, err
 		}
-		return nil, errors.New("unknown system contract method name")
+
+		//判断合约类型是否是基础合约
+		extra := []byte("")
+		if contractType == protocol.PersonalContract {
+
+			//用户触发的基础合约（用户触发，但是不收取Gas费用）
+			if method == protocol.RegisterCandidateMethod {
+				return c.transact(opts, &c.address, input, extra, protocol.RegisterCandidate)
+			} else if method == protocol.VoteCandidateMethod {
+				return c.transact(opts, &c.address, input, extra, protocol.VoteUser)
+			} else if method == protocol.CancelVoteMethod {
+				return c.transact(opts, &c.address, input, extra, protocol.VoteCancel)
+			} else if method == protocol.FireEventMethod {
+				return c.transact(opts, &c.address, input, extra, protocol.UserEvent)
+			}
+			return nil, errors.New("unknown personal contract method name")
+
+		} else if contractType == protocol.SystemContract {
+
+			//由基础链触发的基础合约，不收取Gas费用
+			if method == protocol.AssignTokenMethod {
+
+				//得到当前的分币节点
+				tokennoder, err := c.getTokenNoder(opts)
+				if err != nil {
+					return nil, errors.New("get assign token error")
+				}
+				if tokennoder != opts.From {
+					return nil, errors.New("current assign token not is from account")
+				}
+				return c.transact(opts, &c.address, input, extra, protocol.AssignToken)
+
+			}
+			return nil, errors.New("unknown system contract method name")
+		}
 	}
-	return c.transact(opts, &c.address, input, extra, protocol.Binary)
+	return c.transact(opts, &c.address, input, []byte(""), protocol.Binary)
 }
 
 func (c *BoundContract) Transfer(opts *TransactOpts) (*types.Transaction, error) {

@@ -21,10 +21,10 @@ import (
 	"io"
 	"os"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/core/types"
-	"github.com/boker/chain/log"
-	"github.com/boker/chain/rlp"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/rlp"
 )
 
 // errNoActiveJournal is returned if a transaction is attempted to be inserted

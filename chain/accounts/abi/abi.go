@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/log"
 )
 
 // The ABI holds information about a contract's context and available

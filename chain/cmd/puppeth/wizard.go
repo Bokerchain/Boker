@@ -29,9 +29,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/core"
-	"github.com/boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/core"
+	"github.com/Bokerchain/Boker/chain/log"
 	"golang.org/x/crypto/ssh/terminal"
 )
 

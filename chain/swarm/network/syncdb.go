@@ -20,8 +20,8 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	"github.com/boker/chain/log"
-	"github.com/boker/chain/swarm/storage"
+	"github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/swarm/storage"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/iterator"
 )

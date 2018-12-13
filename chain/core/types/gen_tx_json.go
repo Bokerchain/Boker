@@ -7,9 +7,9 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/boker/chain/boker/protocol"
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/common/hexutil"
+	"github.com/Bokerchain/Boker/chain/boker/protocol"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/common/hexutil"
 )
 
 var _ = (*txdataMarshaling)(nil)

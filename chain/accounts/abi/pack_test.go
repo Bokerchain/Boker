@@ -24,7 +24,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/common"
 )
 
 func TestPack(t *testing.T) {

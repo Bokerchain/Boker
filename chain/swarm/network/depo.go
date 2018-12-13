@@ -22,8 +22,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/boker/chain/log"
-	"github.com/boker/chain/swarm/storage"
+	"github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/swarm/storage"
 )
 
 // Handler for storage/retrieval related protocol requests

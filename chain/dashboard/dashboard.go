@@ -28,9 +28,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/boker/chain/log"
-	"github.com/boker/chain/p2p"
-	"github.com/boker/chain/rpc"
+	"github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/p2p"
+	"github.com/Bokerchain/Boker/chain/rpc"
 	"github.com/rcrowley/go-metrics"
 	"golang.org/x/net/websocket"
 )

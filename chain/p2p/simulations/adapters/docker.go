@@ -28,8 +28,8 @@ import (
 	"strings"
 
 	"github.com/docker/docker/pkg/reexec"
-	"github.com/boker/chain/node"
-	"github.com/boker/chain/p2p/discover"
+	"github.com/Bokerchain/Boker/chain/node"
+	"github.com/Bokerchain/Boker/chain/p2p/discover"
 )
 
 // DockerAdapter is a NodeAdapter which runs simulation nodes inside Docker

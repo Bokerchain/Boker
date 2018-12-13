@@ -26,9 +26,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/boker/chain/accounts"
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/event"
+	"github.com/Bokerchain/Boker/chain/accounts"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/event"
 )
 
 var testSigData = make([]byte, 32)

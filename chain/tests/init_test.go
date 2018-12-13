@@ -29,7 +29,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/params"
 )
 
 var (

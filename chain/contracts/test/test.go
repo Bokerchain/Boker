@@ -7,11 +7,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/boker/chain/accounts/abi/bind"
-	"github.com/boker/chain/boker/protocol"
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/eth"
-	"github.com/boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/accounts/abi/bind"
+	"github.com/Bokerchain/Boker/chain/boker/protocol"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/eth"
+	"github.com/Bokerchain/Boker/chain/log"
 )
 
 //定期进行分配通证

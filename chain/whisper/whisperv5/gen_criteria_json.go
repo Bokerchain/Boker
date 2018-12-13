@@ -5,7 +5,7 @@ package whisperv5
 import (
 	"encoding/json"
 
-	"github.com/boker/chain/common/hexutil"
+	"github.com/Bokerchain/Boker/chain/common/hexutil"
 )
 
 var _ = (*criteriaOverride)(nil)

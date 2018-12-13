@@ -21,12 +21,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/core"
-	"github.com/boker/chain/crypto"
-	"github.com/boker/chain/eth"
-	"github.com/boker/chain/ethdb"
-	"github.com/boker/chain/light"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/core"
+	"github.com/Bokerchain/Boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/eth"
+	"github.com/Bokerchain/Boker/chain/ethdb"
+	"github.com/Bokerchain/Boker/chain/light"
 )
 
 var testBankSecureTrieKey = secAddr(testBankAddress)

@@ -20,7 +20,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/common"
 )
 
 // Tests that the node iterator indeed walks over the entire database contents.

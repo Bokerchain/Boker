@@ -22,8 +22,8 @@ package node
 import (
 	"reflect"
 
-	"github.com/boker/chain/p2p"
-	"github.com/boker/chain/rpc"
+	"github.com/Bokerchain/Boker/chain/p2p"
+	"github.com/Bokerchain/Boker/chain/rpc"
 )
 
 // NoopService is a trivial implementation of the Service interface.

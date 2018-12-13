@@ -20,10 +20,10 @@ import (
 	"math/big"
 	"sync/atomic"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/crypto"
-	_ "github.com/boker/chain/log"
-	"github.com/boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/params"
 )
 
 // emptyCodeHash is used by create to ensure deployment is disallowed to already
@@ -138,7 +138,7 @@ func (evm *EVM) Cancel() {
 // execution error or failed value transfer.
 func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas uint64, value *big.Int) (ret []byte, leftOverGas uint64, err error) {
 
-	//log.Info("****Call****", "addr", addr.String(), "input", input, "gas", gas, "value", value)
+	log.Info("****Call****", "addr", addr.String(), "input", input, "gas", gas, "value", value)
 	if evm.vmConfig.NoRecursion && evm.depth > 0 {
 		return nil, gas, nil
 	}
@@ -176,7 +176,7 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 	//这里测试获取到合约的执行码
 	codeBytes := evm.StateDB.GetCode(addr)
 	codeHash := evm.StateDB.GetCodeHash(addr)
-	//log.Info("Call GetCode", "addr", addr.String(), "codeBytes", codeBytes, "codeHash", codeHash.String(), "input", input)
+	log.Info("Call GetCode", "addr", addr.String(), "codeBytes", codeBytes, "codeHash", codeHash.String(), "input", input)
 	contract.SetCallCode(&addr, codeHash, codeBytes)
 
 	//实际执行智能合约的地方

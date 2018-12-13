@@ -22,7 +22,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/boker/chain/core/vm"
+	"github.com/Bokerchain/Boker/chain/core/vm"
 )
 
 func TestState(t *testing.T) {

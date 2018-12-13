@@ -26,7 +26,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/boker/chain/rlp"
+	"github.com/Bokerchain/Boker/chain/rlp"
 )
 
 var (

@@ -30,8 +30,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/crypto"
 )
 
 // Node represents a host on the network.

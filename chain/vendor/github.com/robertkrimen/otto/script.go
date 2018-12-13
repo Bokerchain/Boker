@@ -5,7 +5,7 @@ import (
 	"encoding/gob"
 	"errors"
 
-	_ "github.com/boker/chain/log"
+	_ "github.com/Bokerchain/Boker/chain/log"
 )
 
 var ErrVersion = errors.New("version mismatch")

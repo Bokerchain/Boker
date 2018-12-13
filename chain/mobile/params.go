@@ -19,8 +19,8 @@
 package geth
 
 import (
-	"github.com/boker/chain/p2p/discv5"
-	"github.com/boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/p2p/discv5"
+	"github.com/Bokerchain/Boker/chain/params"
 )
 
 // MainnetGenesis returns the JSON spec to use for the main Ethereum network. It

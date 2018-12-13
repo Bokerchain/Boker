@@ -19,9 +19,9 @@ package types
 import (
 	"bytes"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/rlp"
-	"github.com/boker/chain/trie"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/rlp"
+	"github.com/Bokerchain/Boker/chain/trie"
 )
 
 type DerivableList interface {

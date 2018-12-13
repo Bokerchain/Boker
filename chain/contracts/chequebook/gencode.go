@@ -25,11 +25,11 @@ import (
 	"io/ioutil"
 	"math/big"
 
-	"github.com/boker/chain/accounts/abi/bind"
-	"github.com/boker/chain/accounts/abi/bind/backends"
-	"github.com/boker/chain/contracts/chequebook/contract"
-	"github.com/boker/chain/core"
-	"github.com/boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/accounts/abi/bind"
+	"github.com/Bokerchain/Boker/chain/accounts/abi/bind/backends"
+	"github.com/Bokerchain/Boker/chain/contracts/chequebook/contract"
+	"github.com/Bokerchain/Boker/chain/core"
+	"github.com/Bokerchain/Boker/chain/crypto"
 )
 
 var (

@@ -5,7 +5,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/common"
 )
 
 // precompiledTest defines the input/output pairs for precompiled contract tests.

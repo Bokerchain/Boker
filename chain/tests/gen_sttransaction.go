@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"math/big"
 
-	"github.com/boker/chain/common/hexutil"
-	"github.com/boker/chain/common/math"
+	"github.com/Bokerchain/Boker/chain/common/hexutil"
+	"github.com/Bokerchain/Boker/chain/common/math"
 )
 
 var _ = (*stTransactionMarshaling)(nil)

@@ -24,8 +24,8 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/boker/chain/common/math"
-	"github.com/boker/chain/crypto/randentropy"
+	"github.com/Bokerchain/Boker/chain/common/math"
+	"github.com/Bokerchain/Boker/chain/crypto/randentropy"
 )
 
 const TestCount = 1000

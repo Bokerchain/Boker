@@ -21,11 +21,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/boker/chain/accounts/abi"
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/core/state"
-	"github.com/boker/chain/core/vm"
-	"github.com/boker/chain/ethdb"
+	"github.com/Bokerchain/Boker/chain/accounts/abi"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/core/state"
+	"github.com/Bokerchain/Boker/chain/core/vm"
+	"github.com/Bokerchain/Boker/chain/ethdb"
 )
 
 func TestDefaults(t *testing.T) {

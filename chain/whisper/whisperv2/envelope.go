@@ -26,11 +26,11 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/common/math"
-	"github.com/boker/chain/crypto"
-	"github.com/boker/chain/crypto/ecies"
-	"github.com/boker/chain/rlp"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/common/math"
+	"github.com/Bokerchain/Boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/crypto/ecies"
+	"github.com/Bokerchain/Boker/chain/rlp"
 )
 
 // Envelope represents a clear-text data packet to transmit through the Whisper

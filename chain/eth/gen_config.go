@@ -5,11 +5,11 @@ package eth
 import (
 	"math/big"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/common/hexutil"
-	"github.com/boker/chain/core"
-	"github.com/boker/chain/eth/downloader"
-	"github.com/boker/chain/eth/gasprice"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/common/hexutil"
+	"github.com/Bokerchain/Boker/chain/core"
+	"github.com/Bokerchain/Boker/chain/eth/downloader"
+	"github.com/Bokerchain/Boker/chain/eth/gasprice"
 )
 
 var _ = (*configMarshaling)(nil)

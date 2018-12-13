@@ -21,7 +21,7 @@ package geth
 import (
 	"errors"
 
-	"github.com/boker/chain/p2p"
+	"github.com/Bokerchain/Boker/chain/p2p"
 )
 
 // NodeInfo represents pi short summary of the information known about the host.

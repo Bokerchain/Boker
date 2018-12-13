@@ -21,11 +21,11 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/core/types"
-	"github.com/boker/chain/crypto/sha3"
-	"github.com/boker/chain/ethdb"
-	"github.com/boker/chain/rlp"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/crypto/sha3"
+	"github.com/Bokerchain/Boker/chain/ethdb"
+	"github.com/Bokerchain/Boker/chain/rlp"
 )
 
 // Tests block header storage and retrieval operations.

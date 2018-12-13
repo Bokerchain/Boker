@@ -19,7 +19,7 @@ package state
 import (
 	"math/big"
 
-	"github.com/boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/common"
 )
 
 type journalEntry interface {

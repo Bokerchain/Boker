@@ -24,9 +24,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/boker/chain/cmd/utils"
-	"github.com/boker/chain/swarm/api"
-	swarm "github.com/boker/chain/swarm/api/client"
+	"github.com/Bokerchain/Boker/chain/cmd/utils"
+	"github.com/Bokerchain/Boker/chain/swarm/api"
+	swarm "github.com/Bokerchain/Boker/chain/swarm/api/client"
 	"gopkg.in/urfave/cli.v1"
 )
 

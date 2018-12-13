@@ -22,12 +22,12 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/common/hexutil"
-	"github.com/boker/chain/common/math"
-	"github.com/boker/chain/core/types"
-	"github.com/boker/chain/params"
-	"github.com/boker/chain/rlp"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/common/hexutil"
+	"github.com/Bokerchain/Boker/chain/common/math"
+	"github.com/Bokerchain/Boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/rlp"
 )
 
 // TransactionTest checks RLP decoding and sender derivation of transactions.

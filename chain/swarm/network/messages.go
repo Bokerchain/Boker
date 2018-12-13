@@ -21,11 +21,11 @@ import (
 	"net"
 	"time"
 
-	"github.com/boker/chain/contracts/chequebook"
-	"github.com/boker/chain/p2p/discover"
-	"github.com/boker/chain/swarm/network/kademlia"
-	"github.com/boker/chain/swarm/services/swap"
-	"github.com/boker/chain/swarm/storage"
+	"github.com/Bokerchain/Boker/chain/contracts/chequebook"
+	"github.com/Bokerchain/Boker/chain/p2p/discover"
+	"github.com/Bokerchain/Boker/chain/swarm/network/kademlia"
+	"github.com/Bokerchain/Boker/chain/swarm/services/swap"
+	"github.com/Bokerchain/Boker/chain/swarm/storage"
 )
 
 /*

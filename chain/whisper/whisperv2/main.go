@@ -27,12 +27,12 @@ import (
 	"os"
 	"time"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/crypto"
-	"github.com/boker/chain/logger"
-	"github.com/boker/chain/p2p"
-	"github.com/boker/chain/p2p/nat"
-	"github.com/boker/chain/whisper"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/logger"
+	"github.com/Bokerchain/Boker/chain/p2p"
+	"github.com/Bokerchain/Boker/chain/p2p/nat"
+	"github.com/Bokerchain/Boker/chain/whisper"
 )
 
 func main() {

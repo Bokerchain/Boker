@@ -24,9 +24,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/crypto"
-	whisper "github.com/boker/chain/whisper/whisperv5"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/crypto"
+	whisper "github.com/Bokerchain/Boker/chain/whisper/whisperv5"
 )
 
 const powRequirement = 0.00001

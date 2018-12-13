@@ -4,12 +4,12 @@ package consensus
 import (
 	"errors"
 
-	"github.com/boker/chain/boker/api"
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/core/state"
-	"github.com/boker/chain/core/types"
-	"github.com/boker/chain/params"
-	"github.com/boker/chain/rpc"
+	"github.com/Bokerchain/Boker/chain/boker/api"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/core/state"
+	"github.com/Bokerchain/Boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/rpc"
 )
 
 var (

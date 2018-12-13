@@ -29,9 +29,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/event"
-	"github.com/boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/event"
+	"github.com/Bokerchain/Boker/chain/log"
 )
 
 const (

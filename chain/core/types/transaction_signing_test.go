@@ -20,8 +20,8 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/crypto"
 )
 
 func TestEIP155Signing(t *testing.T) {

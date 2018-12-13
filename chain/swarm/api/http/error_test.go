@@ -24,7 +24,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/boker/chain/swarm/testutil"
+	"github.com/Bokerchain/Boker/chain/swarm/testutil"
 )
 
 func TestError(t *testing.T) {

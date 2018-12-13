@@ -25,9 +25,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/boker/chain/crypto"
-	"github.com/boker/chain/log"
-	"github.com/boker/chain/swarm/storage"
+	"github.com/Bokerchain/Boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/swarm/storage"
 )
 
 func init() {

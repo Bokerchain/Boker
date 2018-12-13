@@ -19,7 +19,7 @@
 package fetcher
 
 import (
-	"github.com/boker/chain/metrics"
+	"github.com/Bokerchain/Boker/chain/metrics"
 )
 
 var (

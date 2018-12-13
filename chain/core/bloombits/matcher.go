@@ -26,8 +26,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/boker/chain/common/bitutil"
-	"github.com/boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/common/bitutil"
+	"github.com/Bokerchain/Boker/chain/crypto"
 )
 
 // bloomIndexes represents the bit indexes inside the bloom filter that belong

@@ -20,7 +20,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/core/types"
 )
 
 // Tests that ethash works correctly in test mode.

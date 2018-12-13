@@ -23,11 +23,11 @@ import (
 	"net"
 	"sync"
 
-	"github.com/boker/chain/event"
-	"github.com/boker/chain/node"
-	"github.com/boker/chain/p2p"
-	"github.com/boker/chain/p2p/discover"
-	"github.com/boker/chain/rpc"
+	"github.com/Bokerchain/Boker/chain/event"
+	"github.com/Bokerchain/Boker/chain/node"
+	"github.com/Bokerchain/Boker/chain/p2p"
+	"github.com/Bokerchain/Boker/chain/p2p/discover"
+	"github.com/Bokerchain/Boker/chain/rpc"
 )
 
 // SimAdapter is a NodeAdapter which creates in-memory simulation nodes and

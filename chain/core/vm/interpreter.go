@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"sync/atomic"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/common/math"
-	"github.com/boker/chain/crypto"
-	_ "github.com/boker/chain/log"
-	"github.com/boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/common/math"
+	"github.com/Bokerchain/Boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/params"
 )
 
 // Config are the configuration options for the Interpreter
@@ -60,7 +60,7 @@ func NewInterpreter(evm *EVM, cfg Config) *Interpreter {
 		}
 	}*/
 	if !cfg.JumpTable[STOP].valid {
-		cfg.JumpTable = frontierInstructionSet
+		cfg.JumpTable = homesteadInstructionSet
 	}
 
 	return &Interpreter{
@@ -136,14 +136,14 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 	// the execution of one of the operations or until the done flag is set by the
 	// parent context.
 
-	//codeTest := contract.Code
-	//log.Info("Run ", "input", input, "codeTest", codeTest)
+	codeTest := contract.Code
+	log.Info("Run ", "input", input, "codeTest", codeTest)
 
 	//监听about信号
 	for atomic.LoadInt32(&in.evm.abort) == 0 {
 
-		//opByte := byte(op)
-		//log.Info("Run LoadInt32", "op", op, "pc", pc, "opByte", opByte)
+		opByte := byte(op)
+		log.Info("Run LoadInt32", "op", op, "pc", pc, "opByte", opByte)
 
 		//pc是程序计数器，控制当前执行到的code位置, 正常情况下每次都会定位在操作码上
 		op = contract.GetOp(pc)
@@ -231,11 +231,11 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 			return nil, err
 		case operation.reverts:
 
-			//log.Info("Run reverts", "op", op, "pc", pc)
+			log.Info("Run reverts", "op", op, "pc", pc)
 			return res, errExecutionReverted
 		case operation.halts:
 
-			//log.Info("Run halts", "op", op, "pc", pc)
+			log.Info("Run halts", "op", op, "pc", pc)
 			return res, nil
 		case !operation.jumps:
 

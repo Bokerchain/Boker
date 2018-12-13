@@ -19,10 +19,10 @@ package core
 import (
 	"math/big"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/consensus"
-	"github.com/boker/chain/core/types"
-	"github.com/boker/chain/core/vm"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/consensus"
+	"github.com/Bokerchain/Boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/core/vm"
 )
 
 // ChainContext supports retrieving headers and consensus parameters from the

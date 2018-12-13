@@ -21,8 +21,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/boker/chain/crypto"
-	"github.com/boker/chain/crypto/ecies"
+	"github.com/Bokerchain/Boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/crypto/ecies"
 )
 
 func TestEnvelopeOpen(t *testing.T) {

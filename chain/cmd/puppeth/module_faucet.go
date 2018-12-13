@@ -25,7 +25,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/log"
 )
 
 // faucetDockerfile is the Dockerfile required to build an faucet container to
@@ -40,7 +40,7 @@ RUN \
   apk add --update git go make gcc musl-dev ca-certificates linux-headers                             && \
 	mkdir -p $GOPATH/src/github.com/ethereum                                                            && \
 	(cd $GOPATH/src/github.com/ethereum && git clone --depth=1 https://github.com/boker/go-ethereum) && \
-  go build -v github.com/boker/chain/cmd/faucet                                              && \
+  go build -v github.com/Bokerchain/Boker/chain/cmd/faucet                                              && \
   apk del git go make gcc musl-dev linux-headers                                                      && \
   rm -rf $GOPATH && rm -rf /var/cache/apk/*
 

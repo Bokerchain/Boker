@@ -24,10 +24,10 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/core"
-	"github.com/boker/chain/log"
-	"github.com/boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/core"
+	"github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/params"
 )
 
 // makeGenesis creates a new genesis struct based on some user input.

@@ -23,7 +23,7 @@ import (
 	"os"
 	"runtime/trace"
 
-	"github.com/boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/log"
 )
 
 // StartGoTrace turns on tracing, writing to the given file.

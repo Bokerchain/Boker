@@ -20,7 +20,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/params"
 )
 
 func TestTransaction(t *testing.T) {

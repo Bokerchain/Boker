@@ -23,9 +23,9 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/crypto"
-	"github.com/boker/chain/rlp"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/rlp"
 )
 
 // The values in those tests are from the Transaction Tests

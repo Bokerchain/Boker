@@ -22,9 +22,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/ethdb"
-	"github.com/boker/chain/rlp"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/ethdb"
+	"github.com/Bokerchain/Boker/chain/rlp"
 )
 
 // from bcValidBlockTest.json, "SimpleTx"

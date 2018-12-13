@@ -22,8 +22,8 @@ import (
 	"errors"
 	"math/big"
 
-	ethereum "github.com/boker/chain"
-	"github.com/boker/chain/common"
+	ethereum "github.com/Bokerchain/Boker/chain"
+	"github.com/Bokerchain/Boker/chain/common"
 )
 
 // Subscription represents an event subscription where events are

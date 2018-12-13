@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/boker/chain/core/asm"
+	"github.com/Bokerchain/Boker/chain/core/asm"
 )
 
 func Compile(fn string, src []byte, debug bool) (string, error) {

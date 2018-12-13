@@ -22,9 +22,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/boker/chain/swarm/api"
-	httpapi "github.com/boker/chain/swarm/api/http"
-	"github.com/boker/chain/swarm/storage"
+	"github.com/Bokerchain/Boker/chain/swarm/api"
+	httpapi "github.com/Bokerchain/Boker/chain/swarm/api/http"
+	"github.com/Bokerchain/Boker/chain/swarm/storage"
 )
 
 func NewTestSwarmServer(t *testing.T) *TestSwarmServer {

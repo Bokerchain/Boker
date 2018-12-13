@@ -22,12 +22,12 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/log"
-	"github.com/boker/chain/p2p/discover"
-	"github.com/boker/chain/p2p/netutil"
-	"github.com/boker/chain/swarm/network/kademlia"
-	"github.com/boker/chain/swarm/storage"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/p2p/discover"
+	"github.com/Bokerchain/Boker/chain/p2p/netutil"
+	"github.com/Bokerchain/Boker/chain/swarm/network/kademlia"
+	"github.com/Bokerchain/Boker/chain/swarm/storage"
 )
 
 // Hive is the logistic manager of the swarm

@@ -27,9 +27,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/boker/chain/event"
-	"github.com/boker/chain/p2p/discover"
-	"github.com/boker/chain/rlp"
+	"github.com/Bokerchain/Boker/chain/event"
+	"github.com/Bokerchain/Boker/chain/p2p/discover"
+	"github.com/Bokerchain/Boker/chain/rlp"
 )
 
 // Msg defines the structure of a p2p message.

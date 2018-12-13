@@ -34,8 +34,8 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/boker/chain/core"
-	"github.com/boker/chain/rlp"
+	"github.com/Bokerchain/Boker/chain/core"
+	"github.com/Bokerchain/Boker/chain/rlp"
 )
 
 type allocItem struct{ Addr, Balance *big.Int }

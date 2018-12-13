@@ -22,8 +22,8 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/core/types"
 )
 
 // NotFound is returned by API methods if the requested item does not exist.

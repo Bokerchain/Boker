@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/log"
 )
 
 // deployEthstats queries the user for various input on deploying an ethstats

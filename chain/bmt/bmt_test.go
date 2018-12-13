@@ -28,7 +28,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/boker/chain/crypto/sha3"
+	"github.com/Bokerchain/Boker/chain/crypto/sha3"
 )
 
 const (

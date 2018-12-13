@@ -26,10 +26,10 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/crypto"
-	"github.com/boker/chain/crypto/ecies"
-	"github.com/boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/crypto/ecies"
+	"github.com/Bokerchain/Boker/chain/log"
 )
 
 // Message represents an end-user data packet to transmit through the Whisper

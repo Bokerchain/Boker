@@ -22,7 +22,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/crypto"
 )
 
 // Tests whether a message can be wrapped without any identity or encryption.

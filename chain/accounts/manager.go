@@ -21,7 +21,7 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/boker/chain/event"
+	"github.com/Bokerchain/Boker/chain/event"
 )
 
 // Manager is an overarching account manager that can communicate with various

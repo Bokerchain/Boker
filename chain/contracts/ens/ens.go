@@ -22,11 +22,11 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/boker/chain/accounts/abi/bind"
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/contracts/ens/contract"
-	"github.com/boker/chain/core/types"
-	"github.com/boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/accounts/abi/bind"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/contracts/ens/contract"
+	"github.com/Bokerchain/Boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/crypto"
 )
 
 var (

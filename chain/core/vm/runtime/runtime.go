@@ -21,12 +21,12 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/core/state"
-	"github.com/boker/chain/core/vm"
-	"github.com/boker/chain/crypto"
-	"github.com/boker/chain/ethdb"
-	"github.com/boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/core/state"
+	"github.com/Bokerchain/Boker/chain/core/vm"
+	"github.com/Bokerchain/Boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/ethdb"
+	"github.com/Bokerchain/Boker/chain/params"
 )
 
 // Config is a basic type specifying certain configuration flags for running

@@ -25,7 +25,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/boker/chain/ethdb"
+	"github.com/Bokerchain/Boker/chain/ethdb"
 )
 
 func newTestLDB() (*ethdb.LDBDatabase, func()) {

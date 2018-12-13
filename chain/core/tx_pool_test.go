@@ -26,13 +26,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/core/state"
-	"github.com/boker/chain/core/types"
-	"github.com/boker/chain/crypto"
-	"github.com/boker/chain/ethdb"
-	"github.com/boker/chain/event"
-	"github.com/boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/core/state"
+	"github.com/Bokerchain/Boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/ethdb"
+	"github.com/Bokerchain/Boker/chain/event"
+	"github.com/Bokerchain/Boker/chain/params"
 )
 
 // testTxPoolConfig is a transaction pool configuration without stateful disk

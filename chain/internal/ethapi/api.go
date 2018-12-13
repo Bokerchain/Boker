@@ -10,22 +10,22 @@ import (
 	"strings"
 	"time"
 
-	"github.com/boker/chain/accounts"
-	"github.com/boker/chain/accounts/keystore"
-	"github.com/boker/chain/boker/api"
-	"github.com/boker/chain/boker/protocol"
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/common/hexutil"
-	"github.com/boker/chain/common/math"
-	"github.com/boker/chain/core"
-	"github.com/boker/chain/core/types"
-	"github.com/boker/chain/core/vm"
-	"github.com/boker/chain/crypto"
-	"github.com/boker/chain/log"
-	"github.com/boker/chain/p2p"
-	"github.com/boker/chain/params"
-	"github.com/boker/chain/rlp"
-	"github.com/boker/chain/rpc"
+	"github.com/Bokerchain/Boker/chain/accounts"
+	"github.com/Bokerchain/Boker/chain/accounts/keystore"
+	"github.com/Bokerchain/Boker/chain/boker/api"
+	"github.com/Bokerchain/Boker/chain/boker/protocol"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/common/hexutil"
+	"github.com/Bokerchain/Boker/chain/common/math"
+	"github.com/Bokerchain/Boker/chain/core"
+	"github.com/Bokerchain/Boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/core/vm"
+	"github.com/Bokerchain/Boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/p2p"
+	"github.com/Bokerchain/Boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/rlp"
+	"github.com/Bokerchain/Boker/chain/rpc"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/util"
 )
@@ -389,7 +389,7 @@ func signHash(data []byte) []byte {
 //
 // The key used to calculate the signature is decrypted with the given password.
 //
-// https://github.com/boker/chain/wiki/Management-APIs#personal_sign
+// https://github.com/Bokerchain/Boker/chain/wiki/Management-APIs#personal_sign
 func (s *PrivateAccountAPI) Sign(ctx context.Context, data hexutil.Bytes, addr common.Address, passwd string) (hexutil.Bytes, error) {
 	// Look up the wallet containing the requested signer
 	account := accounts.Account{Address: addr}
@@ -416,7 +416,7 @@ func (s *PrivateAccountAPI) Sign(ctx context.Context, data hexutil.Bytes, addr c
 // Note, the signature must conform to the secp256k1 curve R, S and V values, where
 // the V value must be be 27 or 28 for legacy reasons.
 //
-// https://github.com/boker/chain/wiki/Management-APIs#personal_ecRecover
+// https://github.com/Bokerchain/Boker/chain/wiki/Management-APIs#personal_ecRecover
 func (s *PrivateAccountAPI) EcRecover(ctx context.Context, data, sig hexutil.Bytes) (common.Address, error) {
 	if len(sig) != 65 {
 		return common.Address{}, fmt.Errorf("signature must be 65 bytes long")

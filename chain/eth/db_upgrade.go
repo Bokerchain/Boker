@@ -21,11 +21,11 @@ import (
 	"bytes"
 	"time"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/core"
-	"github.com/boker/chain/ethdb"
-	"github.com/boker/chain/log"
-	"github.com/boker/chain/rlp"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/core"
+	"github.com/Bokerchain/Boker/chain/ethdb"
+	"github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/rlp"
 )
 
 var deduplicateData = []byte("dbUpgrade_20170714deduplicateData")

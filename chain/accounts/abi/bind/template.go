@@ -16,7 +16,7 @@
 
 package bind
 
-import "github.com/boker/chain/accounts/abi"
+import "github.com/Bokerchain/Boker/chain/accounts/abi"
 
 // tmplData is the data structure required to fill the binding template.
 type tmplData struct {

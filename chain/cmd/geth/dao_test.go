@@ -23,9 +23,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/core"
-	"github.com/boker/chain/ethdb"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/core"
+	"github.com/Bokerchain/Boker/chain/ethdb"
 )
 
 // Genesis block for nodes which don't care about the DAO fork (i.e. not configured)

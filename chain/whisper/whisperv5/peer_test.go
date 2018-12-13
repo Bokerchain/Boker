@@ -25,11 +25,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/crypto"
-	"github.com/boker/chain/p2p"
-	"github.com/boker/chain/p2p/discover"
-	"github.com/boker/chain/p2p/nat"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/p2p"
+	"github.com/Bokerchain/Boker/chain/p2p/discover"
+	"github.com/Bokerchain/Boker/chain/p2p/nat"
 )
 
 var keys []string = []string{

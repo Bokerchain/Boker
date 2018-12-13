@@ -41,24 +41,24 @@ import (
 	"sync"
 	"time"
 
-	"github.com/boker/chain/accounts"
-	"github.com/boker/chain/accounts/keystore"
-	"github.com/boker/chain/boker/protocol"
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/core"
-	"github.com/boker/chain/core/types"
-	"github.com/boker/chain/eth"
-	"github.com/boker/chain/eth/downloader"
-	"github.com/boker/chain/ethclient"
-	"github.com/boker/chain/ethstats"
-	"github.com/boker/chain/les"
-	"github.com/boker/chain/log"
-	"github.com/boker/chain/node"
-	"github.com/boker/chain/p2p"
-	"github.com/boker/chain/p2p/discover"
-	"github.com/boker/chain/p2p/discv5"
-	"github.com/boker/chain/p2p/nat"
-	"github.com/boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/accounts"
+	"github.com/Bokerchain/Boker/chain/accounts/keystore"
+	"github.com/Bokerchain/Boker/chain/boker/protocol"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/core"
+	"github.com/Bokerchain/Boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/eth"
+	"github.com/Bokerchain/Boker/chain/eth/downloader"
+	"github.com/Bokerchain/Boker/chain/ethclient"
+	"github.com/Bokerchain/Boker/chain/ethstats"
+	"github.com/Bokerchain/Boker/chain/les"
+	"github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/node"
+	"github.com/Bokerchain/Boker/chain/p2p"
+	"github.com/Bokerchain/Boker/chain/p2p/discover"
+	"github.com/Bokerchain/Boker/chain/p2p/discv5"
+	"github.com/Bokerchain/Boker/chain/p2p/nat"
+	"github.com/Bokerchain/Boker/chain/params"
 	"golang.org/x/net/websocket"
 )
 
@@ -443,7 +443,7 @@ func (f *faucet) apiHandler(conn *websocket.Conn) {
 		case strings.HasPrefix(msg.URL, "https://www.facebook.com/"):
 			username, avatar, address, err = authFacebook(msg.URL)
 		default:
-			err = errors.New("Something funky happened, please open an issue at https://github.com/boker/chain/issues")
+			err = errors.New("Something funky happened, please open an issue at https://github.com/Bokerchain/Boker/chain/issues")
 		}
 		if err != nil {
 			if err = sendError(conn, err); err != nil {

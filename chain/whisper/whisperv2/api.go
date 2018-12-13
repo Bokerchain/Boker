@@ -22,9 +22,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/common/hexutil"
-	"github.com/boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/common/hexutil"
+	"github.com/Bokerchain/Boker/chain/crypto"
 )
 
 // PublicWhisperAPI provides the whisper RPC service.

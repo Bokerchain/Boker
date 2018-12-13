@@ -26,7 +26,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/common"
 	"golang.org/x/tools/imports"
 )
 

@@ -21,12 +21,12 @@ import (
 	"os"
 	"os/user"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/common/hexutil"
-	"github.com/boker/chain/core"
-	"github.com/boker/chain/eth/downloader"
-	"github.com/boker/chain/eth/gasprice"
-	"github.com/boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/common/hexutil"
+	"github.com/Bokerchain/Boker/chain/core"
+	"github.com/Bokerchain/Boker/chain/eth/downloader"
+	"github.com/Bokerchain/Boker/chain/eth/gasprice"
+	"github.com/Bokerchain/Boker/chain/params"
 )
 
 // DefaultConfig contains default settings for use on the Ethereum main net.

@@ -23,9 +23,9 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/common/hexutil"
-	"github.com/boker/chain/core/vm"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/common/hexutil"
+	"github.com/Bokerchain/Boker/chain/core/vm"
 	"github.com/robertkrimen/otto"
 )
 

@@ -24,7 +24,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/boker/chain/swarm/storage"
+	"github.com/Bokerchain/Boker/chain/swarm/storage"
 )
 
 func manifest(paths ...string) (manifestReader storage.LazySectionReader) {

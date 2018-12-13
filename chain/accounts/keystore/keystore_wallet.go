@@ -19,9 +19,9 @@ package keystore
 import (
 	"math/big"
 
-	ethereum "github.com/boker/chain"
-	"github.com/boker/chain/accounts"
-	"github.com/boker/chain/core/types"
+	ethereum "github.com/Bokerchain/Boker/chain"
+	"github.com/Bokerchain/Boker/chain/accounts"
+	"github.com/Bokerchain/Boker/chain/core/types"
 )
 
 // keystoreWallet implements the accounts.Wallet interface for the original

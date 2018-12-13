@@ -20,7 +20,7 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/params"
 )
 
 type (

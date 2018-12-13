@@ -19,8 +19,8 @@ package runtime_test
 import (
 	"fmt"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/core/vm/runtime"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/core/vm/runtime"
 )
 
 func ExampleExecute() {

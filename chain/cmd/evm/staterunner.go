@@ -7,10 +7,10 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/boker/chain/core/state"
-	"github.com/boker/chain/core/vm"
-	"github.com/boker/chain/log"
-	"github.com/boker/chain/tests"
+	"github.com/Bokerchain/Boker/chain/core/state"
+	"github.com/Bokerchain/Boker/chain/core/vm"
+	"github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/tests"
 
 	cli "gopkg.in/urfave/cli.v1"
 )

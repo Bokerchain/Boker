@@ -26,11 +26,11 @@ import (
 	"io"
 	"math/big"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/core"
-	"github.com/boker/chain/crypto"
-	"github.com/boker/chain/crypto/secp256k1"
-	"github.com/boker/chain/rlp"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/core"
+	"github.com/Bokerchain/Boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/crypto/secp256k1"
+	"github.com/Bokerchain/Boker/chain/rlp"
 )
 
 // Constants to match up protocol versions and messages

@@ -24,10 +24,10 @@ import (
 	"runtime"
 	"sync"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/consensus"
-	"github.com/boker/chain/core/types"
-	"github.com/boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/consensus"
+	"github.com/Bokerchain/Boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/log"
 )
 
 // Seal implements consensus.Engine, attempting to find a nonce that satisfies

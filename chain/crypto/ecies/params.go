@@ -42,7 +42,7 @@ import (
 	"fmt"
 	"hash"
 
-	ethcrypto "github.com/boker/chain/crypto"
+	ethcrypto "github.com/Bokerchain/Boker/chain/crypto"
 )
 
 var (

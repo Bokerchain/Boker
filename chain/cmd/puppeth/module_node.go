@@ -25,7 +25,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/log"
 )
 
 // nodeDockerfile is the Dockerfile required to run an Ethereum node.

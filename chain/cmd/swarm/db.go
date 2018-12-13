@@ -22,9 +22,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/boker/chain/cmd/utils"
-	"github.com/boker/chain/log"
-	"github.com/boker/chain/swarm/storage"
+	"github.com/Bokerchain/Boker/chain/cmd/utils"
+	"github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/swarm/storage"
 	"gopkg.in/urfave/cli.v1"
 )
 

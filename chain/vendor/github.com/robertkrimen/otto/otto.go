@@ -228,7 +228,7 @@ import (
 	"fmt"
 	"strings"
 
-	_ "github.com/boker/chain/log"
+	_ "github.com/Bokerchain/Boker/chain/log"
 	"github.com/robertkrimen/otto/file"
 	"github.com/robertkrimen/otto/registry"
 )

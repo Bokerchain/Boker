@@ -7,10 +7,10 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/boker/chain/accounts/abi"
-	"github.com/boker/chain/accounts/abi/bind"
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/accounts/abi"
+	"github.com/Bokerchain/Boker/chain/accounts/abi/bind"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/core/types"
 )
 
 // ReleaseOracleABI is the input ABI used to generate the binding from.

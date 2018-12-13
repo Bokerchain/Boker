@@ -24,9 +24,9 @@ import (
 	"net"
 	"time"
 
-	"github.com/boker/chain/log"
-	"github.com/boker/chain/p2p/discover"
-	"github.com/boker/chain/p2p/netutil"
+	"github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/p2p/discover"
+	"github.com/Bokerchain/Boker/chain/p2p/netutil"
 )
 
 const (

@@ -19,7 +19,7 @@ package event_test
 import (
 	"fmt"
 
-	"github.com/boker/chain/event"
+	"github.com/Bokerchain/Boker/chain/event"
 )
 
 func ExampleNewSubscription() {

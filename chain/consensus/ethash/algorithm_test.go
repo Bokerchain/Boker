@@ -25,9 +25,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/common/hexutil"
-	"github.com/boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/common/hexutil"
+	"github.com/Bokerchain/Boker/chain/core/types"
 )
 
 // Tests that verification caches can be correctly generated.

@@ -21,7 +21,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/common"
 )
 
 type testInPayment struct {

@@ -26,11 +26,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/core"
-	"github.com/boker/chain/eth"
-	"github.com/boker/chain/internal/jsre"
-	"github.com/boker/chain/node"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/core"
+	"github.com/Bokerchain/Boker/chain/eth"
+	"github.com/Bokerchain/Boker/chain/internal/jsre"
+	"github.com/Bokerchain/Boker/chain/node"
 )
 
 const (

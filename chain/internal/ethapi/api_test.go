@@ -4,8 +4,8 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/boker/chain/common/hexutil"
-	"github.com/boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/common/hexutil"
+	"github.com/Bokerchain/Boker/chain/core/types"
 )
 
 func TestToTransaction(t *testing.T) {

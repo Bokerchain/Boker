@@ -21,16 +21,16 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/core/types"
-	"github.com/boker/chain/eth/downloader"
-	"github.com/boker/chain/log"
-	"github.com/boker/chain/p2p/discover"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/eth/downloader"
+	"github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/p2p/discover"
 )
 
 const (
 	forceSyncCycle      = 10 * time.Second // Time interval to force syncs, even if few peers are available
-	minDesiredPeerCount = 5                // Amount of peers desired to start syncing
+	minDesiredPeerCount = 2                // Amount of peers desired to start syncing
 
 	// This is the target size for the packs of transactions sent by txsyncLoop.
 	// A pack can get larger than this if a single transactions exceeds this size.
@@ -154,10 +154,13 @@ func (pm *ProtocolManager) syncer() {
 	for {
 		select {
 		case <-pm.newPeerCh:
+
+			log.Info("pm.newPeerCh", "len", pm.peers.Len(), "minDesiredPeerCount", minDesiredPeerCount)
+
 			// Make sure we have peers to select from, then sync
-			if pm.peers.Len() < minDesiredPeerCount {
+			/*if pm.peers.Len() < minDesiredPeerCount {
 				break
-			}
+			}*/
 			go pm.synchronise(pm.peers.BestPeer())
 
 		case <-forceSync.C:

@@ -20,8 +20,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/boker/chain/p2p"
-	"github.com/boker/chain/p2p/discover"
+	"github.com/Bokerchain/Boker/chain/p2p"
+	"github.com/Bokerchain/Boker/chain/p2p/discover"
 )
 
 type testPeer struct {

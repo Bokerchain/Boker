@@ -28,8 +28,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/boker/chain/log"
-	"github.com/boker/chain/swarm/api"
+	"github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/swarm/api"
 )
 
 //templateMap holds a mapping of an HTTP error code to a template

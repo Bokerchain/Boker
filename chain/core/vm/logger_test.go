@@ -20,8 +20,8 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/params"
 )
 
 type dummyContractRef struct {

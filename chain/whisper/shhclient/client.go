@@ -19,10 +19,10 @@ package shhclient
 import (
 	"context"
 
-	"github.com/boker/chain"
-	"github.com/boker/chain/common/hexutil"
-	"github.com/boker/chain/rpc"
-	whisper "github.com/boker/chain/whisper/whisperv5"
+	"github.com/Bokerchain/Boker/chain"
+	"github.com/Bokerchain/Boker/chain/common/hexutil"
+	"github.com/Bokerchain/Boker/chain/rpc"
+	whisper "github.com/Bokerchain/Boker/chain/whisper/whisperv5"
 )
 
 // Client defines typed wrappers for the Whisper v5 RPC API.

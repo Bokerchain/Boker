@@ -24,12 +24,12 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/contracts/ens"
-	"github.com/boker/chain/crypto"
-	"github.com/boker/chain/swarm/network"
-	"github.com/boker/chain/swarm/services/swap"
-	"github.com/boker/chain/swarm/storage"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/contracts/ens"
+	"github.com/Bokerchain/Boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/swarm/network"
+	"github.com/Bokerchain/Boker/chain/swarm/services/swap"
+	"github.com/Bokerchain/Boker/chain/swarm/storage"
 )
 
 const (

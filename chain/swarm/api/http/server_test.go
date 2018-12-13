@@ -26,11 +26,11 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/swarm/api"
-	swarm "github.com/boker/chain/swarm/api/client"
-	"github.com/boker/chain/swarm/storage"
-	"github.com/boker/chain/swarm/testutil"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/swarm/api"
+	swarm "github.com/Bokerchain/Boker/chain/swarm/api/client"
+	"github.com/Bokerchain/Boker/chain/swarm/storage"
+	"github.com/Bokerchain/Boker/chain/swarm/testutil"
 )
 
 func TestBzzrGetPath(t *testing.T) {

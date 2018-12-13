@@ -19,7 +19,7 @@ package state
 import (
 	"sync"
 
-	"github.com/boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/common"
 )
 
 type account struct {

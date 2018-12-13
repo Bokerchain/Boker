@@ -21,9 +21,9 @@ import (
 	"hash"
 	"sync"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/crypto/sha3"
-	"github.com/boker/chain/rlp"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/crypto/sha3"
+	"github.com/Bokerchain/Boker/chain/rlp"
 )
 
 type hasher struct {

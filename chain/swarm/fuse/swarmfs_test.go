@@ -27,8 +27,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/boker/chain/swarm/api"
-	"github.com/boker/chain/swarm/storage"
+	"github.com/Bokerchain/Boker/chain/swarm/api"
+	"github.com/Bokerchain/Boker/chain/swarm/storage"
 )
 
 type fileInfo struct {

@@ -24,8 +24,8 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/boker/chain/crypto"
-	"github.com/boker/chain/p2p"
+	"github.com/Bokerchain/Boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/p2p"
 )
 
 // Tests that datadirs can be successfully created, be them manually configured

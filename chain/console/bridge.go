@@ -23,9 +23,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/boker/chain/accounts/usbwallet"
-	"github.com/boker/chain/log"
-	"github.com/boker/chain/rpc"
+	"github.com/Bokerchain/Boker/chain/accounts/usbwallet"
+	"github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/rpc"
 	"github.com/robertkrimen/otto"
 )
 

@@ -21,8 +21,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/crypto"
 )
 
 // Event is an event potentially triggered by the EVM's LOG mechanism. The Event

@@ -22,9 +22,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/crypto"
-	"github.com/boker/chain/ethdb"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/ethdb"
 )
 
 func newEmptySecure() *SecureTrie {

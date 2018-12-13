@@ -19,7 +19,7 @@ package params
 import (
 	"math/big"
 
-	"github.com/boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/common"
 )
 
 // DAOForkBlockExtra is the block header extra-data field to set for the DAO fork

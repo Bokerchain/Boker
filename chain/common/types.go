@@ -7,8 +7,8 @@ import (
 	"math/rand"
 	"reflect"
 
-	"github.com/boker/chain/common/hexutil"
-	"github.com/boker/chain/crypto/sha3"
+	"github.com/Bokerchain/Boker/chain/common/hexutil"
+	"github.com/Bokerchain/Boker/chain/crypto/sha3"
 )
 
 const (

@@ -17,8 +17,8 @@
 package les
 
 import (
-	"github.com/boker/chain/metrics"
-	"github.com/boker/chain/p2p"
+	"github.com/Bokerchain/Boker/chain/metrics"
+	"github.com/Bokerchain/Boker/chain/p2p"
 )
 
 var (

@@ -9,22 +9,22 @@ import (
 	"sync"
 	"time"
 
-	"github.com/boker/chain/accounts"
-	"github.com/boker/chain/boker/api"
-	"github.com/boker/chain/boker/protocol"
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/consensus"
-	"github.com/boker/chain/consensus/misc"
-	"github.com/boker/chain/core/state"
-	"github.com/boker/chain/core/types"
-	"github.com/boker/chain/crypto"
-	"github.com/boker/chain/crypto/sha3"
-	"github.com/boker/chain/ethdb"
-	"github.com/boker/chain/log"
-	"github.com/boker/chain/params"
-	"github.com/boker/chain/rlp"
-	"github.com/boker/chain/rpc"
-	"github.com/boker/chain/trie"
+	"github.com/Bokerchain/Boker/chain/accounts"
+	"github.com/Bokerchain/Boker/chain/boker/api"
+	"github.com/Bokerchain/Boker/chain/boker/protocol"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/consensus"
+	"github.com/Bokerchain/Boker/chain/consensus/misc"
+	"github.com/Bokerchain/Boker/chain/core/state"
+	"github.com/Bokerchain/Boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/crypto/sha3"
+	"github.com/Bokerchain/Boker/chain/ethdb"
+	"github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/rlp"
+	"github.com/Bokerchain/Boker/chain/rpc"
+	"github.com/Bokerchain/Boker/chain/trie"
 	lru "github.com/hashicorp/golang-lru"
 )
 
@@ -194,9 +194,14 @@ func (d *Dpos) VerifySeal(chain consensus.ChainReader, header *types.Header) err
 
 func (d *Dpos) verifySeal(chain consensus.ChainReader, header *types.Header, parents []*types.Header) error {
 
+	const (
+		genesisNumber uint64 = 0 //创世区块
+		firstNumber   uint64 = 1 //首区块
+	)
+
 	//判断是否是创始区块
 	number := header.Number.Uint64()
-	if number == 0 {
+	if genesisNumber == number {
 		return protocol.ErrUnknownBlock
 	}
 
@@ -214,15 +219,19 @@ func (d *Dpos) verifySeal(chain consensus.ChainReader, header *types.Header, par
 		return err
 	}
 
-	//根据Dpos对象创建一个周期对象
-	producer, err := dposContext.GetProducer(header.Time.Int64())
-	if err != nil {
-		return err
-	}
+	//第一个区块为设置第一个验证者区块，因此不能对其进行周期对象判断
+	if firstNumber != number {
 
-	//验证区块签名者
-	if err := d.verifyBlockSigner(producer, header); err != nil {
-		return err
+		//根据Dpos对象创建一个周期对象
+		producer, err := dposContext.GetProducer(header.Time.Int64())
+		if err != nil {
+			return err
+		}
+
+		//验证区块签名者
+		if err := d.verifyBlockSigner(producer, header); err != nil {
+			return err
+		}
 	}
 	return d.updateConfirmedBlockHeader(chain)
 }

@@ -26,10 +26,10 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/boker/chain/cmd/internal/browser"
-	"github.com/boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/cmd/internal/browser"
+	"github.com/Bokerchain/Boker/chain/params"
 
-	"github.com/boker/chain/cmd/utils"
+	"github.com/Bokerchain/Boker/chain/cmd/utils"
 	cli "gopkg.in/urfave/cli.v1"
 )
 
@@ -41,7 +41,7 @@ var bugCommand = cli.Command{
 	Category:  "MISCELLANEOUS COMMANDS",
 }
 
-const issueUrl = "https://github.com/boker/chain/issues/new"
+const issueUrl = "https://github.com/Bokerchain/Boker/chain/issues/new"
 
 // reportBug reports a bug by opening a new URL to the go-ethereum GH issue
 // tracker and setting default values as the issue body.

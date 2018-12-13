@@ -5,11 +5,11 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/common/math"
-	"github.com/boker/chain/crypto"
-	"github.com/boker/chain/crypto/bn256"
-	"github.com/boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/common/math"
+	"github.com/Bokerchain/Boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/crypto/bn256"
+	"github.com/Bokerchain/Boker/chain/params"
 	"golang.org/x/crypto/ripemd160"
 )
 

@@ -20,17 +20,17 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/log"
 )
 
 /*
 http roundtripper to register for bzz url scheme
-see https://github.com/boker/chain/issues/2040
+see https://github.com/Bokerchain/Boker/chain/issues/2040
 Usage:
 
 import (
- "github.com/boker/chain/common/httpclient"
- "github.com/boker/chain/swarm/api/http"
+ "github.com/Bokerchain/Boker/chain/common/httpclient"
+ "github.com/Bokerchain/Boker/chain/swarm/api/http"
 )
 client := httpclient.New()
 // for (private) swarm proxy running locally

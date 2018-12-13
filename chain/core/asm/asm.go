@@ -21,7 +21,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/boker/chain/core/vm"
+	"github.com/Bokerchain/Boker/chain/core/vm"
 )
 
 // Iterator for disassembled EVM instructions

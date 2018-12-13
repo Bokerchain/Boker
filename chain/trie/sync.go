@@ -20,7 +20,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/common"
 	"gopkg.in/karalabe/cookiejar.v2/collections/prque"
 )
 

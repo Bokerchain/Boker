@@ -27,9 +27,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/boker/chain/accounts"
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/accounts"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/log"
 	"gopkg.in/fatih/set.v0"
 )
 

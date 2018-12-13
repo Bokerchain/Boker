@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/boker/chain/node"
-	"github.com/boker/chain/p2p"
-	"github.com/boker/chain/rpc"
+	"github.com/Bokerchain/Boker/chain/node"
+	"github.com/Bokerchain/Boker/chain/p2p"
+	"github.com/Bokerchain/Boker/chain/rpc"
 )
 
 // SampleService is a trivial network service that can be attached to a node for

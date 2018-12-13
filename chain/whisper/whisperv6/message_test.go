@@ -21,8 +21,8 @@ import (
 	mrand "math/rand"
 	"testing"
 
-	"github.com/boker/chain/crypto"
-	"github.com/boker/chain/rlp"
+	"github.com/Bokerchain/Boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/rlp"
 )
 
 func generateMessageParams() (*MessageParams, error) {

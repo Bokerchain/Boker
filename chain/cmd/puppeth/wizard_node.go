@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"time"
 
-	_ "github.com/boker/chain/accounts/keystore"
-	"github.com/boker/chain/log"
+	_ "github.com/Bokerchain/Boker/chain/accounts/keystore"
+	"github.com/Bokerchain/Boker/chain/log"
 )
 
 // deployNode creates a new node configuration based on some user input.

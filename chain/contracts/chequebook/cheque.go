@@ -36,14 +36,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/boker/chain/accounts/abi/bind"
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/common/hexutil"
-	"github.com/boker/chain/contracts/chequebook/contract"
-	"github.com/boker/chain/core/types"
-	"github.com/boker/chain/crypto"
-	"github.com/boker/chain/log"
-	"github.com/boker/chain/swarm/services/swap/swap"
+	"github.com/Bokerchain/Boker/chain/accounts/abi/bind"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/common/hexutil"
+	"github.com/Bokerchain/Boker/chain/contracts/chequebook/contract"
+	"github.com/Bokerchain/Boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/swarm/services/swap/swap"
 )
 
 // TODO(zelig): watch peer solvency and notify of bouncing cheques

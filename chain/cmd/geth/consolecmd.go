@@ -5,10 +5,10 @@ import (
 	"os/signal"
 	"strings"
 
-	"github.com/boker/chain/cmd/utils"
-	"github.com/boker/chain/console"
-	"github.com/boker/chain/node"
-	"github.com/boker/chain/rpc"
+	"github.com/Bokerchain/Boker/chain/cmd/utils"
+	"github.com/Bokerchain/Boker/chain/console"
+	"github.com/Bokerchain/Boker/chain/node"
+	"github.com/Bokerchain/Boker/chain/rpc"
 	"gopkg.in/urfave/cli.v1"
 )
 
@@ -24,7 +24,7 @@ var (
 		Description: `
 The Geth console is an interactive shell for the JavaScript runtime environment
 which exposes a node admin interface as well as the Ðapp JavaScript API.
-See https://github.com/boker/chain/wiki/Javascipt-Console.`,
+See https://github.com/Bokerchain/Boker/chain/wiki/Javascipt-Console.`,
 	}
 
 	attachCommand = cli.Command{
@@ -37,7 +37,7 @@ See https://github.com/boker/chain/wiki/Javascipt-Console.`,
 		Description: `
 The Geth console is an interactive shell for the JavaScript runtime environment
 which exposes a node admin interface as well as the Ðapp JavaScript API.
-See https://github.com/boker/chain/wiki/Javascipt-Console.
+See https://github.com/Bokerchain/Boker/chain/wiki/Javascipt-Console.
 This command allows to open a console on a running geth node.`,
 	}
 
@@ -50,7 +50,7 @@ This command allows to open a console on a running geth node.`,
 		Category:  "CONSOLE COMMANDS",
 		Description: `
 The JavaScript VM exposes a node admin interface as well as the Ðapp
-JavaScript API. See https://github.com/boker/chain/wiki/Javascipt-Console`,
+JavaScript API. See https://github.com/Bokerchain/Boker/chain/wiki/Javascipt-Console`,
 	}
 )
 

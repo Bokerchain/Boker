@@ -22,9 +22,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/boker/chain/accounts"
-	"github.com/boker/chain/event"
-	"github.com/boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/accounts"
+	"github.com/Bokerchain/Boker/chain/event"
+	"github.com/Bokerchain/Boker/chain/log"
 	"github.com/karalabe/hid"
 )
 

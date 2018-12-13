@@ -21,9 +21,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/boker/chain/eth/downloader"
-	"github.com/boker/chain/p2p"
-	"github.com/boker/chain/p2p/discover"
+	"github.com/Bokerchain/Boker/chain/eth/downloader"
+	"github.com/Bokerchain/Boker/chain/p2p"
+	"github.com/Bokerchain/Boker/chain/p2p/discover"
 )
 
 // Tests that fast sync gets disabled as soon as a real block is successfully

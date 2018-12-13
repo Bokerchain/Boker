@@ -19,7 +19,7 @@ package vm
 import (
 	"fmt"
 
-	"github.com/boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/params"
 )
 
 func makeStackFunc(pop, push int) stackValidationFunc {

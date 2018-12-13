@@ -20,10 +20,10 @@ import (
 	"context"
 	"sync"
 
-	ethereum "github.com/boker/chain"
-	"github.com/boker/chain/boker/api"
-	"github.com/boker/chain/event"
-	"github.com/boker/chain/rpc"
+	ethereum "github.com/Bokerchain/Boker/chain"
+	"github.com/Bokerchain/Boker/chain/boker/api"
+	"github.com/Bokerchain/Boker/chain/event"
+	"github.com/Bokerchain/Boker/chain/rpc"
 )
 
 // PublicDownloaderAPI provides an API which gives information about the current synchronisation status.

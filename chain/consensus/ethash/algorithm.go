@@ -26,11 +26,11 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/common/bitutil"
-	"github.com/boker/chain/crypto"
-	"github.com/boker/chain/crypto/sha3"
-	"github.com/boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/common/bitutil"
+	"github.com/Bokerchain/Boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/crypto/sha3"
+	"github.com/Bokerchain/Boker/chain/log"
 )
 
 const (

@@ -26,20 +26,20 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/consensus"
-	"github.com/boker/chain/consensus/misc"
-	"github.com/boker/chain/core"
-	"github.com/boker/chain/core/types"
-	"github.com/boker/chain/eth/downloader"
-	"github.com/boker/chain/eth/fetcher"
-	"github.com/boker/chain/ethdb"
-	"github.com/boker/chain/event"
-	"github.com/boker/chain/log"
-	"github.com/boker/chain/p2p"
-	"github.com/boker/chain/p2p/discover"
-	"github.com/boker/chain/params"
-	"github.com/boker/chain/rlp"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/consensus"
+	"github.com/Bokerchain/Boker/chain/consensus/misc"
+	"github.com/Bokerchain/Boker/chain/core"
+	"github.com/Bokerchain/Boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/eth/downloader"
+	"github.com/Bokerchain/Boker/chain/eth/fetcher"
+	"github.com/Bokerchain/Boker/chain/ethdb"
+	"github.com/Bokerchain/Boker/chain/event"
+	"github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/p2p"
+	"github.com/Bokerchain/Boker/chain/p2p/discover"
+	"github.com/Bokerchain/Boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/rlp"
 )
 
 const (
@@ -137,6 +137,8 @@ func NewProtocolManager(config *params.ChainConfig, mode downloader.SyncMode, ne
 		}
 		// Compatible; initialise the sub-protocol
 		version := version // Closure for the run
+
+		log.Info("append SubProtocols", "Name", ProtocolName, "Version", version)
 		manager.SubProtocols = append(manager.SubProtocols, p2p.Protocol{
 			Name:    ProtocolName,
 			Version: version,
@@ -147,6 +149,8 @@ func NewProtocolManager(config *params.ChainConfig, mode downloader.SyncMode, ne
 				case manager.newPeerCh <- peer:
 					manager.wg.Add(1)
 					defer manager.wg.Done()
+
+					log.Info("manager.handle")
 					return manager.handle(peer)
 				case <-manager.quitSync:
 					return p2p.DiscQuitting
@@ -211,21 +215,28 @@ func (pm *ProtocolManager) removePeer(id string) {
 //启动P2P网络
 func (pm *ProtocolManager) Start(maxPeers int) {
 
+	log.Info("ProtocolManager Start")
 	pm.maxPeers = maxPeers
 
 	//广播新出现的交易对象
 	pm.txCh = make(chan core.TxPreEvent, txChanSize)
 	pm.txSub = pm.txpool.SubscribeTxPreEvent(pm.txCh)
+
+	log.Info("ProtocolManager txBroadcastLoop")
 	go pm.txBroadcastLoop()
 
 	//广播新挖掘出的区块(等待本节点的新挖掘出区块事件)
 	pm.minedBlockSub = pm.eventMux.Subscribe(core.NewMinedBlockEvent{})
+
+	log.Info("ProtocolManager minedBroadcastLoop")
 	go pm.minedBroadcastLoop()
 
 	//定时与相邻节点进行区块全链的强制同步
+	log.Info("ProtocolManager syncer")
 	go pm.syncer()
 
 	//将新出现的交易对象均匀的同步给相邻节点
+	log.Info("ProtocolManager txsyncLoop")
 	go pm.txsyncLoop()
 }
 
@@ -262,15 +273,15 @@ func (pm *ProtocolManager) newPeer(pv int, p *p2p.Peer, rw p2p.MsgReadWriter) *p
 func (pm *ProtocolManager) handle(p *peer) error {
 
 	//判断节点数量是否超过最大节点数量
+	p.Log().Info("Ethereum peer connected", "name", p.Name(), "len", pm.peers.Len(), "maxPeers", pm.maxPeers)
 	if pm.peers.Len() >= pm.maxPeers {
 		return p2p.DiscTooManyPeers
 	}
-	p.Log().Debug("Ethereum peer connected", "name", p.Name())
 
 	//执行以太坊握手
 	td, head, genesis := pm.blockchain.Status()
 	if err := p.Handshake(pm.networkId, td, head, genesis); err != nil {
-		p.Log().Debug("Ethereum handshake failed", "err", err)
+		p.Log().Error("Ethereum handshake failed", "err", err)
 		return err
 	}
 	if rw, ok := p.rw.(*meteredMsgReadWriter); ok {
@@ -282,6 +293,8 @@ func (pm *ProtocolManager) handle(p *peer) error {
 		p.Log().Error("Ethereum peer registration failed", "err", err)
 		return err
 	}
+	p.Log().Info("Ethereum peer registration", "len", pm.peers.Len())
+
 	defer pm.removePeer(p.id)
 
 	//在下载中注册节点， 如果下载标识它被禁止，我们会断开连接
@@ -313,6 +326,7 @@ func (pm *ProtocolManager) handle(p *peer) error {
 		}()
 	}
 
+	p.Log().Info("Ethereum peer registration 2", "len", pm.peers.Len())
 	//主循环,处理传入的消息。
 	for {
 		if err := pm.handleMsg(p); err != nil {

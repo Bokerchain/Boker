@@ -4,17 +4,17 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/boker/chain/boker/api"
-	"github.com/boker/chain/boker/protocol"
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/consensus/dpos"
-	"github.com/boker/chain/consensus/ethash"
-	"github.com/boker/chain/consensus/misc"
-	"github.com/boker/chain/core/state"
-	"github.com/boker/chain/core/types"
-	"github.com/boker/chain/core/vm"
-	"github.com/boker/chain/ethdb"
-	"github.com/boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/boker/api"
+	"github.com/Bokerchain/Boker/chain/boker/protocol"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/consensus/dpos"
+	"github.com/Bokerchain/Boker/chain/consensus/ethash"
+	"github.com/Bokerchain/Boker/chain/consensus/misc"
+	"github.com/Bokerchain/Boker/chain/core/state"
+	"github.com/Bokerchain/Boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/core/vm"
+	"github.com/Bokerchain/Boker/chain/ethdb"
+	"github.com/Bokerchain/Boker/chain/params"
 )
 
 // So we can deterministically seed different blockchains

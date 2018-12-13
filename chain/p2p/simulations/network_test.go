@@ -22,8 +22,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/boker/chain/p2p/discover"
-	"github.com/boker/chain/p2p/simulations/adapters"
+	"github.com/Bokerchain/Boker/chain/p2p/discover"
+	"github.com/Bokerchain/Boker/chain/p2p/simulations/adapters"
 )
 
 // TestNetworkSimulation creates a multi-node simulation network with each node

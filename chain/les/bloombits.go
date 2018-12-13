@@ -19,8 +19,8 @@ package les
 import (
 	"time"
 
-	"github.com/boker/chain/common/bitutil"
-	"github.com/boker/chain/light"
+	"github.com/Bokerchain/Boker/chain/common/bitutil"
+	"github.com/Bokerchain/Boker/chain/light"
 )
 
 const (

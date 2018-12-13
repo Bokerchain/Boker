@@ -19,7 +19,7 @@ package downloader
 import (
 	"fmt"
 
-	"github.com/boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/core/types"
 )
 
 // peerDropFn is a callback type for dropping a peer detected as malicious.

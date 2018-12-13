@@ -27,12 +27,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/boker/chain/event"
-	"github.com/boker/chain/node"
-	"github.com/boker/chain/p2p"
-	"github.com/boker/chain/p2p/discover"
-	"github.com/boker/chain/p2p/simulations/adapters"
-	"github.com/boker/chain/rpc"
+	"github.com/Bokerchain/Boker/chain/event"
+	"github.com/Bokerchain/Boker/chain/node"
+	"github.com/Bokerchain/Boker/chain/p2p"
+	"github.com/Bokerchain/Boker/chain/p2p/discover"
+	"github.com/Bokerchain/Boker/chain/p2p/simulations/adapters"
+	"github.com/Bokerchain/Boker/chain/rpc"
 )
 
 // testService implements the node.Service interface and provides protocols

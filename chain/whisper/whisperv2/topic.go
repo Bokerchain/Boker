@@ -19,7 +19,7 @@
 
 package whisperv2
 
-import "github.com/boker/chain/crypto"
+import "github.com/Bokerchain/Boker/chain/crypto"
 
 // Topic represents a cryptographically secure, probabilistic partial
 // classifications of a message, determined as the first (left) 4 bytes of the

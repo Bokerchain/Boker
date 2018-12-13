@@ -24,7 +24,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/common"
 )
 
 // Hash represents the 32 byte Keccak256 hash of arbitrary data.

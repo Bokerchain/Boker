@@ -10,11 +10,11 @@ fi
 # Create fake Go workspace if it doesn't exist yet.
 workspace="$PWD/build/_workspace"
 root="$PWD"
-ethdir="$workspace/src/github.com/boker"
+ethdir="$workspace/src/github.com/Bokerchain/Boker"
 if [ ! -L "$ethdir/chain" ]; then
     mkdir -p "$ethdir"
     cd "$ethdir"
-    ln -s ../../../../../. chain
+    ln -s ../../../../../../. chain
     cd "$root"
 fi
 

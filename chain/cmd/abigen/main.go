@@ -8,8 +8,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/boker/chain/accounts/abi/bind"
-	"github.com/boker/chain/common/compiler"
+	"github.com/Bokerchain/Boker/chain/accounts/abi/bind"
+	"github.com/Bokerchain/Boker/chain/common/compiler"
 )
 
 var (

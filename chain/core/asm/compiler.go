@@ -23,8 +23,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/boker/chain/common/math"
-	"github.com/boker/chain/core/vm"
+	"github.com/Bokerchain/Boker/chain/common/math"
+	"github.com/Bokerchain/Boker/chain/core/vm"
 )
 
 // Compiler contains information about the parsed source

@@ -24,7 +24,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/log"
 )
 
 type brokenLimitedReader struct {

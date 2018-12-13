@@ -27,12 +27,12 @@ import (
 	"time"
 
 	"github.com/docker/docker/pkg/reexec"
-	"github.com/boker/chain/accounts/keystore"
-	"github.com/boker/chain/internal/cmdtest"
-	"github.com/boker/chain/node"
-	"github.com/boker/chain/p2p"
-	"github.com/boker/chain/rpc"
-	"github.com/boker/chain/swarm"
+	"github.com/Bokerchain/Boker/chain/accounts/keystore"
+	"github.com/Bokerchain/Boker/chain/internal/cmdtest"
+	"github.com/Bokerchain/Boker/chain/node"
+	"github.com/Bokerchain/Boker/chain/p2p"
+	"github.com/Bokerchain/Boker/chain/rpc"
+	"github.com/Bokerchain/Boker/chain/swarm"
 )
 
 func init() {

@@ -21,11 +21,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/boker/chain/consensus/ethash"
-	"github.com/boker/chain/core/types"
-	"github.com/boker/chain/core/vm"
-	"github.com/boker/chain/ethdb"
-	"github.com/boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/consensus/ethash"
+	"github.com/Bokerchain/Boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/core/vm"
+	"github.com/Bokerchain/Boker/chain/ethdb"
+	"github.com/Bokerchain/Boker/chain/params"
 )
 
 // Tests that simple header verification works, for both good and bad blocks.

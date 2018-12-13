@@ -19,8 +19,8 @@ package trie
 import (
 	"fmt"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/log"
 )
 
 var secureKeyPrefix = []byte("secure-key-")

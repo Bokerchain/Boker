@@ -19,7 +19,7 @@ package ethapi
 import (
 	"sync"
 
-	"github.com/boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/common"
 )
 
 type AddrLocker struct {

@@ -24,17 +24,17 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/boker/chain/core"
-	"github.com/boker/chain/eth"
-	"github.com/boker/chain/eth/downloader"
-	"github.com/boker/chain/ethclient"
-	"github.com/boker/chain/ethstats"
-	"github.com/boker/chain/les"
-	"github.com/boker/chain/node"
-	"github.com/boker/chain/p2p"
-	"github.com/boker/chain/p2p/nat"
-	"github.com/boker/chain/params"
-	whisper "github.com/boker/chain/whisper/whisperv5"
+	"github.com/Bokerchain/Boker/chain/core"
+	"github.com/Bokerchain/Boker/chain/eth"
+	"github.com/Bokerchain/Boker/chain/eth/downloader"
+	"github.com/Bokerchain/Boker/chain/ethclient"
+	"github.com/Bokerchain/Boker/chain/ethstats"
+	"github.com/Bokerchain/Boker/chain/les"
+	"github.com/Bokerchain/Boker/chain/node"
+	"github.com/Bokerchain/Boker/chain/p2p"
+	"github.com/Bokerchain/Boker/chain/p2p/nat"
+	"github.com/Bokerchain/Boker/chain/params"
+	whisper "github.com/Bokerchain/Boker/chain/whisper/whisperv5"
 )
 
 // NodeConfig represents the collection of configuration values to fine tune the Geth

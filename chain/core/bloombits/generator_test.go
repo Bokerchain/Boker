@@ -21,7 +21,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/core/types"
 )
 
 // Tests that batched bloom bits are correctly rotated from the input bloom

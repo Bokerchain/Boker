@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/log"
 )
 
 // manageServers displays a list of servers the user can disconnect from, and an

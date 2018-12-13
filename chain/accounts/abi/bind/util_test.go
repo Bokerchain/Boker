@@ -22,12 +22,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/boker/chain/accounts/abi/bind"
-	"github.com/boker/chain/accounts/abi/bind/backends"
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/core"
-	"github.com/boker/chain/core/types"
-	"github.com/boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/accounts/abi/bind"
+	"github.com/Bokerchain/Boker/chain/accounts/abi/bind/backends"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/core"
+	"github.com/Bokerchain/Boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/crypto"
 )
 
 var testKey, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")

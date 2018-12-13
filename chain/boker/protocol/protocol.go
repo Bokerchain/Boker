@@ -10,11 +10,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/boker/chain/accounts/abi"
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/crypto/sha3"
-	"github.com/boker/chain/log"
-	"github.com/boker/chain/rlp"
+	"github.com/Bokerchain/Boker/chain/accounts/abi"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/crypto/sha3"
+	"github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/rlp"
 )
 
 const (
@@ -68,12 +68,6 @@ const (
 	SystemContract                       //系统基础合约
 	PersonalContract                     //个人基础合约
 )
-
-/*	ContractVote                              //投票合约
-	ContractAssignToken                       //通证分配合约
-	UnContractVote                            //取消投票合约
-	UnContractAssignToken                     //取消通证分配合约
-)*/
 
 var (
 	BobbyUnit          *big.Int = big.NewInt(1e+17) //Bobby的单位

@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/ethdb"
-	"github.com/boker/chain/trie"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/ethdb"
+	"github.com/Bokerchain/Boker/chain/trie"
 	lru "github.com/hashicorp/golang-lru"
 )
 

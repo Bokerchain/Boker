@@ -19,7 +19,7 @@ package number
 import (
 	"math/big"
 
-	"github.com/boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/common"
 )
 
 var tt256 = new(big.Int).Lsh(big.NewInt(1), 256)

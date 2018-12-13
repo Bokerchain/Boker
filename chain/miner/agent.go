@@ -21,8 +21,8 @@ import (
 
 	"sync/atomic"
 
-	"github.com/boker/chain/consensus"
-	"github.com/boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/consensus"
+	"github.com/Bokerchain/Boker/chain/log"
 )
 
 type CpuAgent struct {

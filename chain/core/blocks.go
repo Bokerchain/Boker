@@ -1,6 +1,6 @@
 package core
 
-import "github.com/boker/chain/common"
+import "github.com/Bokerchain/Boker/chain/common"
 
 // BadHashes represent a set of manually tracked bad hashes (usually hard forks)
 var BadHashes = map[common.Hash]bool{

@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/boker/chain/event"
+	"github.com/Bokerchain/Boker/chain/event"
 )
 
 // This example demonstrates how SubscriptionScope can be used to control the lifetime of

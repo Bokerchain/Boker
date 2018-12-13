@@ -21,8 +21,8 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/boker/chain/core/types"
-	"github.com/boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/crypto"
 )
 
 // Tests that transactions can be added to strict lists and list contents and

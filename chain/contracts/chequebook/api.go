@@ -20,7 +20,7 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/common"
 )
 
 const Version = "1.0"

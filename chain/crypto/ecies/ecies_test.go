@@ -40,7 +40,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/crypto"
 )
 
 var dumpEnc bool

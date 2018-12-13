@@ -20,9 +20,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/boker/chain/core"
-	"github.com/boker/chain/eth/downloader"
-	"github.com/boker/chain/light"
+	"github.com/Bokerchain/Boker/chain/core"
+	"github.com/Bokerchain/Boker/chain/eth/downloader"
+	"github.com/Bokerchain/Boker/chain/light"
 )
 
 const (

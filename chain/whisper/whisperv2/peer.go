@@ -20,10 +20,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/log"
-	"github.com/boker/chain/p2p"
-	"github.com/boker/chain/rlp"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/p2p"
+	"github.com/Bokerchain/Boker/chain/rlp"
 	"gopkg.in/fatih/set.v0"
 )
 

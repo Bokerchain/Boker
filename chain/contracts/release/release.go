@@ -25,15 +25,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/boker/chain/accounts/abi/bind"
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/eth"
-	"github.com/boker/chain/internal/ethapi"
-	"github.com/boker/chain/les"
-	"github.com/boker/chain/log"
-	"github.com/boker/chain/node"
-	"github.com/boker/chain/p2p"
-	"github.com/boker/chain/rpc"
+	"github.com/Bokerchain/Boker/chain/accounts/abi/bind"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/eth"
+	"github.com/Bokerchain/Boker/chain/internal/ethapi"
+	"github.com/Bokerchain/Boker/chain/les"
+	"github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/node"
+	"github.com/Bokerchain/Boker/chain/p2p"
+	"github.com/Bokerchain/Boker/chain/rpc"
 )
 
 //检查新版本的时间间隔(小时)
@@ -150,7 +150,7 @@ func (r *ReleaseService) checkVersion() {
 
 		warning := fmt.Sprintf("Client v%d.%d.%d-%x seems older than the latest upstream release v%d.%d.%d-%x",
 			r.config.Major, r.config.Minor, r.config.Patch, r.config.Commit[:4], version.Major, version.Minor, version.Patch, version.Commit[:4])
-		howtofix := fmt.Sprintf("Please check https://github.com/boker/chain/releases for new releases")
+		howtofix := fmt.Sprintf("Please check https://github.com/Bokerchain/Boker/chain/releases for new releases")
 		separator := strings.Repeat("-", len(warning))
 
 		log.Warn(separator)

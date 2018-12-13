@@ -19,10 +19,10 @@ package core
 import (
 	"math/big"
 
-	"github.com/boker/chain/boker/api"
-	"github.com/boker/chain/core/state"
-	"github.com/boker/chain/core/types"
-	"github.com/boker/chain/core/vm"
+	"github.com/Bokerchain/Boker/chain/boker/api"
+	"github.com/Bokerchain/Boker/chain/core/state"
+	"github.com/Bokerchain/Boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/core/vm"
 )
 
 //区块验证者接口

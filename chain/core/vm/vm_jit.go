@@ -38,9 +38,9 @@ import (
 	"math/big"
 	"unsafe"
 
-	"github.com/boker/chain/core/state"
-	"github.com/boker/chain/crypto"
-	"github.com/boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/core/state"
+	"github.com/Bokerchain/Boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/params"
 )
 
 type JitVm struct {

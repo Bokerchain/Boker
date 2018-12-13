@@ -20,9 +20,9 @@ import (
 	"container/ring"
 	"sync"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/core/types"
-	_ "github.com/boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/core/types"
+	_ "github.com/Bokerchain/Boker/chain/log"
 )
 
 // headerRetriever is used by the unconfirmed block set to verify whether a previously

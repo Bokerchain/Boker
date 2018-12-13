@@ -21,7 +21,7 @@ package p2p
 import (
 	"net"
 
-	"github.com/boker/chain/metrics"
+	"github.com/Bokerchain/Boker/chain/metrics"
 )
 
 var (

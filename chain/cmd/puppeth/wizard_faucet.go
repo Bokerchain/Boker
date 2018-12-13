@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/boker/chain/accounts/keystore"
-	"github.com/boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/accounts/keystore"
+	"github.com/Bokerchain/Boker/chain/log"
 )
 
 // deployFaucet queries the user for various input on deploying a faucet, after

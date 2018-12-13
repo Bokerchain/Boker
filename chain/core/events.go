@@ -17,8 +17,8 @@
 package core
 
 import (
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/core/types"
 )
 
 // TxPreEvent is posted when a transaction enters the transaction pool.

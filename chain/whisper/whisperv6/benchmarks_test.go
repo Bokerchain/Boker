@@ -19,7 +19,7 @@ package whisperv6
 import (
 	"testing"
 
-	"github.com/boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/crypto"
 )
 
 func BenchmarkDeriveKeyMaterial(b *testing.B) {

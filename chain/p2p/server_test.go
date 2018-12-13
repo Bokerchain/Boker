@@ -25,9 +25,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/boker/chain/crypto"
-	"github.com/boker/chain/crypto/sha3"
-	"github.com/boker/chain/p2p/discover"
+	"github.com/Bokerchain/Boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/crypto/sha3"
+	"github.com/Bokerchain/Boker/chain/p2p/discover"
 )
 
 func init() {

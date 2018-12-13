@@ -19,8 +19,8 @@ package miner
 import (
 	"testing"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/core/types"
 )
 
 // noopHeaderRetriever is an implementation of headerRetriever that always

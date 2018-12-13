@@ -25,8 +25,8 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/boker/chain/swarm/api"
-	"github.com/boker/chain/swarm/testutil"
+	"github.com/Bokerchain/Boker/chain/swarm/api"
+	"github.com/Bokerchain/Boker/chain/swarm/testutil"
 )
 
 // TestClientUploadDownloadRaw test uploading and downloading raw data to swarm

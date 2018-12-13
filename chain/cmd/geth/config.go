@@ -12,16 +12,16 @@ import (
 
 	cli "gopkg.in/urfave/cli.v1"
 
-	"github.com/boker/chain/cmd/utils"
+	"github.com/Bokerchain/Boker/chain/cmd/utils"
 
-	_ "github.com/boker/chain/boker"
-	"github.com/boker/chain/contracts/release"
-	"github.com/boker/chain/dashboard"
-	"github.com/boker/chain/eth"
-	"github.com/boker/chain/log"
-	"github.com/boker/chain/node"
-	"github.com/boker/chain/params"
-	whisper "github.com/boker/chain/whisper/whisperv5"
+	_ "github.com/Bokerchain/Boker/chain/boker"
+	"github.com/Bokerchain/Boker/chain/contracts/release"
+	"github.com/Bokerchain/Boker/chain/dashboard"
+	"github.com/Bokerchain/Boker/chain/eth"
+	"github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/node"
+	"github.com/Bokerchain/Boker/chain/params"
+	whisper "github.com/Bokerchain/Boker/chain/whisper/whisperv5"
 	"github.com/naoina/toml"
 )
 

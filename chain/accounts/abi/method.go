@@ -22,8 +22,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/boker/chain/crypto"
-	"github.com/boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/log"
 )
 
 // Callable method given a `Name` and whether the method is a constant.

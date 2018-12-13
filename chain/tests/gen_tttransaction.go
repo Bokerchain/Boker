@@ -7,9 +7,9 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/common/hexutil"
-	"github.com/boker/chain/common/math"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/common/hexutil"
+	"github.com/Bokerchain/Boker/chain/common/math"
 )
 
 var _ = (*ttTransactionMarshaling)(nil)

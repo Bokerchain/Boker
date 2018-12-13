@@ -25,8 +25,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/boker/chain/accounts"
-	"github.com/boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/accounts"
+	"github.com/Bokerchain/Boker/chain/crypto"
 	"github.com/pborman/uuid"
 	"golang.org/x/crypto/pbkdf2"
 )

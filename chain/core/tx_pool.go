@@ -9,14 +9,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/boker/chain/boker/protocol"
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/core/state"
-	"github.com/boker/chain/core/types"
-	"github.com/boker/chain/event"
-	"github.com/boker/chain/log"
-	"github.com/boker/chain/metrics"
-	"github.com/boker/chain/params"
+	"github.com/Bokerchain/Boker/chain/boker/protocol"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/core/state"
+	"github.com/Bokerchain/Boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/event"
+	"github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/metrics"
+	"github.com/Bokerchain/Boker/chain/params"
 	"gopkg.in/karalabe/cookiejar.v2/collections/prque"
 )
 
@@ -391,6 +391,7 @@ func (pool *TxPool) reset(oldHead, newHead *types.Header) {
 
 	//这里需要进行判断，如果是基础合约的话，GasLimit会很大，这里要看是否进行处理
 	pool.currentMaxGas = newHead.GasLimit
+	log.Info("Set newHead.GasLimit", "newHead.GasLimit", newHead.GasLimit, "Number", newHead.Number)
 
 	// Inject any transactions discarded due to reorgs
 	log.Debug("Reinjecting stale transactions", "count", len(reinject))
@@ -527,7 +528,7 @@ func (pool *TxPool) local() map[common.Address]types.Transactions {
 //普通交易检验
 func (pool *TxPool) normalValidateTx(tx *types.Transaction, local bool) error {
 
-	//log.Info("****normalValidateTx****")
+	log.Info("****normalValidateTx****", "tx Gas", tx.Gas(), "pool.currentMaxGas", pool.currentMaxGas)
 
 	//如果当前的最大Gas数量小于交易所标记的Gas数量，则放回GasLimit错误(这里需要添加针对基础合约类型的判断，因为基础合约采用的Gas为最大值)
 	if pool.currentMaxGas.Cmp(tx.Gas()) < 0 {
@@ -540,7 +541,7 @@ func (pool *TxPool) normalValidateTx(tx *types.Transaction, local bool) error {
 	if err != nil {
 		return ErrInvalidSender
 	}
-	//log.Info("normalValidateTx", "from", from)
+	log.Info("normalValidateTx", "from", from)
 
 	// Drop non-local transactions under our own minimal accepted gas price
 	local = local || pool.locals.contains(from) // account may be local even if the transaction arrived from the network

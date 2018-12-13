@@ -30,9 +30,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/boker/chain/common"
-	"github.com/boker/chain/crypto"
-	"github.com/boker/chain/crypto/secp256k1"
+	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/crypto/secp256k1"
 )
 
 const NodeIDBits = 512

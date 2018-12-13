@@ -19,7 +19,7 @@ package bloombits
 import (
 	"errors"
 
-	"github.com/boker/chain/core/types"
+	"github.com/Bokerchain/Boker/chain/core/types"
 )
 
 // errSectionOutOfBounds is returned if the user tried to add more bloom filters

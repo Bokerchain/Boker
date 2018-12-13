@@ -22,8 +22,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/boker/chain/core"
-	"github.com/boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/core"
+	"github.com/Bokerchain/Boker/chain/log"
 	"github.com/olekukonko/tablewriter"
 )
 

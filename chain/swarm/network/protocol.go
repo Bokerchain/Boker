@@ -37,12 +37,12 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/boker/chain/contracts/chequebook"
-	"github.com/boker/chain/log"
-	"github.com/boker/chain/p2p"
-	bzzswap "github.com/boker/chain/swarm/services/swap"
-	"github.com/boker/chain/swarm/services/swap/swap"
-	"github.com/boker/chain/swarm/storage"
+	"github.com/Bokerchain/Boker/chain/contracts/chequebook"
+	"github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/p2p"
+	bzzswap "github.com/Bokerchain/Boker/chain/swarm/services/swap"
+	"github.com/Bokerchain/Boker/chain/swarm/services/swap/swap"
+	"github.com/Bokerchain/Boker/chain/swarm/storage"
 )
 
 const (
