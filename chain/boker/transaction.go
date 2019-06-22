@@ -27,18 +27,17 @@ func NewTransaction(ethereum *eth.Ethereum) *BokerTransaction {
 	}
 }
 
-func (t *BokerTransaction) SubmitBokerTransaction(ctx context.Context, txType protocol.TxType, to common.Address, extra string) error {
+func (t *BokerTransaction) SubmitBokerTransaction(ctx context.Context, txType protocol.TxType, to common.Address, extra string) (*types.Transaction, error) {
 
-	//log.Info("****SubmitBokerTransaction****", "txType", txType, "to", to.String())
+	log.Info("(t *BokerTransaction) SubmitBokerTransaction", "txType", txType, "to", to.String())
 	if t.ethereum != nil {
 
 		//得到From账号
 		from, err := t.ethereum.ApiBackend.Coinbase()
 		if err != nil {
-			log.Error("bokerTransaction CoinBase", "error", err)
-			return err
+			log.Error("(t *BokerTransaction) SubmitBokerTransaction CoinBase", "error", err)
+			return nil, err
 		}
-		//log.Info("SubmitBokerTransaction CoinBase", "from", from.String())
 
 		//设置参数（其中有些参数可以通过调用设置默认设置来进行获取）
 		args := ethapi.SendTxArgs{
@@ -50,7 +49,6 @@ func (t *BokerTransaction) SubmitBokerTransaction(ctx context.Context, txType pr
 			GasPrice: nil,
 			Value:    nil,
 			Data:     hexutil.Bytes([]byte(extra)),
-			//Extra:    hexutil.Bytes([]byte(extra)),
 		}
 
 		//查找包含所请求签名者的钱包
@@ -59,16 +57,16 @@ func (t *BokerTransaction) SubmitBokerTransaction(ctx context.Context, txType pr
 		//根据帐号得到钱包信息
 		wallet, err := t.ethereum.AccountManager().Find(account)
 		if err != nil {
-			log.Error("SubmitBokerTransaction AccountManager Find", "error", err)
-			return err
+			log.Error("(t *BokerTransaction) SubmitBokerTransaction AccountManager", "error", err)
+			return nil, err
 		}
 
 		//设置默认设置
 		if err := args.SetDefaults(ctx, t.ethereum.ApiBackend); err != nil {
-			log.Error("SubmitBokerTransaction SetDefaults", "error", err)
-			return err
+			log.Error("(t *BokerTransaction) SubmitBokerTransaction SetDefaults", "error", err)
+			return nil, err
 		}
-		log.Info("SubmitBokerTransaction SetDefaults", "Nonce", args.Nonce.String(), "txType", args.Type)
+		log.Info("(t *BokerTransaction) SubmitBokerTransaction SetDefaults", "Nonce", args.Nonce.String(), "txType", args.Type)
 
 		input := []byte("")
 		tx := types.NewBaseTransaction(args.Type, (uint64)(*args.Nonce), (common.Address)(*args.To), (*big.Int)(args.Value), input)
@@ -81,17 +79,16 @@ func (t *BokerTransaction) SubmitBokerTransaction(ctx context.Context, txType pr
 		//对该笔交易签名来确保该笔交易的真实有效性
 		signed, err := wallet.SignTxWithPassphrase(account, t.ethereum.Password(), tx, chainID)
 		if err != nil {
-			log.Error("SubmitBokerTransaction SignTxWithPassphrase", "error", err)
-			return err
+			log.Error("(t *BokerTransaction) SubmitBokerTransaction SignTxWithPassphrase", "error", err)
+			return nil, err
 		}
-		//log.Info("SubmitBokerTransaction SetDefaults", "Nonce", args.Nonce.String(), "GasPrice", args.GasPrice)
 
 		if _, err := ethapi.SubmitTransaction(ctx, t.ethereum.ApiBackend, signed); err != nil {
-			log.Error("SubmitBokerTransaction SubmitTransaction", "error", err)
-			return err
+			log.Error("(t *BokerTransaction) SubmitBokerTransaction SubmitTransaction", "error", err)
+			return nil, err
 		}
 
-		return nil
+		return signed, nil
 	}
-	return protocol.ErrInvalidSystem
+	return nil, protocol.ErrInvalidSystem
 }

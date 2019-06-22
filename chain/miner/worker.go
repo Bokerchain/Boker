@@ -202,16 +202,20 @@ func (self *worker) mintBlock(now int64) {
 		return
 	}
 	if size == 0 {
-		if self.chain.CurrentBlock().Number().Uint64() != 0 {
-			log.Error("current block number is`t zero")
+
+		//block := self.chain.CurrentBlock()
+		firstTimer := self.chain.GetBlockByNumber(0).Time().Int64()
+
+		//log.Info("block Information", "number", block.Number(), "firstTimer", firstTimer, "now", now)
+		if err := engine.CheckDeadline(self.chain.CurrentBlock(), now, firstTimer); err != nil {
+
+			//log.Error("CheckDeadline Failed", "now", now, "firstTimer", firstTimer, "err", err)
 			return
 		}
-		if err := engine.CheckDeadline(self.chain.CurrentBlock(), now); err != nil {
-			return
-		}
+
 		if self.chain.Boker().IsValidator(self.coinbase) {
 
-			log.Info("mintBlock")
+			//log.Info("mintBlock")
 
 			work, err := self.createNewWork()
 			if err != nil {
@@ -232,11 +236,12 @@ func (self *worker) mintBlock(now int64) {
 
 	} else {
 
-		if err := engine.CheckDeadline(self.chain.CurrentBlock(), now); err != nil {
+		firstTimer := self.chain.GetBlockByNumber(0).Time().Int64()
+		if err := engine.CheckDeadline(self.chain.CurrentBlock(), now, firstTimer); err != nil {
 			return
 		}
 
-		err := engine.CheckProducer(self.chain.CurrentBlock(), now)
+		err := engine.CheckProducer(self.chain.CurrentBlock(), now, firstTimer)
 		if err != nil {
 			switch err {
 			case dpos.ErrWaitForPrevBlock,
@@ -469,6 +474,8 @@ func (self *worker) makeCurrent(parent *types.Block, header *types.Header) error
 
 func (self *worker) createNewWork() (*Work, error) {
 
+	//log.Info("(self *worker) createNewWork")
+
 	//初始化各种临界区
 	self.mu.Lock()
 	defer self.mu.Unlock()
@@ -502,6 +509,7 @@ func (self *worker) createNewWork() (*Work, error) {
 		Extra:      self.extra,
 		Time:       big.NewInt(tstamp),
 	}
+	//log.Info("(self *worker) createNewWork", "Number", num)
 
 	//如果我们正在挖掘，只设置coinbase（避免出现虚假区块奖励）
 	if atomic.LoadInt32(&self.mining) == 1 {
@@ -545,6 +553,7 @@ func (self *worker) createNewWork() (*Work, error) {
 	if err != nil {
 		return nil, fmt.Errorf("got error when fetch pending transactions, err: %s", err)
 	}
+	log.Info("(d *Dpos) Prepare", "Pending len", len(pending))
 
 	//将待处理交易列表,封装进一个TransactionsByPriceAndNonce类型的结构中。这个结构中包含一个heads字段，把交易按照gas price进行排序
 	txs := types.NewTransactionsByPriceAndNonce(self.current.signer, pending)
@@ -583,7 +592,7 @@ func (self *worker) createNewWork() (*Work, error) {
 		log.Info("createNewWork check eth is nil")
 	}
 
-	log.Info("createNewWork self.engine.Finalize")
+	//log.Info("createNewWork self.engine.Finalize")
 	if work.Block, err = self.engine.Finalize(self.chain, header, work.state, work.txs, uncles, work.receipts, work.dposContext, self.eth.Boker()); err != nil {
 		return nil, fmt.Errorf("got error when finalize block for sealing, err: %s", err)
 	}

@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/Bokerchain/Boker/chain/log"
+	_ "github.com/Bokerchain/Boker/chain/log"
 )
 
 // The ABI holds information about a contract's context and available
@@ -75,6 +75,7 @@ func (abi ABI) Pack(name string, args ...interface{}) ([]byte, error) {
 
 func (abi ABI) Unpack(v interface{}, name string, output []byte) (err error) {
 
+	//log.Info("Unpack", "name", name, "output", output)
 	if err = bytesAreProper(output); err != nil {
 		return err
 	}
@@ -92,7 +93,7 @@ func (abi ABI) Unpack(v interface{}, name string, output []byte) (err error) {
 		return unpack.tupleUnpack(v, output)
 	}
 
-	log.Info("Unpack", "output", output)
+	//log.Info("Unpack", "output", output)
 	return unpack.singleUnpack(v, output)
 }
 

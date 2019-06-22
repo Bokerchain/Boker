@@ -38,10 +38,6 @@ import (
 
 // Ethash proof-of-work protocol constants.
 var (
-	//BobbyUnit     *big.Int = big.NewInt(1e+17) //Bobby的单位
-	//BobbyMultiple *big.Int = big.NewInt(220)   //倍数
-	//TransferUnit     *big.Int = big.NewInt(1e+17) //转账单位(这个数值仅用于每次给指定账号，方便指定账号给用户分配通证)
-	//TransferMultiple *big.Int = big.NewInt(330) //转账倍数
 	maxUncles = 2 //单个块中允许的最大叔块数量
 )
 

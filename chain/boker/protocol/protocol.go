@@ -18,17 +18,18 @@ import (
 )
 
 const (
-	ExtraVanity         = 32           //扩展字段的前缀字节数量
-	ExtraSeal           = 65           //扩展字段的后缀字节数量
-	InmemorySignatures  = 4096         //保留在内存中的最近块签名的数量
-	ProducerInterval    = int64(5)     //打包时间间隔（秒）
-	TokenNoderInterval  = int64(300)   //分配通证时间间隔(秒)
-	EpochInterval       = int64(86400) //一个周期的时间（86400秒 = 1天）
-	MaxValidatorSize    = 1            //DPOS的验证者数量
-	SafeSize            = 1            //安全的验证者数量
-	ConsensusSize       = 1            //共识确认验证者数量
-	AssignTokenInterval = time.Second  //分配通证时间间隔(秒)
-	VotesInterval       = time.Second  //投票时间间隔(秒)
+	ExtraVanity        = 32           //扩展字段的前缀字节数量
+	ExtraSeal          = 65           //扩展字段的后缀字节数量
+	InmemorySignatures = 4096         //保留在内存中的最近块签名的数量
+	ProducerInterval   = int64(5)     //打包时间间隔（秒）
+	TokenNoderInterval = int64(300)   //分配通证时间间隔(秒)
+	EpochInterval      = int64(86400) //一个周期的时间（86400秒 = 1天）
+	MaxValidatorSize   = 1            //DPOS的验证者数量
+	SafeSize           = 1            //安全的验证者数量
+	ConsensusSize      = 1            //共识确认验证者数量
+	BokerInterval      = time.Second  //分配通证时间间隔(秒)
+	AssignInterval     = time.Minute  //分配通证时间间隔单位
+	AssignTimer        = 5
 )
 
 //新增多个交易类型
@@ -56,8 +57,8 @@ const (
 	UserEvent         //用户数据上传
 
 	/****系统基础合约交易类型****/
-	AssignToken  //分配通证(每次分配通证的时候触发)
-	AssignReward //出块节点的通证奖励(每次分配通证的时候触发)
+	AssignToken //分配通证(每次分配通证的时候触发)
+	//AssignReward //出块节点的通证奖励(每次分配通证的时候触发)
 )
 
 //新增合约类型
@@ -71,9 +72,9 @@ const (
 
 var (
 	BobbyUnit          *big.Int = big.NewInt(1e+17) //Bobby的单位
-	BobbyMultiple      *big.Int = big.NewInt(220)   //倍数
+	BobbyMultiple      *big.Int = big.NewInt(110)   //倍数
 	TransferUnit       *big.Int = big.NewInt(1e+17) //转账单位(这个数值仅用于每次给指定账号，方便指定账号给用户分配通证)
-	TransferMultiple   *big.Int = big.NewInt(330)   //转账倍数
+	TransferMultiple   *big.Int = big.NewInt(165)   //转账倍数
 	SetValidatorVotes  *big.Int = big.NewInt(10000)
 	MaxGasPrice        *big.Int = new(big.Int).SetUint64(0xffffffffffffffff) //最大的GasPrice
 	MaxGasLimit        *big.Int = new(big.Int).SetUint64(0)                  //最大的GasLimit

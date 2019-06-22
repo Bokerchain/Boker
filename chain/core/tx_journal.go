@@ -113,13 +113,16 @@ func (journal *txJournal) insert(tx *types.Transaction) error {
 // rotate regenerates the transaction journal based on the current contents of
 // the transaction pool.
 func (journal *txJournal) rotate(all map[common.Address]types.Transactions) error {
-	// Close the current journal (if any is open)
+
+	log.Info("(journal *txJournal) rotate")
+
 	if journal.writer != nil {
 		if err := journal.writer.Close(); err != nil {
 			return err
 		}
 		journal.writer = nil
 	}
+
 	// Generate a new journal with the contents of the current pool
 	replacement, err := os.OpenFile(journal.path+".new", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0755)
 	if err != nil {

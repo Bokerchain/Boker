@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script src="js/web3j/web3.js"></script>
+		<script src="js/web3j/ethereumjs-tx-1.3.3.min.js"></script>
+		<script type="text/javascript" src="js/common/mixin.js?v=20190221kasdkasdk"></script>
+	</head>
+
+	<body>
+		<button style="display:block;width:100px;height:40px;margin-left:30px" onclick="test()">测试转账</button>
+	</body>
+	<script>
+		//合约地址
+		window.$contract = '0x213ac60c17c648B78c92b3050039DBBc9AeF58B8';
+		window.$serverIp = 'http://172.200.2.195:9001';
+		var web3;
+		// 创建web3对象并连接到以太坊节点
+		if(typeof web3 !== 'undefined') {
+			web3 = new Web3(web3.currentProvider);
+		} else {
+			web3 = new Web3(new Web3.providers.HttpProvider($serverIp));
+		}
+		var infoContract = web3.eth.contract(ABI);
+		//参数配 合约地址
+		var info = infoContract.at($contract);
+
+		function test() {
+			//我的钱包地址
+			var account = "0x5fa7bc87479f3e4e72092e4a7ea59bd16d55a422";
+			//私钥
+			var privateKey = "2edc22b49ca89fc3ca21528c1f432a5357be635a3fe17072ad73aa010fd6cb55";
+			web3.eth.getTransactionCount(account, function(err, nonce) {
+				var tx = new ethereumjs.Tx({
+					type: 0,
+					nonce: nonce,
+					gasPrice: web3.toHex(web3.toWei('5', 'gwei')),
+					gasLimit: 100000,
+					to: "0x1b9cfa3a084936946c2c966e59b6aab230c76680", //收钱地址
+					value: 5,
+					data: '',
+					extra: ''
+				});
+				tx.sign(ethereumjs.Buffer.Buffer.from(privateKey, 'hex'));
+				var raw = '0x' + tx.serialize().toString('hex');
+				console.log(tx);
+				web3.eth.sendRawTransaction(raw, function(err, transactionHash) {
+					
+				});
+			});
+		}
+	</script>
+
+</html>

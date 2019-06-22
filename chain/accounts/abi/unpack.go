@@ -228,7 +228,7 @@ func lengthPrefixPointsTo(index int, output []byte) (start int, length int, err 
 // checks for proper formatting of byte output
 func bytesAreProper(output []byte) error {
 
-	log.Info("****bytesAreProper****")
+	//log.Info("****bytesAreProper****")
 
 	if len(output) == 0 {
 		return fmt.Errorf("abi: unmarshalling empty output")

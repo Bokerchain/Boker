@@ -24,11 +24,13 @@ import (
 	"math/big"
 	"sync/atomic"
 	"time"
+	"unsafe"
 
 	"github.com/Bokerchain/Boker/chain/boker/protocol"
 	"github.com/Bokerchain/Boker/chain/common"
 	"github.com/Bokerchain/Boker/chain/common/hexutil"
 	"github.com/Bokerchain/Boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/log"
 	"github.com/Bokerchain/Boker/chain/rlp"
 )
 
@@ -56,17 +58,17 @@ type Transaction struct {
 
 //这里注意算法 交易费 = gasUsed * gasPrice
 type txdata struct {
-	Type         protocol.TxType `json:"type"   gencodec:"required"`           //交易类型
-	AccountNonce uint64          `json:"nonce"    gencodec:"required"`         //交易Nonce
-	Price        *big.Int        `json:"gasPrice" gencodec:"required"`         //Gas单价
-	GasLimit     *big.Int        `json:"gas"      gencodec:"required"`         //GasLimit
-	Time         *big.Int        `json:"timestamp"        gencodec:"required"` //交易发起时间
-	Recipient    *common.Address `json:"to"       rlp:"nil"`                   //接收地址，可以为nil
-	Amount       *big.Int        `json:"value"    gencodec:"required"`         //交易使用的数量
-	Payload      []byte          `json:"input"    gencodec:"required"`         //交易可以携带的数据，在不同类型的交易中有不同的含义(这个字段在eth.sendTransaction()中对应的是data字段，在eth.getTransaction()中对应的是input字段)
-	Extra        []byte          `json:"extra"    gencodec:"required"`         //扩展数据
+	AccountNonce uint64          `json:"nonce"    gencodec:"required"` //交易Nonce
+	Price        *big.Int        `json:"gasPrice" gencodec:"required"` //Gas单价
+	GasLimit     *big.Int        `json:"gas"      gencodec:"required"` //GasLimit
+	Recipient    *common.Address `json:"to"       rlp:"nil"`           //接收地址，可以为nil
+	Amount       *big.Int        `json:"value"    gencodec:"required"` //交易使用的数量
+	Payload      []byte          `json:"input"    gencodec:"required"` //交易可以携带的数据，在不同类型的交易中有不同的含义(这个字段在eth.sendTransaction()中对应的是data字段，在eth.getTransaction()中对应的是input字段)
 
-	//交易的签名数据
+	Type  protocol.TxType `json:"type"   gencodec:"required"`           //交易类型
+	Time  *big.Int        `json:"timestamp"        gencodec:"required"` //交易发起时间
+	Extra []byte          `json:"extra"    gencodec:"required"`         //扩展数据
+
 	V *big.Int `json:"v" gencodec:"required"`
 	R *big.Int `json:"r" gencodec:"required"`
 	S *big.Int `json:"s" gencodec:"required"`
@@ -115,15 +117,14 @@ func newTransaction(txType protocol.TxType, nonce uint64, to *common.Address, am
 		AccountNonce: nonce,
 		Recipient:    to,
 		Payload:      payload,
-		//Extra:        extra,
-		Amount:   new(big.Int),
-		GasLimit: new(big.Int),
-		Time:     new(big.Int),
-		Price:    new(big.Int),
-		Type:     txType,
-		V:        new(big.Int),
-		R:        new(big.Int),
-		S:        new(big.Int),
+		Amount:       new(big.Int),
+		GasLimit:     new(big.Int),
+		Time:         new(big.Int),
+		Price:        new(big.Int),
+		Type:         txType,
+		V:            new(big.Int),
+		R:            new(big.Int),
+		S:            new(big.Int),
 	}
 
 	//设置交易时间
@@ -138,6 +139,12 @@ func newTransaction(txType protocol.TxType, nonce uint64, to *common.Address, am
 	if gasPrice != nil {
 		d.Price.Set(gasPrice)
 	}
+
+	// 显示所有的数据大小;
+	log.Info("transaction.go newTransaction",
+		"AccountNonce", unsafe.Sizeof(d.AccountNonce),
+		"Type", unsafe.Sizeof(d.Type),
+		"Price", unsafe.Sizeof(d.Price))
 
 	return &Transaction{data: d}
 }
@@ -203,14 +210,6 @@ func IsAssignToken(txType protocol.TxType) bool {
 	}
 }
 
-func IsAssignReward(txType protocol.TxType) bool {
-	if txType == protocol.AssignReward {
-		return true
-	} else {
-		return false
-	}
-}
-
 func IsRegisterCandidate(txType protocol.TxType) bool {
 	if txType == protocol.RegisterCandidate {
 		return true
@@ -239,7 +238,7 @@ func IsBinary(txType protocol.TxType) bool {
 //当当前交易不是普通类型是进行校验(这里进行了修改，交易非普通类型时也应该继续处理)
 func (tx *Transaction) Validate() error {
 
-	if tx.Type() < protocol.Binary || tx.Type() > protocol.AssignReward {
+	if tx.Type() < protocol.Binary || tx.Type() > protocol.AssignToken {
 		return errors.New("unknown transaction type")
 	}
 	return nil
@@ -312,6 +311,10 @@ func (tx *Transaction) Nonce() uint64         { return tx.data.AccountNonce }
 func (tx *Transaction) CheckNonce() bool      { return true }
 func (tx *Transaction) Type() protocol.TxType { return tx.data.Type }
 func (tx *Transaction) Time() *big.Int        { return tx.data.Time }
+func (tx *Transaction) V() *big.Int           { return tx.data.V }
+func (tx *Transaction) S() *big.Int           { return tx.data.S }
+func (tx *Transaction) R() *big.Int           { return tx.data.R }
+func (tx *Transaction) SetTime()              { tx.data.Time.SetInt64(time.Now().Unix()) }
 
 // To returns the recipient address of the transaction.
 // It returns nil if the transaction is a contract creation.

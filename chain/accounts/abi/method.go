@@ -145,30 +145,30 @@ func (method Method) isTupleReturn() bool { return len(method.Outputs) > 1 }
 
 func (method Method) singleUnpack(v interface{}, output []byte) error {
 
-	log.Info("singleUnpack")
+	//log.Info("singleUnpack")
 
 	// make sure the passed value is a pointer
 	valueOf := reflect.ValueOf(v)
-	log.Info("ValueOf")
+	//log.Info("ValueOf")
 
 	if reflect.Ptr != valueOf.Kind() {
 		return fmt.Errorf("abi: Unpack(non-pointer %T)", v)
 	}
-	log.Info("Kind")
+	//log.Info("Kind")
 
 	value := valueOf.Elem()
-	log.Info("Elem", "outputs", len(method.Outputs))
+	//log.Info("Elem", "outputs", len(method.Outputs))
 
 	marshalledValue, err := toGoType(0, method.Outputs[0].Type, output)
 	if err != nil {
 		return err
 	}
-	log.Info("toGoType")
+	//log.Info("toGoType")
 
 	if err := set(value, reflect.ValueOf(marshalledValue), method.Outputs[0]); err != nil {
 		return err
 	}
-	log.Info("set")
+	//log.Info("set")
 
 	return nil
 }

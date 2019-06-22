@@ -230,16 +230,6 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 
 	protocol.DecodeAbi("", "", "")
 
-	/*var test []byte = []byte("2000000000000000000000000000000000000000000000000000000000000000046861686100000000000000000000000000000000000000000000000000000000")
-	r := bytes.NewReader(test)
-	s := rlp.NewStream(r, 0)
-	kind, size, err := s.Kind()
-	log.Info("****startNode****", "kind", kind, "size", size, "err", err, "test", test)
-	*/
-	/*k, content, rest, err := rlp.Split(test)
-	length, _ := rlp.CountValues(test)
-	log.Info("****startNode****", "k", k, "content", content, "rest", rest, "err", err, "length", length)
-	*/
 	//启动节点
 	utils.StartNode(stack)
 	log.Info("Start Node")

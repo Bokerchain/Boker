@@ -35,6 +35,7 @@ import (
 	"github.com/Bokerchain/Boker/chain/ethdb"
 	"github.com/Bokerchain/Boker/chain/event"
 	"github.com/Bokerchain/Boker/chain/light"
+	"github.com/Bokerchain/Boker/chain/log"
 	"github.com/Bokerchain/Boker/chain/params"
 	"github.com/Bokerchain/Boker/chain/rpc"
 )
@@ -100,6 +101,8 @@ func (b *LesApiBackend) GetEVM(ctx context.Context, msg core.Message, state *sta
 }
 
 func (b *LesApiBackend) SendTx(ctx context.Context, signedTx *types.Transaction) error {
+
+	log.Info("(b *LesApiBackend) SendTx", "Nonce", signedTx.Nonce())
 	return b.eth.txPool.Add(ctx, signedTx)
 }
 

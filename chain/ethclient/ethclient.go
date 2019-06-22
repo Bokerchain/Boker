@@ -160,6 +160,8 @@ func (tx *rpcTransaction) UnmarshalJSON(msg []byte) error {
 //根据所给的hash返回相应的交易
 func (ec *Client) TransactionByHash(ctx context.Context, hash common.Hash) (tx *types.Transaction, isPending bool, err error) {
 
+	log.Info("(ec *Client) TransactionByHash", "hash", hash)
+
 	var json *rpcTransaction
 	err = ec.c.CallContext(ctx, &json, "eth_getTransactionByHash", hash)
 	if err != nil {
@@ -438,12 +440,12 @@ func (ec *Client) SendTransaction(ctx context.Context, tx *types.Transaction) er
 	if err != nil {
 		return err
 	}
-	log.Info("SendTransaction", "len", len(data), "data", data)
+	log.Info("(ec *Client) SendTransaction", "len", len(data), "data", data)
 
 	tx_tmp := new(types.Transaction)
 	if err := rlp.DecodeBytes(data, tx_tmp); err != nil {
 
-		log.Error("SendTransaction", "error", err, "data", data)
+		log.Error("(ec *Client) SendTransaction", "error", err, "data", data)
 		return err
 	}
 
@@ -455,6 +457,8 @@ func (ec *Client) SendTransaction(ctx context.Context, tx *types.Transaction) er
 //得到最后一次的出块节点
 func (ec *Client) GetLastProducerAt(ctx context.Context) ([]byte, error) {
 
+	log.Info("(ec *Client) GetLastProducerAt")
+
 	var result hexutil.Bytes
 	err := ec.c.CallContext(ctx, &result, "eth_getLastProducer")
 	return result, err
@@ -462,6 +466,8 @@ func (ec *Client) GetLastProducerAt(ctx context.Context) ([]byte, error) {
 
 //得到最后一次的分币节点
 func (ec *Client) GetLastTokenNoderAt(ctx context.Context) ([]byte, error) {
+
+	log.Info("(ec *Client) GetLastTokenNoderAt")
 
 	var result hexutil.Bytes
 	err := ec.c.CallContext(ctx, &result, "eth_getLastTokenNoder")
@@ -471,6 +477,8 @@ func (ec *Client) GetLastTokenNoderAt(ctx context.Context) ([]byte, error) {
 //得到下一次的出块节点
 func (ec *Client) GetNextProducerAt(ctx context.Context) ([]byte, error) {
 
+	log.Info("(ec *Client) GetNextProducerAt")
+
 	var result hexutil.Bytes
 	err := ec.c.CallContext(ctx, &result, "eth_getNextProducer")
 	return result, err
@@ -479,37 +487,57 @@ func (ec *Client) GetNextProducerAt(ctx context.Context) ([]byte, error) {
 //得到下一次的分币节点
 func (ec *Client) GetNextTokenNoderAt(ctx context.Context) ([]byte, error) {
 
+	log.Info("(ec *Client) GetNextTokenNoderAt")
+
 	var result hexutil.Bytes
 	err := ec.c.CallContext(ctx, &result, "eth_getNextTokenNoder")
 	return result, err
 }
 
 //设置基础合约
-func (ec *Client) SetBaseContracts(ctx context.Context, address common.Address, contractType uint64, abiJson string) error {
+func (ec *Client) SetBaseContracts(ctx context.Context, address common.Address, contractType uint64, abiJson string) (common.Hash, error) {
 
-	var result hexutil.Bytes
-	err := ec.c.CallContext(ctx, &result, "eth_setBaseContracts", address, contractType, abiJson)
-	return err
+	log.Info("(ec *Client) SetBaseContracts", "address", address.String())
+
+	var txHash common.Hash
+	err := ec.c.CallContext(ctx, &txHash, "eth_setBaseContracts", address, contractType, abiJson)
+	if err != nil {
+		return common.Hash{}, err
+	}
+
+	return txHash, nil
 }
 
 //取消基础合约
-func (ec *Client) CancelBaseContracts(ctx context.Context, address common.Address, contractType uint64) error {
+func (ec *Client) CancelBaseContracts(ctx context.Context, address common.Address, contractType uint64) (common.Hash, error) {
 
-	var result hexutil.Bytes
-	err := ec.c.CallContext(ctx, &result, "eth_cancelBaseContracts", address, contractType)
-	return err
+	log.Info("(ec *Client) CancelBaseContracts", "address", address.String())
+
+	var txHash common.Hash
+	err := ec.c.CallContext(ctx, &txHash, "eth_cancelBaseContracts", address, contractType)
+	if err != nil {
+		return common.Hash{}, err
+	}
+	return txHash, nil
 }
 
 //添加唯一验证人
-func (ec *Client) AddValidator(ctx context.Context, address common.Address, votes uint64) error {
+func (ec *Client) AddValidator(ctx context.Context, address common.Address, votes uint64) (common.Hash, error) {
 
-	var result hexutil.Bytes
-	err := ec.c.CallContext(ctx, &result, "eth_addValidator", address, votes)
-	return err
+	log.Info("(ec *Client) AddValidator", "address", address.String(), "votes", votes)
+
+	var txHash common.Hash
+	err := ec.c.CallContext(ctx, &txHash, "eth_addValidator", address, votes)
+	if err != nil {
+		return common.Hash{}, err
+	}
+	return txHash, nil
 }
 
 //解析abi数据
 func (ec *Client) DecodeAbi(ctx context.Context, abiJson string, method string, payload string) error {
+
+	log.Info("(ec *Client) DecodeAbi", "method", method)
 
 	var result hexutil.Bytes
 	err := ec.c.CallContext(ctx, &result, "eth_decodeAbi", abiJson, method, payload)

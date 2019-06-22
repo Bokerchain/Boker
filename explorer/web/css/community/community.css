@@ -1,0 +1,144 @@
+.homePage .modal .communityModal {
+	width: 6.16rem;
+	height: 11.44rem;
+	background-image: url(../../img/community/communityModal.png);
+	background-size: contain;
+}
+.communityModal .header {
+	display: flex;
+	display: -webkit-flex;
+	align-items: center;
+	-webkit-align-items: center;
+	justify-content: space-between;
+	-webkit-justify-content: space-between;
+	height: 0.76rem;
+	width: 100%;
+	padding-left: 0.64rem;
+	padding-right: 0.44rem;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+
+.communityModal .header div {
+	font-size: 0.36rem;
+	color: #B0D4FE;
+	letter-spacing: 0.04rem;
+}
+
+.communityModal .header img {
+	width: 0.36rem;
+	height: 0.34rem;
+	margin-top: 0.06rem;
+}
+
+.communityModal .content{
+	width: 100%;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	padding: 0.4rem 0.4rem 0;
+	height: auto;
+}
+.communityModal .content .title{
+	color: #FFBA00;
+	font-size: 0.26rem;
+	width: 4.88rem;
+	height: 0.1rem;
+	text-align: center;
+	background-image: url(../../img/community/line@3x.png);
+	background-size: contain;
+	margin: 0 auto;
+	margin-bottom: 0.22rem;
+}
+.communityModal .content .title1{
+	width: 3.9rem;
+}
+.communityModal .content .info{
+	color: #90AED2;
+	font-size: 0.22rem;
+	line-height: 0.28rem;
+}
+.communityModal .headerImg{
+	width: 6.1rem;
+	height: 0.56rem;
+	margin-left: 0.03rem;
+}
+.communityModal .introduceBox{
+	width: 100%;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	padding: 0 0.16rem;
+	overflow-x: scroll;
+	overflow-y: hidden;
+}
+.communityModal .introduceBox::-webkit-scrollbar {
+    display: none;
+}
+.communityModal .introduces{
+	width: 16rem;
+	height: 2.4rem;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+
+.communityModal .introduces .introduce{
+	width: 2.94rem;
+	height: 2.36rem;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	padding: 0.16rem;
+	background-image: url(../../img/community/infoBg@3x.png);
+	background-size: contain;
+	display: inline-block;
+	float: left;
+    margin-right: 0.2rem;
+}
+.communityModal .introduce .title{
+	color: #FFBA00;
+	font-size: 0.2rem;
+	text-align: center;
+	margin: 0.2rem 0;
+}
+.communityModal .introduce .detail{
+	width: 100%;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	padding: 0 0.1rem;
+	color: #90AED2;	
+	font-size: 0.18rem;
+	line-height: 0.26rem;
+}
+.communityModal .parentBox{
+	padding: 0.1rem 0.2rem 0.3rem 0.2rem;
+	box-sizing: border-box;
+}
+.communityModal .parentAddress{
+	width: 100%;
+	padding: 0 0.12rem;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+.communityModal .parentAddress .address{
+	width: 100%;
+	height: 0.84rem;
+	border:#8D8DD6 0.02rem solid;
+	border-left: none;
+	border-right: none;
+	margin-bottom: 0.24rem;
+	text-align: left;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	padding-left: 0.28rem;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: flex-start;
+}
+.communityModal .address .name{
+	color: #B0D4FE;
+	font-size: 0.24rem;
+	margin-bottom: 0.06rem;
+}
+.communityModal .address .url{
+	color: #FFBA00;
+	font-size:  0.24rem;
+}

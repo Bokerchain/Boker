@@ -145,8 +145,6 @@ func (c *BoundContract) Call(opts *CallOpts, result interface{}, method string, 
 //得到当前分币帐号
 func (c *BoundContract) getTokenNoder(opts *TransactOpts) (common.Address, error) {
 
-	//ethereum.ChainReader.
-
 	var ether *eth.Ethereum
 	if err := GethNode.Service(&ether); err != nil {
 		return common.Address{}, err
@@ -156,7 +154,8 @@ func (c *BoundContract) getTokenNoder(opts *TransactOpts) (common.Address, error
 		return common.Address{}, errors.New("failed to lookup token node")
 	}
 
-	return ether.BlockChain().CurrentBlock().DposCtx().GetCurrentTokenNoder()
+	firstTimer := ether.BlockChain().GetBlockByNumber(0).Time().Int64()
+	return ether.BlockChain().CurrentBlock().DposCtx().GetCurrentTokenNoder(firstTimer)
 }
 
 //得到当前的验证者帐号
@@ -171,7 +170,8 @@ func (c *BoundContract) getProducer(opts *TransactOpts) (common.Address, error) 
 		return common.Address{}, errors.New("failed to lookup token node")
 	}
 
-	return ether.BlockChain().CurrentBlock().DposCtx().GetCurrentProducer()
+	firstTimer := ether.BlockChain().GetBlockByNumber(0).Time().Int64()
+	return ether.BlockChain().CurrentBlock().DposCtx().GetCurrentProducer(firstTimer)
 }
 
 //得到参数类型
@@ -187,6 +187,8 @@ func typeof(v interface{}) bool {
 
 //使用输入的值作为参数调用合约方法
 func (c *BoundContract) Transact(opts *TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
+
+	log.Info("Create Transact", "method", method)
 
 	//打包合约参数
 	input, err := c.abi.Pack(method, params...)
@@ -210,6 +212,7 @@ func (c *BoundContract) Transact(opts *TransactOpts, method string, params ...in
 
 		//判断合约类型是否是基础合约
 		extra := []byte("")
+		log.Info("Create Transact", "protocol.PersonalContract", protocol.PersonalContract)
 		if contractType == protocol.PersonalContract {
 
 			//用户触发的基础合约（用户触发，但是不收取Gas费用）
@@ -239,6 +242,17 @@ func (c *BoundContract) Transact(opts *TransactOpts, method string, params ...in
 				}
 				return c.transact(opts, &c.address, input, extra, protocol.AssignToken)
 
+			} else if method == protocol.RotateVoteMethod {
+
+				//得到当前的分币节点
+				tokennoder, err := c.getTokenNoder(opts)
+				if err != nil {
+					return nil, errors.New("get rotate vote error")
+				}
+				if tokennoder != opts.From {
+					return nil, errors.New("current rotate vote not is from account")
+				}
+				return c.transact(opts, &c.address, input, extra, protocol.VoteEpoch)
 			}
 			return nil, errors.New("unknown system contract method name")
 		}
@@ -408,7 +422,7 @@ func (c *BoundContract) transact(opts *TransactOpts, contract *common.Address, p
 
 		//普通交易
 		return c.normalTransact(opts, contract, payload, extra, transactTypes)
-	} else if (transactTypes >= protocol.SetValidator) && (transactTypes <= protocol.AssignReward) {
+	} else if (transactTypes >= protocol.SetValidator) && (transactTypes <= protocol.AssignToken) {
 
 		//基础合约交易
 		return c.baseTransact(opts, contract, payload, extra, transactTypes)

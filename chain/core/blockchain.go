@@ -887,7 +887,7 @@ func (bc *BlockChain) InsertChain(chain types.Blocks) (int, error) {
 //将区块插入到链中
 func (bc *BlockChain) insertChain(chain types.Blocks) (int, []interface{}, []*types.Log, error) {
 
-	log.Info("****insertChain****")
+	log.Info("(bc *BlockChain) insertChain")
 
 	//进行健全性检查，确保所提供的链实际顺序和已连接的
 	for i := 1; i < len(chain); i++ {
@@ -918,6 +918,7 @@ func (bc *BlockChain) insertChain(chain types.Blocks) (int, []interface{}, []*ty
 					chain[i].ParentHash().Bytes()[:4])
 		}
 	}
+	
 	// Pre-checks passed, start the full block imports
 	bc.wg.Add(1)
 	defer bc.wg.Done()
@@ -1008,30 +1009,46 @@ func (bc *BlockChain) insertChain(chain types.Blocks) (int, []interface{}, []*ty
 		if err != nil {
 			return i, events, coalescedLogs, err
 		}
+
 		// Process block using the parent state as reference point.
+		log.Info("Process Block", "Number", block.Number())
 		receipts, logs, usedGas, err := bc.processor.Process(block, state, bc.vmConfig)
 		if err != nil {
+
+			log.Error("Process Block", "Number", block.Number(), "err", err)
 			bc.reportBlock(block, receipts, err)
 			return i, events, coalescedLogs, err
 		}
 
 		// Validate the state using the default validator
+		log.Info("ValidateState", "Number", block.Number())
 		err = bc.Validator().ValidateState(block, parent, state, receipts, usedGas)
 		if err != nil {
+
+			log.Error("Validator", "Number", block.Number(), "err", err)
 			bc.reportBlock(block, receipts, err)
 			return i, events, coalescedLogs, err
 		}
+
 		// Validate the dpos state using the default validator
+		log.Info("ValidateDposState", "Number", block.Number())
 		err = bc.Validator().ValidateDposState(block)
 		if err != nil {
+
+			log.Error("ValidateDposState", "Number", block.Number(), "err", err)
 			bc.reportBlock(block, receipts, err)
 			return i, events, coalescedLogs, err
 		}
+
 		// Validate validator
 		dposEngine, isDpos := bc.engine.(*dpos.Dpos)
 		if isDpos {
+
+			log.Info("VerifySeal", "Number", block.Number())
 			err = dposEngine.VerifySeal(bc, block.Header())
 			if err != nil {
+
+				log.Error("VerifySeal", "Number", block.Number(), "err", err)
 				bc.reportBlock(block, receipts, err)
 				return i, events, coalescedLogs, err
 			}

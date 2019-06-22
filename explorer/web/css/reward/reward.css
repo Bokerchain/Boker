@@ -1,0 +1,294 @@
+/*打赏 模态框*/
+.homePage .modal .rewardModal {
+	width: 6.14rem;
+	height: 9.56rem;
+	background-image: url(../../img/reward/rewardModal.png);
+	background-size: contain;
+}
+
+.rewardModal .header {
+	display: flex;
+	display: -webkit-flex;
+	align-items: center;
+	-webkit-align-items: center;
+	justify-content: space-between;
+	-webkit-justify-content: space-between;
+	height: 0.76rem;
+	width: 6.14rem;
+	padding-left: 0.64rem;
+	padding-right: 0.44rem;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	position: fixed;
+}
+
+.rewardModal .emptyDiv{
+	height: 0.76rem;
+}
+
+.rewardModal .header .title {
+	font-size: 0.36rem;
+	color: #FFFFFF;
+	letter-spacing: 0.04rem;
+}
+.rewardModal .header .rewardRecord {
+	font-size: 0.3rem;
+	width: 2.6rem;
+	height: 0.58rem;
+	line-height: 0.58rem;
+	text-align: center;
+	color: #FFFFFF;
+	letter-spacing: 0.02rem;
+	background-image: url(../../img/reward/rewardRecord@3x.png);
+	background-size: cover;
+	margin-top: 0.15rem;
+}
+
+.rewardModal .header img {
+	width: 0.36rem;
+	height: 0.34rem;
+	margin-top: 0.06rem;
+}
+.rewardModal .contentBox{
+	width: 100%;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	padding: 0 0.1rem;
+}
+.rewardModal .contentBox .titleInfo{
+	width: 100%;
+	height: 0.8rem;
+	line-height: 0.8rem;
+	color: #FFFFFF;
+	opacity: 0.3;
+	text-align: center;
+	font-size: 0.26rem;
+}
+.rewardModal .contentBox .balance{
+	color: #FFBA00;
+	font-size: 0.26rem;
+	width: 100%;
+	height: 0.9rem;
+	/*background-image: url(../../img/reward/rec.png);
+	background-size: contain;*/
+	background-color: #504A8C;
+	padding: 0 0.4rem 0 0.16rem;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	margin-bottom: 0.96rem;
+}
+.rewardModal .contentBox .balance img{
+	width: 0.1rem;
+	height: 0.2rem;
+}
+.rewardModal .contentBox .line{
+	color: #FFFFFF;
+	font-size: 0.26rem;
+	width: 100%;
+	height: 0.84rem;
+	background-color: #504A8C;
+	padding: 0 0.4rem 0 0.16rem;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	border-top: #8D8DD6 1px solid;
+	border-bottom: #8D8DD6 1px solid;
+	margin-bottom: 0.34rem;
+}
+.rewardModal .contentBox .line label{
+	display: inline-block;
+	width: 35%;
+}
+.rewardModal .contentBox .line input{
+	display: inline-block;
+	width: 65%;
+	border: none;
+	background: none;
+	outline: none;
+	color: #FFFFFF;
+}
+.rewardModal .btn{
+	background-image: url(../../img/reward/rewardBtn@3x.png);
+	background-size: contain;
+	width: 2.94rem;
+	height: 0.78rem;
+	line-height: 0.78rem;
+	margin: 0 auto;
+	text-align: center;
+	color: #FFFFFF;
+	font-size: 0.26rem;
+	letter-spacing: 0.02rem;
+	margin-top: 0.78rem;
+}
+.rewardModal .forgetPassword{
+	width: 1rem;
+	height: 0.3rem;
+	line-height: 0.3rem;
+	font-size: 0.22rem;
+	color: #FFFFFF;
+	margin: 0 auto;
+	margin-top: 0.15rem;
+	text-align: center;
+}
+.rewardModal .btnLine{
+	width: 1rem;
+	height: 0.02rem;
+	background: rgba(141,141,214,0.8);
+	margin: 0 auto;
+	margin-top: 0.04rem;
+	box-shadow: 0rem 0.02rem 0.08rem #8D8DD6;
+}
+/*打赏记录模态框css样式*/
+.homePage .modal .rewardRecordModal {
+	width: 6.14rem;
+	height: 9.56rem;
+	background-image: url(../../img/reward/rewardRecordModal.png);
+	background-size: contain;
+}
+.rewardRecordModal .header {
+	display: flex;
+	display: -webkit-flex;
+	align-items: center;
+	-webkit-align-items: center;
+	justify-content: space-between;
+	-webkit-justify-content: space-between;
+	height: 0.76rem;
+	width: 6.14rem;
+	padding-left: 0.64rem;
+	padding-right: 0.44rem;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	position: fixed;
+}
+.rewardRecordModal .emptyDiv{
+	height: 0.76rem;
+}
+.rewardRecordModal .header .title {
+	font-size: 0.36rem;
+	color: #FFFFFF;
+	letter-spacing: 0.04rem;
+}
+.rewardRecordModal .header img {
+	width: 0.36rem;
+	height: 0.34rem;
+	margin-top: 0.06rem;
+}
+.rewardRecordModal .noData {
+    width: 100%;
+    text-align: center;
+    color: #B0D4FE;
+    font-size: 0.26rem;
+    height: 2rem;
+    line-height: 2rem;
+}
+.rewardRecordModal .contentBox{
+	width: 100%;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	padding: 0 0.1rem;
+	overflow-y: scroll;
+    overflow-x: hidden;
+    max-height: 8.3rem;
+}
+.rewardRecordModal .item{
+	width: 5.94rem;
+	height: 1.4rem;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	padding: 0.36rem 0.2rem;
+	border-bottom: #B0D4FE 1px solid;
+}
+.rewardRecordModal .item .line1{
+	color: #FFFFFF;
+	font-size: 0.26rem;
+	width: 100%;
+}
+.rewardRecordModal .line1 .yellowColor{
+	color: #FFBA00;
+}
+.rewardRecordModal .item .line2{
+	color: #FFFFFF;
+	font-size: 0.22rem;
+	width: 100%;
+}
+.rewardRecordModal .line2 .time{
+	color: #5D578F;
+}
+/*重置密码模态框的css样式*/
+.homePage .modal .resetPasswordModal {
+	width: 6.14rem;
+	height: 8.52rem;
+	background-image: url(../../img/register/importkey.png);
+	background-size: contain;
+}
+.resetPasswordModal .header {
+	display: flex;
+	display: -webkit-flex;
+	align-items: center;
+	-webkit-align-items: center;
+	justify-content: space-between;
+	-webkit-justify-content: space-between;
+	height: 0.76rem;
+	width: 100%;
+	padding-left: 0.64rem;
+	padding-right: 0.44rem;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+
+.resetPasswordModal .header div {
+	font-size: 0.36rem;
+	color: #B0D4FE;
+	letter-spacing: 0.04rem;
+}
+
+.resetPasswordModal .header img {
+	width: 0.36rem;
+	height: 0.34rem;
+	margin-top: 0.06rem;
+}
+.resetPasswordModal .importBtn{
+	width: 2.94rem;
+	height: 0.78rem;
+	line-height: 0.78rem;
+	color: #FFF0FE;
+	background-image: url(../../img/register/btn2@3x.png);
+	background-size: contain;
+	-webkit-background-size: contain;
+	margin: 0 auto;
+	text-align: center;
+	font-size: 0.26rem;
+	margin-top: 1.72rem;
+}
+.resetPasswordModal .contentBox{
+	width: 5.2rem;
+	height: 1.76rem;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	border: #504A8C 1px solid;
+	border-radius: 0.06rem;
+	-moz-border-radius: 0.06rem;
+	-webkit-border-radius: 0.06rem;
+	font-size: 0.26rem;
+	margin: 0 auto;
+	margin-top: 2.4rem;
+}
+.resetPasswordModal .contentBox div{
+	height: 50%;
+	padding: 0 0.22rem;
+}
+.resetPasswordModal .contentBox div:nth-child(1){
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	border-bottom: #504A8C 1px solid;
+}
+.resetPasswordModal .contentBox input{
+	border: none;
+	outline: none;
+	background: none;
+	display: block;
+	flex: 1;
+	color: #FFFFFF;
+}

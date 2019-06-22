@@ -1,0 +1,108 @@
+{
+    "deploy": [
+        {
+            "file": "BokerManager.sol",
+            "contracts": [
+                "BokerManager"
+            ]
+        },
+        {
+            "file": "BokerFinance.sol",
+            "contracts": [
+                "BokerFinance"
+            ]
+        },
+        {
+            "file": "BokerDappData.sol",
+            "contracts": [
+                "BokerDappData"
+            ]
+        },
+        {
+            "file": "BokerDapp.sol",
+            "contracts": [
+                "BokerDapp"
+            ]
+        },
+        {
+            "file": "BokerFileData.sol",
+            "contracts": [
+                "BokerFileData"
+            ]
+        },
+        {
+            "file": "BokerFile.sol",
+            "contracts": [
+                "BokerFile"
+            ]
+        },
+        {
+            "file": "BokerTokenPowerData.sol",
+            "contracts": [
+                "BokerTokenPowerData"
+            ]
+        },
+        {
+            "file": "BokerTokenPower.sol",
+            "contracts": [
+                "BokerTokenPower"
+            ]
+        },
+        {
+            "file": "BokerTokenUserData.sol",
+            "contracts": [
+                "BokerTokenUserData"
+            ]
+        },
+        {
+            "file": "BokerTokenUser.sol",
+            "contracts": [
+                "BokerTokenUserData"
+            ]
+        },
+        {
+            "file": "BokerLog.sol",
+            "contracts": [
+                "BokerLog"
+            ]
+        },
+        {
+            "file": "BokerLogData.sol",
+            "contracts": [
+                "BokerLogData"
+            ]
+        },
+        {
+            "file": "BokerNode.sol",
+            "contracts": [
+                "BokerNode"
+            ]
+        },
+        {
+            "file": "BokerNodeData.sol",
+            "contracts": [
+                "BokerNodeData"
+            ]
+        },
+		{
+            "file": "chain_all.sol",
+            "contracts": [
+                "RecipientSuccess",
+				"CWAREToken",
+				"Chainware"
+            ]
+        },
+		{
+            "file": "BokerInterface.sol",
+            "contracts": [
+                "BokerInterface"
+            ]
+        },
+		{
+            "file": "BokerInterfaceBase.sol",
+            "contracts": [
+                "BokerInterfaceBase"
+            ]
+        }
+    ]
+}

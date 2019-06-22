@@ -250,7 +250,18 @@ func (c *Console) AutoCompleteInput(line string, pos int) (string, []string, str
 //欢迎词
 func (c *Console) Welcome() {
 
-	fmt.Fprintf(c.printer, "Welcome to the Bokerchain Geth JavaScript console!\n\n")
+	welcome := `Welcome to the Bokerchain Geth JavaScript console!
+
+  ____            _                           _               _         
+ | __ )    ___   | | __   ___   _ __    ___  | |__     __ _  (_)  _ __  
+ |  _ \   / _ \  | |/ /  / _ \ | '__|  / __| | '_ \   / _  | | | | ' \ 
+ | |_) | | (_) | |   <  |  __/ | |    | (__  | | | | | (_| | | | | | | |
+ |____/   \___/  |_|\_\  \___| |_|     \___| |_| |_|  \__,_| |_| |_| |_|
+
+
+`
+
+	fmt.Fprintf(c.printer, welcome)
 	c.jsre.Run(`
 		console.log("instance: " + web3.version.node);
 		console.log("coinbase: " + eth.coinbase);

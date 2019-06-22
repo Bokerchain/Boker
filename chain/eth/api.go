@@ -57,7 +57,9 @@ func (api *PublicEthereumAPI) Validator() (common.Address, error) {
 	if api.e.BlockChain().CurrentBlock().DposCtx() == nil {
 		return common.Address{}, ErrDpos
 	}
-	return api.e.BlockChain().CurrentBlock().DposCtx().GetCurrentProducer()
+
+	firstTimer := api.e.BlockChain().GetBlockByNumber(0).Time().Int64()
+	return api.e.BlockChain().CurrentBlock().DposCtx().GetCurrentProducer(firstTimer)
 }
 
 //采矿奖励将被发送到的地址（即挖矿者账号）

@@ -8,6 +8,7 @@ import (
 
 	"github.com/Bokerchain/Boker/chain/boker/protocol"
 	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/core/types"
 	"github.com/Bokerchain/Boker/chain/eth"
 	"github.com/Bokerchain/Boker/chain/log"
 	"github.com/Bokerchain/Boker/chain/params"
@@ -55,26 +56,25 @@ func New() *BokerBackend {
 	boker.accounts = nil
 	boker.contracts = nil
 	boker.transactions = nil
-
 	boker.loadConfig()
 	return boker
 }
 
 func (boker *BokerBackend) Init(e *eth.Ethereum, bokerProto *protocol.BokerBackendProto) error {
 
-	log.Info("****Init Boker****")
+	log.Info("(boker *BokerBackend) Init")
 
 	//创建类
 	boker.ethereum = e
 
-	log.Info("Create Bokerchain Transaction Object")
+	log.Info("(boker *BokerBackend) NewTransaction")
 	boker.transactions = NewTransaction(e)
 
-	log.Info("Create Bokerchain Account Object")
+	log.Info("(boker *BokerBackend) NewAccount")
 	boker.accounts = NewAccount()
 
 	var err error
-	log.Info("Create Bokerchain Contract Object")
+	log.Info("(boker *BokerBackend) NewContract")
 	boker.contracts, err = NewContract(e.ChainDb(), e, boker.transactions, bokerProto)
 	if err != nil {
 		return nil
@@ -85,7 +85,7 @@ func (boker *BokerBackend) Init(e *eth.Ethereum, bokerProto *protocol.BokerBacke
 //loadConfig 加载json格式的配置文件
 func (boker *BokerBackend) loadConfig() error {
 
-	log.Info("****loadConfig****")
+	log.Info("(boker *BokerBackend) loadConfig")
 
 	if boker.ethereum != nil {
 
@@ -100,14 +100,14 @@ func (boker *BokerBackend) loadConfig() error {
 		//读取文件
 		buffer, err := ioutil.ReadFile(JsonFileName)
 		if err != nil {
-			log.Error("Bokerchain Read boker.json File Error", "Error", err)
+			log.Error("(boker *BokerBackend) loadConfig Read boker.json File Error", "Error", err)
 			return err
 		}
 
 		config := BokerConfig{}
 		err = json.Unmarshal(buffer, &config)
 		if err != nil {
-			log.Error("Bokerchain Unmarshal boker.json File Error", "Error", err)
+			log.Error("(boker *BokerBackend) loadConfig Unmarshal boker.json File Error", "Error", err)
 			return err
 		}
 
@@ -116,17 +116,17 @@ func (boker *BokerBackend) loadConfig() error {
 		for _, v := range config.Dpos.Validators {
 			boker.config.Dpos.Validators = append(boker.config.Dpos.Validators, v)
 		}
-		log.Info("Load Bokerchain Dpos Validators", "Size", len(boker.config.Dpos.Validators))
+		log.Info("(boker *BokerBackend) loadConfig Dpos Validators", "Size", len(boker.config.Dpos.Validators))
 
 		boker.config.Contracts.Bases = make([]BaseContract, 0)
 		for _, v := range config.Contracts.Bases {
 			boker.config.Contracts.Bases = append(boker.config.Contracts.Bases, v)
 		}
-		log.Info("Load Bokerchain Base Contracts", "Size", len(boker.config.Contracts.Bases))
+		log.Info("(boker *BokerBackend) loadConfig Base Contracts", "Size", len(boker.config.Contracts.Bases))
 
 		boker.config.Producer.Coinbase = config.Producer.Coinbase
 		boker.config.Producer.Password = config.Producer.Password
-		log.Info("Load Bokerchain Producer", "Coinbase", boker.config.Producer.Coinbase, "Password", boker.config.Producer.Password)
+		log.Info("(boker *BokerBackend) loadConfig Producer", "Coinbase", boker.config.Producer.Coinbase, "Password", boker.config.Producer.Password)
 
 		return nil
 	}
@@ -136,10 +136,10 @@ func (boker *BokerBackend) loadConfig() error {
 //GetAccount 根据账号地址，得到账号等级
 func (boker *BokerBackend) GetAccount(account common.Address) ([]protocol.TxType, error) {
 
-	//log.Info("****GetAccount****", "account", account.String())
+	log.Info("(boker *BokerBackend) GetAccount", "account", account.String())
 	if boker.accounts == nil {
 
-		log.Error("Boker GetAccount function accounts Objects is nil")
+		log.Error("(boker *BokerBackend) GetAccount Accounts Objects is nil")
 		return []protocol.TxType{protocol.Binary}, nil
 	}
 
@@ -169,7 +169,7 @@ func (boker *BokerBackend) IsValidator(address common.Address) bool {
 }
 
 //SubmitBokerTransaction 设置一个播客链交易
-func (boker *BokerBackend) SubmitBokerTransaction(ctx context.Context, txType protocol.TxType, to common.Address, extra string) error {
+func (boker *BokerBackend) SubmitBokerTransaction(ctx context.Context, txType protocol.TxType, to common.Address, extra string) (*types.Transaction, error) {
 	return boker.transactions.SubmitBokerTransaction(ctx, txType, to, extra)
 }
 
@@ -213,9 +213,6 @@ func (boker *BokerBackend) GetMethodName(txType protocol.TxType) (string, string
 
 	case protocol.AssignToken: //分配通证
 		return "", protocol.AssignTokenMethod, nil
-
-	case protocol.AssignReward: //出块节点的通证奖励
-		return "", "", nil
 
 	default:
 		return "", "", protocol.ErrTxType

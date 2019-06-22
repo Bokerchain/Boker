@@ -20,6 +20,7 @@ import (
 	"sync"
 
 	"github.com/Bokerchain/Boker/chain/common"
+	"github.com/Bokerchain/Boker/chain/log"
 )
 
 type account struct {
@@ -91,9 +92,16 @@ func (ms *ManagedState) GetNonce(addr common.Address) uint64 {
 
 	if ms.hasAccount(addr) {
 		account := ms.getAccount(addr)
-		return uint64(len(account.nonces)) + account.nstart
+
+		nonce := uint64(len(account.nonces)) + account.nstart
+		//log.Info("(ms *ManagedState) GetNonce", "addr", addr, "nonce", nonce, "nstart", account.nstart)
+
+		return nonce
 	} else {
-		return ms.StateDB.GetNonce(addr)
+
+		nonce := ms.StateDB.GetNonce(addr)
+		//log.Info("(ms *ManagedState) GetNonce", "addr", addr, "nonce", nonce)
+		return nonce
 	}
 }
 
@@ -105,6 +113,9 @@ func (ms *ManagedState) SetNonce(addr common.Address, nonce uint64) {
 	so.SetNonce(nonce)
 
 	ms.accounts[addr] = newAccount(so)
+
+	log.Info("(ms *ManagedState) SetNonce", "addr", addr, "nonce", nonce)
+
 }
 
 // HasAccount returns whether the given address is managed or not

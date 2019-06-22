@@ -333,7 +333,7 @@ func (st *StateTransition) TransitionDb(boker bokerapi.Api) (ret []byte, require
 		st.state.SetNonce(sender.Address(), st.state.GetNonce(sender.Address())+1)
 		ret, st.gas, vmerr = evm.Call(sender, st.to().Address(), st.data, st.gas, st.value)
 
-		log.Info("evm Call", "ret", ret, "gas", st.gas)
+		//log.Info("evm Call", "ret", ret, "gas", st.gas)
 	}
 	if vmerr != nil {
 

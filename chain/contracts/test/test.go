@@ -57,14 +57,14 @@ func (testService *TestService) Stop() error {
 
 func (testService *TestService) tick() {
 
-	timer := time.NewTimer(protocol.AssignTokenInterval * 1)
+	timer := time.NewTimer(protocol.BokerInterval * 1)
 	defer timer.Stop()
 
 	for {
 		select {
 		case <-timer.C:
 			testService.assignToken()
-			timer.Reset(protocol.AssignTokenInterval * 1)
+			timer.Reset(protocol.BokerInterval * 1)
 		case errc := <-testService.quit:
 			errc <- nil
 			return

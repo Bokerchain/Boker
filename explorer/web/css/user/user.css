@@ -1,0 +1,140 @@
+/*左侧边栏*/
+.homePage .sideBar{
+	width: 4.42rem;
+	height: 100%;
+	position: fixed;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	z-index: 9999;
+}
+.homePage .sideBarAnimate{
+	transition: all 0.45s cubic-bezier(0.23, 1, 0.32, 1);
+	transform: translate3d(-100%, 0, 0);
+	visibility: hidden;
+}
+.sideBar .info{
+	width: 3.66rem;
+	height: 100%;
+	float: left;
+	background-image: url(../../img/user/rectangle.png);
+	background-size: contain;
+	-webkit-background-size: contain;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	padding-top: 0.66rem;
+}
+.sideBar .info .headImg{
+	width: 100%;
+	height: 1.68rem;
+	margin-bottom: 0.28rem;
+}
+.sideBar .info .headImg img{
+	width: 1.68rem;
+	height: 1.68rem;
+	border-radius: 0.84rem;
+	-webkit-border-radius: 0.84rem;
+}
+.sideBar .info .headImg span{
+	width: 1.68rem;
+	height: 1.68rem;
+}
+.sideBar .info .nickname{
+	width: 100%;
+	height: 0.3rem;
+	line-height: 0.3rem;
+	font-size: 0.3rem;
+	text-align: center;
+	color: #FFFFFF;
+	margin-bottom: 0.42rem;
+}
+.sideBar .info .phone{
+	width: 100%;
+	height: 0.86rem;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	border-left: #FFB002 0.06rem solid;
+	padding:  0 0.4rem;
+	font-size: 0.3rem;
+	color: #FFFFFF;
+	background-color: #313056;
+}
+.sideBar .info .phone img{
+	width: 0.4rem;
+	height: 0.4rem;
+}
+.sideBar .info .phone span{
+	margin-right: 0.1rem;
+}
+.sideBar .closeBtn{
+	float: left;
+	width: 0.76rem;
+	height: 1.51rem;
+	background-image: url(../../img/user/circle@3x.png);
+	background-size: contain;
+	-webkit-background-size: contain;
+}
+.sideBar .closeBtn img{
+	width: 0.2rem;
+	height: 0.36rem;
+	margin-right: 0.3rem;
+}
+/*右侧边栏*/
+.homePage .rightSideBar{
+	width: 4.42rem;
+	height: 100%;
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 9999;
+}
+.homePage .rightSideBarAnimate{
+	transition: all 0.45s cubic-bezier(0.23, 1, 0.32, 1);
+	transform: translate3d(100%, 0, 0);
+	visibility: hidden;
+}
+.rightSideBar .info{
+	width: 3.66rem;
+	height: 100%;
+	float: right;
+	background-image: url(../../img/user/rectangle.png);
+	background-size: contain;
+	-webkit-background-size: contain;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	padding-bottom: 2rem;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+.rightSideBar .info img{
+	width: 4.06rem;
+	height: 3.82rem;
+}
+.rightSideBar .info span{
+	color: #FFFFFF;
+	font-size: 0.28rem;
+	text-align: center;
+}
+.rightSideBar .closeBtn{
+	float: right;
+	width: 0.76rem;
+	height: 1.51rem;
+	background-image: url(../../img/user/1.png);
+	background-size: contain;
+	-webkit-background-size: contain;
+}
+.rightSideBar .closeBtn img{
+	width: 0.2rem;
+	height: 0.36rem;
+	margin-left: 0.2rem;
+}
+
+
+
+
+
+
+

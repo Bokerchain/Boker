@@ -199,10 +199,9 @@ func (d *Dpos) verifySeal(chain consensus.ChainReader, header *types.Header, par
 		firstNumber   uint64 = 1 //首区块
 	)
 
-	//判断是否是创始区块
 	number := header.Number.Uint64()
 	if genesisNumber == number {
-		return protocol.ErrUnknownBlock
+		return nil
 	}
 
 	//得到父区块信息
@@ -222,9 +221,14 @@ func (d *Dpos) verifySeal(chain consensus.ChainReader, header *types.Header, par
 	//第一个区块为设置第一个验证者区块，因此不能对其进行周期对象判断
 	if firstNumber != number {
 
+		parentHeader := chain.GetHeader(header.ParentHash, number-1)
+		firstTimer := parentHeader.Time.Int64()
+
 		//根据Dpos对象创建一个周期对象
-		producer, err := dposContext.GetProducer(header.Time.Int64())
+		producer, err := dposContext.GetProducer(header.Time.Int64(), firstTimer)
 		if err != nil {
+
+			log.Error("Check Producer Failed", "time", header.Time.Int64(), "parentTime", firstTimer)
 			return err
 		}
 
@@ -272,6 +276,12 @@ func (d *Dpos) updateConfirmedBlockHeader(chain consensus.ChainReader) error {
 		d.confirmedBlockHeader = header
 	}
 
+	//获取首区块头
+	firstHeader := chain.GetHeaderByNumber(1)
+	if firstHeader == nil {
+		return nil
+	}
+
 	//获取当前区块头
 	curHeader := chain.CurrentHeader()
 	epoch := int64(-1)
@@ -279,7 +289,7 @@ func (d *Dpos) updateConfirmedBlockHeader(chain consensus.ChainReader) error {
 	for d.confirmedBlockHeader.Hash() != curHeader.Hash() && d.confirmedBlockHeader.Number.Uint64() < curHeader.Number.Uint64() {
 
 		//得到当前的周期循环数
-		curEpoch := curHeader.Time.Int64() / protocol.EpochInterval
+		curEpoch := (curHeader.Time.Int64() - firstHeader.Time.Int64()) / protocol.EpochInterval
 
 		//当前周期不等于初始-1的周期
 		if curEpoch != epoch {
@@ -336,6 +346,8 @@ func (s *Dpos) storeConfirmedBlockHeader(db ethdb.Database) error {
 //拼接区块头信息
 func (d *Dpos) Prepare(chain consensus.ChainReader, header *types.Header) error {
 
+	//log.Info("(d *Dpos) Prepare", "Number", header.Number.String())
+
 	//设置区块头中的Nonce字段，防止双花攻击
 	header.Nonce = types.BlockNonce{}
 	number := header.Number.Uint64()
@@ -364,37 +376,38 @@ func (d *Dpos) Prepare(chain consensus.ChainReader, header *types.Header) error 
 //累计奖励
 func AccumulateRewards(config *params.ChainConfig, state *state.StateDB, header *types.Header, uncles []*types.Header, boker bokerapi.Api) {
 
-	//得到合约的账号地址
-	/*addr, err := boker.GetContractAddr(protocol.ContractAssignToken)
-	if err != nil {
-		return
-	}*/
+	//log.Info("****AccumulateRewards****", "Number", header.Number.String())
 
-	//给出块节点的报酬(1 * 220 = 220 单位:Bobby)
+	//给出块节点的报酬(1 * 660 = 660 单位:Bobby)
 	blockReward := big.NewInt(1)
 	blockReward.Mul(protocol.BobbyUnit, protocol.BobbyMultiple)
 	reward := new(big.Int).Set(blockReward)
 	state.AddBalance(header.Coinbase, reward)
+	//log.Info("Block Award", "Coinbase", header.Coinbase, "reward", reward)
 
-	//给指定账号产生报酬，此账号用于分配通证(1 * 330 = 330 单位:Bobby)
+	//得到合约的账号地址
+	addr, err := boker.GetContractAddr(protocol.SystemContract)
+	if err != nil {
+		//log.Error("Not Found Assign Token Address")
+		return
+	}
+
+	//给指定账号产生报酬，此账号用于分配通证(1 * 990 = 990 单位:Bobby)
 	blockTransfer := big.NewInt(1)
 	blockTransfer.Mul(protocol.BobbyUnit, protocol.TransferMultiple)
 	transferReward := new(big.Int).Set(blockTransfer)
-	//state.AddBalance(addr, transferReward)
-
-	state.AddBalance(header.Coinbase, transferReward)
+	state.AddBalance(addr, transferReward)
+	//log.Info("Contract Award", "addr", addr, "transferReward", transferReward)
 }
 
 //将交易放入到区块中
 func (d *Dpos) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt, dposContext *types.DposContext, boker bokerapi.Api) (*types.Block, error) {
 
-	log.Info("****Finalize****", "Number", header.Number.String())
+	log.Info("(d *Dpos) Finalize", "Number", header.Number.String(), "txs", len(txs))
 
 	//计算报酬
 	AccumulateRewards(chain.Config(), state, header, uncles, boker)
-
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
-
 	parent := chain.GetHeaderByHash(header.ParentHash)
 	if protocol.TimeOfFirstBlock == 0 {
 		if firstBlockHeader := chain.GetHeaderByNumber(1); firstBlockHeader != nil {
@@ -405,7 +418,6 @@ func (d *Dpos) Finalize(chain consensus.ChainReader, header *types.Header, state
 	//更新MintCnt的默克尔树，并返回一个新区块
 	updateMintCnt(parent.Time.Int64(), header.Time.Int64(), header.Validator, dposContext)
 	header.DposProto = dposContext.ToProto()
-	//log.Info("Get Bokerchain Dpos Trie", "DposProto", header.DposProto.Root().String())
 
 	singleTrie, contractsTrie, abiTrie := boker.GetContractTrie()
 	header.BokerProto = protocol.ToBokerProto(singleTrie.Hash(), contractsTrie.Hash(), abiTrie.Hash())
@@ -415,18 +427,18 @@ func (d *Dpos) Finalize(chain consensus.ChainReader, header *types.Header, state
 }
 
 //检测区块的时间信息
-func (d *Dpos) CheckDeadline(lastBlock *types.Block, now int64) error {
+func (d *Dpos) CheckDeadline(lastBlock *types.Block, now int64, firstTimer int64) error {
 
 	//根据当前时间得到上一个出块时间和下一个出块时间
-	prevSlot := PrevSlot(now)
-	nextSlot := NextSlot(now)
+	prevSlot := PrevSlot(now-firstTimer) + firstTimer
+	nextSlot := NextSlot(now-firstTimer) + firstTimer
 
 	//判断最后的区块时间是否大于下一个的区块时间
 	if lastBlock.Time().Int64() >= nextSlot {
 		return ErrMintFutureBlock
 	}
 
-	offset := now % protocol.EpochInterval
+	offset := (now - firstTimer) % protocol.EpochInterval
 	if offset%protocol.ProducerInterval != 0 {
 		return protocol.ErrInvalidProducerTime
 	}
@@ -439,13 +451,15 @@ func (d *Dpos) CheckDeadline(lastBlock *types.Block, now int64) error {
 }
 
 //检测当前区块头中是否是当前的打包节点
-func (d *Dpos) CheckProducer(lastBlock *types.Block, now int64) error {
+func (d *Dpos) CheckProducer(lastBlock *types.Block, now int64, firstTimer int64) error {
 
 	dposContext, err := types.NewDposContextFromProto(d.db, lastBlock.Header().DposProto)
 	if err != nil {
 		return err
 	}
-	producer, err := dposContext.GetProducer(now)
+
+	//lastTimer := lastBlock.Header().Time.Int64()
+	producer, err := dposContext.GetProducer(now, firstTimer)
 	if err != nil {
 		return err
 	}
@@ -458,7 +472,7 @@ func (d *Dpos) CheckProducer(lastBlock *types.Block, now int64) error {
 //检测当前区块头中是否是当前的打包节点
 func (d *Dpos) SelfProducer(lastBlock *types.Block, producer common.Address) error {
 
-	log.Info("****SelfProducer****", "number", lastBlock.Header().Number, "hash", lastBlock.Header().Hash().String())
+	log.Info("(d *Dpos) SelfProducer", "number", lastBlock.Header().Number, "hash", lastBlock.Header().Hash().String())
 
 	if lastBlock.Header().Number.Int64() != 0 {
 		return protocol.ErrGenesisBlock
@@ -484,8 +498,6 @@ func (d *Dpos) SelfProducer(lastBlock *types.Block, producer common.Address) err
 //得到当前出块节点的数量
 func (d *Dpos) GetProducerSize(lastBlock *types.Block, producer common.Address) (uint64, error) {
 
-	//log.Info("****GetProducerSize****", "number", lastBlock.Header().Number, "hash", lastBlock.Header().Hash().String())
-
 	dposContext, err := types.NewDposContextFromProto(d.db, lastBlock.Header().DposProto)
 	if err != nil {
 		return uint64(0), err
@@ -499,28 +511,6 @@ func (d *Dpos) GetProducerSize(lastBlock *types.Block, producer common.Address) 
 	return uint64(len(producers)), nil
 }
 
-//检查当前的验证者是否为当前节点
-func (d *Dpos) CheckTokenNoder(lastBlock *types.Block, now int64) error {
-
-	log.Info("****CheckTokenNoder****")
-
-	if err := d.CheckDeadline(lastBlock, now); err != nil {
-		return err
-	}
-	dposContext, err := types.NewDposContextFromProto(d.db, lastBlock.Header().DposProto)
-	if err != nil {
-		return err
-	}
-	producer, err := dposContext.GetTokenNoder(now)
-	if err != nil {
-		return err
-	}
-	if (producer == common.Address{}) || bytes.Compare(producer.Bytes(), d.signer.Bytes()) != 0 {
-		return protocol.ErrInvalidTokenNoder
-	}
-	return nil
-}
-
 //封装区块
 func (d *Dpos) Seal(chain consensus.ChainReader, block *types.Block, stop <-chan struct{}) (*types.Block, error) {
 
@@ -531,8 +521,10 @@ func (d *Dpos) Seal(chain consensus.ChainReader, block *types.Block, stop <-chan
 	}
 	now := time.Now().Unix()
 
+	firstHeader := chain.GetHeaderByNumber(0)
+
 	//得到下一个区块出块时间-当前时间的差值
-	delay := NextSlot(now) - now
+	delay := (NextSlot(now-firstHeader.Time.Int64()) + firstHeader.Time.Int64()) - now
 	if delay > 0 {
 		select {
 		case <-stop:

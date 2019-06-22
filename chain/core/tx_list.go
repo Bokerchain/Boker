@@ -71,6 +71,9 @@ func (m *txSortedMap) Get(nonce uint64) *types.Transaction {
 // Put inserts a new transaction into the map, also updating the map's nonce
 // index. If a transaction already exists with the same nonce, it's overwritten.
 func (m *txSortedMap) Put(tx *types.Transaction) {
+
+	log.Info("(m *txSortedMap) Put", "nonce", tx.Nonce())
+
 	nonce := tx.Nonce()
 	if m.items[nonce] == nil {
 		heap.Push(m.index, nonce)
@@ -176,18 +179,42 @@ func (m *txSortedMap) Remove(nonce uint64) bool {
 // prevent getting into and invalid state. This is not something that should ever
 // happen but better to be self correcting than failing!
 func (m *txSortedMap) Ready(start uint64) types.Transactions {
+
+	log.Info("(m *txSortedMap) Ready", "start", start)
+
 	// Short circuit if no transactions are available
 	if m.index.Len() == 0 || (*m.index)[0] > start {
 		return nil
 	}
+
 	// Otherwise start accumulating incremental transactions
 	var ready types.Transactions
 	for next := (*m.index)[0]; m.index.Len() > 0 && (*m.index)[0] == next; next++ {
+
+		//log.Info("(m *txSortedMap) Ready append", "next", next)
 		ready = append(ready, m.items[next])
 		delete(m.items, next)
 		heap.Pop(m.index)
 	}
 	m.cache = nil
+
+	return ready
+}
+
+func (m *txSortedMap) Check() types.Transactions {
+
+	log.Info("(m *txSortedMap) Check")
+
+	if m.index.Len() == 0 {
+		return nil
+	}
+
+	var ready types.Transactions
+	for next := (*m.index)[0]; m.index.Len() > 0 && (*m.index)[0] == next; next++ {
+
+		log.Info("(m *txSortedMap) Check append", "next", next)
+		ready = append(ready, m.items[next])
+	}
 
 	return ready
 }
@@ -348,7 +375,17 @@ func (l *txList) Remove(tx *types.Transaction) (bool, types.Transactions) {
 // prevent getting into and invalid state. This is not something that should ever
 // happen but better to be self correcting than failing!
 func (l *txList) Ready(start uint64) types.Transactions {
+
+	log.Info("(l *txList) Ready", "start", start, "txs", l.txs.Len())
+
 	return l.txs.Ready(start)
+}
+
+func (l *txList) Check(start uint64) types.Transactions {
+
+	log.Info("(l *txList) Check", "start", start, "txs", l.txs.Len())
+
+	return l.txs.Check()
 }
 
 // Len returns the length of the transaction list.

@@ -73,6 +73,8 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB, cfg
 		statedb.Prepare(tx.Hash(), block.Hash(), i)
 		receipt, _, err := ApplyTransaction(p.config, block.DposCtx(), p.bc, nil, gp, statedb, header, tx, totalUsedGas, cfg, p.boker)
 		if err != nil {
+
+			log.Error("Process", "Number", block.Number(), "txHash", tx.Hash(), "Type", tx.Type(), "error", err)
 			return nil, nil, nil, err
 		}
 
@@ -118,9 +120,14 @@ func binaryTransaction(config *params.ChainConfig,
 	//用待处理的更改更新状态
 	var root []byte
 	if config.IsByzantium(header.Number) {
+
+		//log.Info("binaryTransaction IsByzantium", "Number", header.Number.String())
 		statedb.Finalise(true)
 	} else {
+
+		log.Info("binaryTransaction not IsByzantium", "Number", header.Number.String())
 		root = statedb.IntermediateRoot(config.IsEIP158(header.Number)).Bytes()
+		log.Info("binaryTransaction not IsByzantium", "Number", header.Number.String(), "root", root)
 	}
 	usedGas.Add(usedGas, gas)
 
@@ -175,9 +182,14 @@ func contractSetTransaction(config *params.ChainConfig,
 
 	var root []byte
 	if config.IsByzantium(header.Number) {
+
+		log.Info("contractSetTransaction IsByzantium", "Number", header.Number.String())
 		statedb.Finalise(true)
 	} else {
+
+		log.Info("contractSetTransaction not IsByzantium", "Number", header.Number.String())
 		root = statedb.IntermediateRoot(config.IsEIP158(header.Number)).Bytes()
+		log.Info("contractSetTransaction not IsByzantium", "Number", header.Number.String(), "root", root)
 	}
 	usedGas.Add(usedGas, gas)
 
@@ -203,7 +215,7 @@ func baseTransaction(config *params.ChainConfig,
 	msg types.Message,
 	boker bokerapi.Api) (*types.Receipt, *big.Int, error) {
 
-	log.Info("****baseTransaction****")
+	//log.Info("****baseTransaction****")
 
 	msg, err := tx.AsMessage(types.MakeSigner(config, header.Number))
 	if err != nil {
@@ -211,16 +223,23 @@ func baseTransaction(config *params.ChainConfig,
 		log.Error("baseTransaction AsMessage", "err", err)
 		return nil, nil, err
 	}
+	//log.Info("baseTransaction", "Type", tx.Type(), "Time", header.Time.Int64())
 
 	//判断是否是分配通证合约
-	if tx.Type() == protocol.AssignToken || tx.Type() == protocol.AssignReward {
+	if tx.Type() == protocol.AssignToken {
 
-		tokenNoder, err := dposContext.GetCurrentTokenNoder()
+		firstBlock := bc.GetBlockByNumber(0)
+		if firstBlock == nil {
+			return nil, nil, errors.New("not found first block")
+		}
+
+		tokenNoder, err := dposContext.GetTokenNoder(tx.Time().Int64(), firstBlock.Time().Int64())
 		if err != nil {
 
-			log.Error("baseTransaction dposContext.GetCurrentTokenNoder", "err", err)
+			//log.Error("baseTransaction dposContext.GetCurrentTokenNoder", "tx Time", tx.Time().Int64(), "firstTimer", firstBlock.Time().Int64(), "err", err)
 			return nil, nil, err
 		}
+
 		if tokenNoder != msg.From() {
 
 			log.Error("baseTransaction failed tokenNoder != msg.From()", "tokenNoder", tokenNoder, "msg.From()", msg.From())
@@ -251,7 +270,7 @@ func baseTransaction(config *params.ChainConfig,
 	receipt.Logs = statedb.GetLogs(tx.Hash())
 	receipt.Bloom = types.CreateBloom(types.Receipts{receipt})
 
-	log.Info("****baseTransaction End****", "gas", gas, "err", err)
+	//log.Info("****baseTransaction End****", "gas", gas, "err", err)
 	return receipt, gas, err
 }
 
@@ -277,34 +296,37 @@ func validatorTransaction(config *params.ChainConfig,
 	context := NewEVMContext(msg, header, bc, author)
 	vmenv := vm.NewEVM(context, statedb, config, cfg)
 
-	producer, err := dposContext.GetCurrentProducer()
-	if protocol.ErrEpochTrieNil == err {
+	firstBlock := bc.GetBlockByNumber(0)
+	if firstBlock == nil {
+		return nil, nil, errors.New("not found first block")
+	}
+	producer, err := dposContext.GetProducer(header.Time.Int64(), firstBlock.Time().Int64())
 
+	log.Info("validatorTransaction", "Time", header.Time.Int64(), "firstTimer", firstBlock.Time().Int64(), "err", err)
+
+	if protocol.ErrEpochTrieNil == err || protocol.ErrInvalidProducer == err {
+
+		log.Info("validatorTransaction", "Number", bc.CurrentBlock().Number().Int64())
 		if bc.CurrentBlock().Number().Int64() == 0 {
 
-			//log.Info("validatorTransaction validatorMessage", "txType", msg.TxType())
 			_, extra, gas, failed, err := validatorMessage(vmenv, msg, gp, msg.TxType(), boker)
 			if err != nil {
 				return nil, nil, err
 			}
 			tx.SetExtra(extra)
-			//log.Info("validatorTransaction", "tx.extra", tx.Extra(), "extra", extra)
 
 			//设置验证者
 			dposContext.Clean()
 			dposContext.InsertValidator(*msg.To(), protocol.SetValidatorVotes)
-			//log.Info("validatorTransaction InsertValidator", "root", dposContext.Root().String())
 
 			root := statedb.IntermediateRoot(false).Bytes()
 			usedGas.Add(usedGas, gas)
-			//log.Info("validatorTransaction Add", "gas", gas, "usedGas", usedGas, "root", root)
 
 			receipt := types.NewReceipt(root, failed, usedGas)
 			receipt.TxHash = tx.Hash()
 			receipt.GasUsed = new(big.Int).Set(gas)
 			receipt.Logs = statedb.GetLogs(tx.Hash())
 			receipt.Bloom = types.CreateBloom(types.Receipts{receipt})
-			//log.Info("validatorTransaction CreateBloom")
 
 			return receipt, gas, err
 		}
@@ -358,7 +380,7 @@ func ApplyTransaction(config *params.ChainConfig,
 	if err != nil {
 		return nil, nil, err
 	}
-	log.Info("****ApplyTransaction****", "Number", header.Number.String(), "txType", msg.TxType(), "from", msg.From())
+	log.Info("state_processor.go ApplyTransaction", "Number", header.Number.String(), "txType", msg.TxType(), "from", msg.From())
 
 	if msg.TxType() == protocol.Binary {
 
@@ -375,7 +397,7 @@ func ApplyTransaction(config *params.ChainConfig,
 		case protocol.SetPersonalContract, protocol.CancelPersonalContract, protocol.SetSystemContract, protocol.CancelSystemContract:
 			//设置合约(已经测试)
 			return contractSetTransaction(config, dposContext, bc, author, gp, statedb, header, tx, usedGas, cfg, msg, boker)
-		case protocol.VoteUser, protocol.VoteEpoch, protocol.AssignToken, protocol.AssignReward, protocol.RegisterCandidate: //基础交易(已经测试)
+		case protocol.VoteUser, protocol.VoteEpoch, protocol.AssignToken, protocol.RegisterCandidate: //基础交易(已经测试)
 
 			return baseTransaction(config, dposContext, bc, author, gp, statedb, header, tx, usedGas, cfg, msg, boker)
 		case protocol.SetValidator: //设置验证人(已经测试)

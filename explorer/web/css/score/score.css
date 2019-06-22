@@ -1,0 +1,229 @@
+/*提升算力模态框*/
+.homePage .modal .scoreModal {
+	width: 6.14rem;
+	height: 10.74rem;
+	background-image: url(../../img/score/addScore.png);
+	background-size: contain;
+	overflow-y: scroll;
+	overflow-x: hidden;
+}
+
+.scoreModal .header {
+	display: flex;
+	display: -webkit-flex;
+	align-items: center;
+	-webkit-align-items: center;
+	justify-content: space-between;
+	-webkit-justify-content: space-between;
+	height: 0.76rem;
+	width: 6.14rem;
+	padding-left: 0.64rem;
+	padding-right: 0.44rem;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	position: fixed;
+}
+
+.scoreModal .emptyDiv{
+	height: 0.76rem;
+}
+.scoreModal .contentBox{
+	overflow-y: scroll;
+    overflow-x: hidden;
+    height: 9.98rem;
+}
+.scoreModal .contentBox::-webkit-scrollbar {
+    display: none;
+}
+
+.scoreModal .header div {
+	font-size: 0.36rem;
+	color: #B0D4FE;
+	letter-spacing: 0.04rem;
+}
+
+.scoreModal .header img {
+	width: 0.36rem;
+	height: 0.34rem;
+	margin-top: 0.06rem;
+}
+
+.scoreModal .lines {
+	width: 100%;
+	text-align: center;
+	padding-top: 0.44rem;
+	color: #B0D4FE;
+}
+
+.scoreModal .lines .lineParent {
+	width: 5.43rem;
+	height: 2.31rem;
+	margin: 0 auto;
+	background-image: url(../../img/score/biglinebg.png);
+	background-size: cover;
+	-webkit-background-size: cover;
+	margin-bottom: 0.36rem;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+
+.scoreModal .lines .line {
+	width: 5.44rem;
+	height: 0.82rem;
+	margin: 0 auto;
+	background-image: url(../../img/score/linebg.png);
+	background-size: cover;
+	-webkit-background-size: cover;
+	margin-bottom: 0.36rem;
+	padding: 0.18rem 0.24rem;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+
+.line .lock {
+	height: 0.36rem;
+	width: 1.5rem;
+}
+
+.line .login {
+	height: 0.24rem;
+	width: 1.06rem;
+}
+
+.line .lock span,
+.line .invite span,
+.line .eye span,
+.line .upload span {
+	font-size: 0.26rem;
+}
+
+.line .lock img {
+	width: 0.3rem;
+	height: 0.36rem;
+}
+
+.line .login img {
+	width: 0.24rem;
+	height: 0.24rem;
+}
+
+.line .login span {
+	font-size: 0.22rem;
+	color:#181536;
+}
+
+.line .invite,
+.line .eye,
+.line .upload {
+	width: 1.5rem;
+}
+
+.line .invite img {
+	width: 0.36rem;
+	height: 0.36rem;
+}
+
+.line .inviteFriends {
+	width: 1.86rem;
+	height: 0.5rem;
+}
+
+.line .inviteFriends img,
+.line .temporary img {
+	width: 100%;
+	height: 100%;
+}
+
+.line .eye img {
+	width: 0.36rem;
+	height: 0.28rem;
+}
+
+.line .temporary {
+	width: 1.28rem;
+	height: 0.5rem;
+}
+
+.line .upload img {
+	width: 0.3rem;
+	height: 0.3rem;
+}
+.scoreModal .thirdPartyTitle{
+	margin: 0 auto;
+	width: 6.1rem;
+	height: 0.56rem;
+	background-image: url(../../img/score/thirdPaty@3x.png);
+	background-size: contain;
+	margin-left: 0.02rem;
+}
+.scoreModal .thirdPartys{
+	width: 100%;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	padding: 0.2rem 0.37rem;
+	position: relative;
+}
+.thirdPartys .shadow{
+	position: absolute;
+	top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.3);
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.thirdPartys .thirdParty{
+	height: 0.66rem;
+	color: #B0D4FE;
+	font-size: 0.24rem;
+	margin-bottom: 0.3rem;
+	position: relative;
+}
+.thirdPartys .hasBinded{
+	color: #51565B !important;
+}
+.thirdParty .scores {
+	width: 1.7rem;
+}
+.thirdParty .scores .btnName{
+	color: #FEFEFE;
+	width: 1.22rem;
+	height: 0.66rem;
+	line-height: 0.66rem;
+	text-align: center;
+	background-image: url(../../img/score/bindBtn@3x.png);
+	background-size: contain;
+	-webkit-background-size: contain;
+}
+.thirdParty .thirdPartyInfo{
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	position: absolute;
+	width: 100%;
+	left: -5px;
+	top: 0;
+	background-image: url(../../img/score/thirdParty@3x.png);
+	background-size: contain;
+	width: 5.46rem;
+	height: 2.78rem;
+	z-index: 100;
+	font-size: 0.24rem;
+	color: #FEFEFE;
+	padding: 0.18rem 0.26rem;
+}
+.thirdPartyInfo .info{
+	color: #B0D4FE;
+	margin-bottom: 0.18rem;
+}
+.thirdPartyInfo img{
+	width: 1.22rem;
+	height: 0.48rem;
+}
+.thirdPartyInfo p{
+	margin-bottom: 0.09rem;
+}

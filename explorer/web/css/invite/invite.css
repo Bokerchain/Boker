@@ -1,0 +1,258 @@
+/*邀请好友 模态框css*/
+
+.homePage .modal .inviteModal {
+	width: 6.14rem;
+	height: 9.56rem;
+	background-image: url(../../img/invite/inviteModal.png);
+	background-size: contain;
+	transition: all 0.45s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.inviteModal .header {
+	display: flex;
+	display: -webkit-flex;
+	align-items: center;
+	-webkit-align-items: center;
+	justify-content: space-between;
+	-webkit-justify-content: space-between;
+	height: 0.76rem;
+	width: 6.14rem;
+	padding-left: 0.64rem;
+	padding-right: 0.44rem;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	position: fixed;
+}
+.inviteModal .emptyDiv{
+	height: 0.76rem;
+}
+.inviteModal .contentBox{
+	overflow-y: scroll;
+    overflow-x: hidden;
+    height: 8.6rem;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    padding: 0 0.46rem;
+}
+.inviteModal .contentBox::-webkit-scrollbar {
+    display: none;
+}
+.inviteModal .header div {
+	font-size: 0.36rem;
+	color: #B0D4FE;
+	letter-spacing: 0.02rem;
+}
+
+.inviteModal .header img {
+	width: 0.36rem;
+	height: 0.34rem;
+	margin-top: 0.06rem;
+}
+
+.inviteModal .info {
+	font-size: 0.24rem;
+	text-align: center;
+	color: #FFFFFF;
+	margin: 0.24rem auto;
+}
+.inviteModal .rewardBox{
+	width: 100%;
+	/*box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	padding:0 0.28rem;*/
+	overflow-x: scroll;
+	overflow-y: hidden;
+}
+.inviteModal .rewardBox::-webkit-scrollbar {
+    display: none;
+}
+.inviteModal .rewardBox .reward {
+	/*width: 100%;*/
+	width: 13.2rem;
+/*	height: 1.4rem;*/
+}
+
+.reward .person {
+	width: 1.32rem;
+	height: auto;
+	display: flex;
+	display: -webkit-flex;
+	flex-direction: column;
+	-webkit-flex-direction: column;
+	align-items: center;
+	-webkit-align-items: center;
+	justify-content: center;
+	-webkit-justify-content: center;
+}
+
+.reward .person .headImg {
+	width: 0.88rem;
+}
+
+.reward .person .headImg img {
+	width: 0.34rem;
+	height: 0.36rem;
+}
+
+.reward .person .headImg span {
+	color: #FFFFFF;
+	font-size: 0.2rem;
+}
+.reward .person .headImgActive span {
+	color: #FFE26D;
+}
+.reward .person .line {
+	width: 100%;
+	margin: 0.22rem auto;
+	height: 0.06rem;
+	position: relative;
+}
+
+.reward .person .line .left-line {
+	float: left;
+	width: 50%;
+	height: 0.06rem;
+	background-color: #FFFFFF;
+}
+
+.reward .person .line .point {
+	position: absolute;
+	width: 0.14rem;
+	height: 0.14rem;
+	background-color: #FFFFFF;
+	border-radius: 0.07rem;
+	-webkit-border-radius: 0.07rem;
+	top: 50%;
+	left: 50%;
+	-webkit-transform: translateX(-50%) translateY(-50%);
+	-moz-transform: translateX(-50%) translateY(-50%);
+	-ms-transform: translateX(-50%) translateY(-50%);
+	transform: translateX(-50%) translateY(-50%);
+}
+
+.reward .person .line .right-line {
+	float: right;
+	background-color: #FFFFFF;
+	width: 50%;
+	height: 0.06rem;
+}
+
+
+.reward .person .line .yellowLine{
+	background-color: #FFE26D;
+}
+
+.reward .person .scores{
+	width: 0.88rem;
+	height: 0.44rem;
+	background-image: url(../../img/invite/scorebg@3x.png);
+	background-size: contain;
+	background-repeat: no-repeat;
+}
+.reward .person .scoresActive {
+	background-image: url(../../img/invite/scorebgActive@3x.png);
+}
+
+.reward .person .scores img {
+	width: 0.14rem;
+	height: 0.26rem;
+}
+
+.reward .person .scores span{
+	font-size: 0.26rem;
+	color: #BFBFBF;
+}
+
+.reward .person .scoresActive span {
+	color: #986100;
+	
+}
+.inviteModal .inviteCode {
+	width: 4.98rem;
+	height: 4rem;
+	background-image: url(../../img/invite/inviteCodebg@3x.png);
+	background-size: contain;
+	margin: 0.52rem auto;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	padding-top: 1rem;
+}
+
+.inviteModal .inviteCode .code{
+	color: #FFE26D;
+	font-size: 0.28rem;
+	text-align: center;
+}
+.inviteModal .inviteCode .copyBtn{
+	background: url(../../img/invite/copyCode@3x.png);
+	width:2.02rem;
+	height: 0.7rem;
+	background-size: contain;
+	color: #FFFFFF;
+	line-height: 0.7rem;
+	text-align: center;
+	margin: 0.38rem auto 0.5rem;
+	font-size: 0.24rem;
+}
+.inviteModal .inviteCode p{
+	color: #FFFFFF;
+	font-size: 0.22rem;
+	text-align: center;
+	margin-bottom: 0.15rem;
+}
+.inviteModal .inviteResult{
+	width: 100%;
+	height: auto;
+}
+.inviteModal .inviteResult .title{
+	text-align: center;
+	height: 0.24rem;
+}
+.inviteModal .inviteResult .title img{
+	width: 0.68rem;
+	height: 0.16rem;
+}
+.inviteModal .inviteResult .title span{
+	color: #FFE26D;
+	font-size: 0.24rem;
+	display: inline-block;
+	height: 0.24rem;
+	line-height: 0.24rem;
+	margin: 0 0.18rem;
+}
+.inviteModal .inviteResult .scores{
+	margin: 0.26rem 0;
+	text-align: center;
+	color: #FFE26D;
+	font-size: 0.22rem;
+}
+.inviteModal .inviteResult .detail{
+	width: 100%;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	/*padding: 0 0.46rem;*/
+	font-size: 0.22rem;
+	color: #FFFFFF;
+	margin-bottom: 0.2rem;
+}
+.inviteModal .inviteResult .detail>div{
+	margin: 0.14rem 0;
+}
+.inviteModal .inviteResult .firstSp{
+	display: inline-block;
+	width: 1.4rem;
+	text-align: left;
+	white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.inviteModal .inviteResult .secondSp{
+	display: inline-block;
+	width: 2.2rem;
+	text-align: center;
+}
+.inviteModal .inviteResult .thirdSp{
+	display: inline-block;
+	width: 1.4rem;
+	text-align: right;
+}

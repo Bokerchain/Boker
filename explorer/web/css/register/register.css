@@ -1,0 +1,785 @@
+/*登录注册模态框css*/
+.homePage .modal .registerModal {
+	width: 6.14rem;
+	height: 8.74rem;
+	background-image: url(../../img/register/registerModal.png);
+	background-size: contain;
+	transition: all 0.45s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.registerModal .header {
+	display: flex;
+	display: -webkit-flex;
+	align-items: center;
+	-webkit-align-items: center;
+	justify-content: space-between;
+	-webkit-justify-content: space-between;
+	height: 0.76rem;
+	width: 100%;
+	padding-left: 0.64rem;
+	padding-right: 0.44rem;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+
+.registerModal .header div {
+	font-size: 0.36rem;
+	color: #B0D4FE;
+	letter-spacing: 0.04rem;
+}
+
+.registerModal .header img {
+	width: 0.36rem;
+	height: 0.34rem;
+	margin-top: 0.06rem;
+}
+
+.registerModal .introduce{
+	padding: 0.8rem 0.46rem 0.6rem 0.46rem;
+	width: 100%;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	font-size: 0.24rem;
+}
+.registerModal .introduce .yellow{
+	width: 100%;
+	text-align: center;
+	color: #FFBA00;
+	margin-bottom: 0.1rem;
+}
+.registerModal .introduce .white{
+	width: 100%;
+	text-align: center;
+	color: #FFF0FE;
+	margin-top: 0.35rem;
+}
+.registerModal .registerBox{
+	width: 5.2rem;
+	height: 2.7rem;
+	margin: 0 auto;
+	font-size: 0.24rem;
+	color: #FFF0FE;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	border-radius: 0.06rem;
+	-webkit-border-radius: 0.06rem;
+	border: #504A8C 0.02rem solid;
+	display: flex;
+	display: -webkit-flex;
+	flex-direction: column;
+	-webkit-flex-direction: column;
+	margin-bottom: 0.7rem;
+}
+.registerModal .registerBox>div{
+	flex: 1;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	width: 100%;
+	padding-left:0.12rem ;
+	padding-right: 0.12rem;
+	display: flex;
+	display: -webkit-flex;
+	justify-content: space-between;
+	-webkit-justify-content: space-between;
+	align-items: center;
+	-webkit-align-items: center;
+}
+.registerModal .registerBox .line{
+	border-bottom: #5D669E 0.02rem solid;
+}
+.registerBox .line1 .line1-left{
+	letter-spacing: 0.03rem;
+}
+.registerBox .line1 .line1-right{
+	font-size: 0.22rem;
+}
+.registerBox .line1 .line1-right span{
+	display: inline-block;
+	font-size: 0.24rem;
+	height: 0.2rem;
+	line-height: 0.2rem;
+}
+.registerBox .line1 .line1-right img{
+	width: 0.12rem;
+	height: 0.2rem;
+	margin-left: 0.22rem;
+	margin-right: 0.14rem;
+}
+.registerBox .line2-left{
+	width: 70%;
+	font-size: 0.24rem;
+	height: 0.4rem;
+	line-height: 0.4rem;
+/*	display: flex;
+	display: -webkit-flex;
+	justify-content: space-between;
+	-webkit-justify-content: space-between;
+	align-items: center;
+	-webkit-align-items: center;*/
+}
+.registerBox .line2-left span{
+	float: left;
+	font-size: 0.24rem;
+	height: 0.24rem;
+	line-height: 0.24rem;
+	width: 20%;
+	margin-right: 5%;
+	border-right: #FFFFFF 0.02rem solid;
+}
+.registerBox .line2-left input{
+	float: left;
+	height: 0.3rem;
+	line-height: 0.3rem;
+	font-size: 0.24rem;
+	padding: 0;
+	border: 0;
+	outline: none;
+	background: none;
+	width: 70%;
+	color: #FFF0FE;
+}
+/*按钮的可点击状态*/
+.registerBox .line2-right .btn1{
+	background-image: url(../../img/register/btn1@3x.png);
+	background-size: contain;
+	-webkit-background-size: contain;
+	width: 1.38rem;
+	height: 0.62rem;
+	line-height: 0.62rem;
+	text-align: center;
+	font-size: 0.2rem;
+}
+/*按钮的不可点击状态*/
+.registerBox .line2-right .btn3{
+	background-image: url(../../img/register/btn3@3x.png);
+	background-size: contain;
+	-webkit-background-size: contain;
+	width: 1.38rem;
+	height: 0.62rem;
+	line-height: 0.62rem;
+	text-align: center;
+	font-size: 0.2rem;
+}
+.registerBox .line3 input{
+	border: 0;
+	outline: none;
+	background: none;
+	color: #FFF0FE;
+}
+.registerModal .registerBtn{
+	width: 2.94rem;
+	height: 0.78rem;
+	line-height: 0.78rem;
+	color: #FFF0FE;
+	background-image: url(../../img/register/btn2@3x.png);
+	background-size: contain;
+	-webkit-background-size: contain;
+	margin: 0 auto;
+	text-align: center;
+	font-size: 0.26rem;
+}
+
+/********************/
+/*输入交易密码 模态框css*/
+.homePage .modal .passwordModal {
+	width: 6.14rem;
+	height: 8.12rem;
+	background-image: url(../../img/register/passwordModal.png);
+	background-size: contain;
+}
+.passwordModal .header {
+	display: flex;
+	display: -webkit-flex;
+	align-items: center;
+	-webkit-align-items: center;
+	justify-content: space-between;
+	-webkit-justify-content: space-between;
+	height: 0.76rem;
+	width: 100%;
+	padding-left: 0.64rem;
+	padding-right: 0.44rem;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+
+.passwordModal .header div {
+	font-size: 0.36rem;
+	color: #B0D4FE;
+	letter-spacing: 0.04rem;
+}
+
+.passwordModal .header img {
+	width: 0.36rem;
+	height: 0.34rem;
+	margin-top: 0.06rem;
+}
+.passwordModal .introduce{
+	padding: 0.6rem 0.46rem 0.4rem 0.46rem;
+	width: 100%;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	font-size: 0.24rem;
+}
+.passwordModal .introduce .yellow{
+	width: 100%;
+	text-align: center;
+	color: #FFBA00;
+	margin-bottom: 0.1rem;
+}
+.passwordModal .introduce .white{
+	width: 100%;
+	text-align: center;
+	color: #FFF0FE;
+	margin-top: 0.35rem;
+}
+.passwordModal .passwordBox{
+	width: 5.2rem;
+	height: 3.48rem;
+	margin: 0 auto;
+	font-size: 0.24rem;
+	color: #FFFFFF;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	border-radius: 0.06rem;
+	-webkit-border-radius: 0.06rem;
+	border: #504A8C 0.02rem solid;
+	display: flex;
+	display: -webkit-flex;
+	flex-direction: column;
+	-webkit-flex-direction: column;
+	margin-bottom: 0.8rem;
+}
+.passwordModal .passwordBox>div{
+	flex: 1;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	width: 100%;
+	padding-left:0.12rem ;
+	padding-right: 0.12rem;
+	display: flex;
+	display: -webkit-flex;
+	justify-content: space-between;
+	-webkit-justify-content: space-between;
+	align-items: center;
+	-webkit-align-items: center;
+}
+.passwordModal .passwordBox .line{
+	border-bottom: #5D669E 0.02rem solid;
+}
+.passwordBox>div label{
+	letter-spacing: 0.01rem;
+	display: inline-block;
+	height: 0.24rem;
+	line-height: 0.24rem;
+	width: 35%;
+}
+.passwordBox>div input{
+	padding: 0;
+	border: none;
+	background: none;
+	outline: none;
+	color: #FFFFFF;
+	display: inline-block;
+	height: 0.3rem;
+	line-height: 0.3rem;
+	width: 62%;
+}
+.passwordModal .registerBtn{
+	width: 2.94rem;
+	height: 0.78rem;
+	line-height: 0.78rem;
+	color: #FFF0FE;
+	background-image: url(../../img/register/btn2@3x.png);
+	background-size: contain;
+	-webkit-background-size: contain;
+	margin: 0 auto;
+	text-align: center;
+	font-size: 0.26rem;
+}
+/*导入私钥 模态框样式*/
+.homePage .modal .importKeyModal {
+	width: 6.14rem;
+	height: 8.52rem;
+	background-image: url(../../img/register/importkey.png);
+	background-size: contain;
+}
+.importKeyModal .header {
+	display: flex;
+	display: -webkit-flex;
+	align-items: center;
+	-webkit-align-items: center;
+	justify-content: space-between;
+	-webkit-justify-content: space-between;
+	height: 0.76rem;
+	width: 100%;
+	padding-left: 0.64rem;
+	padding-right: 0.44rem;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+
+.importKeyModal .header div {
+	font-size: 0.36rem;
+	color: #B0D4FE;
+	letter-spacing: 0.04rem;
+}
+
+.importKeyModal .header img {
+	width: 0.36rem;
+	height: 0.34rem;
+	margin-top: 0.06rem;
+}
+.importKeyModal .importBtn{
+	width: 2.94rem;
+	height: 0.78rem;
+	line-height: 0.78rem;
+	color: #FFF0FE;
+	background-image: url(../../img/register/btn2@3x.png);
+	background-size: contain;
+	-webkit-background-size: contain;
+	margin: 0 auto;
+	text-align: center;
+	font-size: 0.26rem;
+}
+.importKeyModal .inputArea{
+	width: 5.78rem;
+	height: 2.78rem;
+	background-image: url(../../img/register/keybox@3x.png);
+	background-size: contain;
+	-webkit-background-size: contain;
+	margin: 0 auto;
+	margin-top: 0.4rem;
+	margin-bottom: 0.6rem;
+}
+.importKeyModal .inputArea textarea{
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	width: 100%;
+	height: 100%;
+	border: none;
+	font-size: 0.24rem;
+	padding: 0.32rem 0.28rem;
+	outline: none;
+	background: none;
+	color: #FFFFFF;
+	font-family: "微软雅黑","microsoft yahei";
+}
+.importKeyModal .password{
+	width: 100%;
+	color: #FFFFFF;
+	font-size: 0.24rem;
+	margin-bottom: 0.1rem;
+	padding: 0 0.34rem;
+	display: flex;
+	display: -webkit-flex;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+.importKeyModal .password input{
+	flex: 1;
+	border: none;
+	padding: 0;
+	background: none;
+	outline: none;
+	font-size: 0.24rem;
+	color: #FFFFFF;
+}
+.importKeyModal .line{
+	margin: 0 auto;
+	margin-bottom: 1.2rem;
+}
+.importKeyModal .line img{
+	width: 5.78rem;
+	height: 0.2rem;
+}
+/*导出私钥模态框css*/
+.homePage .modal .exportKeyModal {
+	width: 6.14rem;
+	height: 8.74rem;
+	background-image: url(../../img/register/exportModal.png);
+	background-size: contain;
+}
+.exportKeyModal .header {
+	display: flex;
+	display: -webkit-flex;
+	align-items: center;
+	-webkit-align-items: center;
+	justify-content: space-between;
+	-webkit-justify-content: space-between;
+	height: 0.76rem;
+	width: 100%;
+	padding-left: 0.64rem;
+	padding-right: 0.44rem;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+
+.exportKeyModal .header div {
+	font-size: 0.36rem;
+	color: #B0D4FE;
+	letter-spacing: 0.04rem;
+}
+
+.exportKeyModal .header img {
+	width: 0.36rem;
+	height: 0.34rem;
+	margin-top: 0.06rem;
+}
+.exportKeyModal .importBtn{
+	width: 2.94rem;
+	height: 0.78rem;
+	line-height: 0.78rem;
+	color: #FFF0FE;
+	background-image: url(../../img/register/btn2@3x.png);
+	background-size: contain;
+	-webkit-background-size: contain;
+	margin: 0 auto;
+	text-align: center;
+	font-size: 0.26rem;
+}
+.exportKeyModal .btns{
+	width: 5.0rem;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	margin: 0.3rem auto;
+}
+.exportKeyModal .btns .leftBtn {
+	width: 2.56rem;
+	height: 0.78rem;
+	line-height: 0.78rem;
+	position: relative;
+	text-align: center;
+	color: #FFFFFF;
+	font-size: 0.26rem;
+}
+.exportKeyModal .btns .leftBtn img{
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+}
+.exportKeyModal .btns .leftBtn span{
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	-webkit-transform: translateX(-50%) translateY(-50%);
+	transform: translateX(-50%) translateY(-50%);
+}
+.exportKeyModal .btns .rightBtn {
+	width: 2.43rem;
+	height: 0.78rem;
+	line-height: 0.78rem;
+	position: relative;
+	text-align: center;
+	color: #FFFFFF;
+	font-size: 0.26rem;
+}
+.exportKeyModal .btns .rightBtn img{
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+}
+.exportKeyModal .btns .rightBtn span{
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	-webkit-transform: translateX(-50%) translateY(-50%);
+	transform: translateX(-50%) translateY(-50%);
+}
+.exportKeyModal .btns .leftBtn .dark,.exportKeyModal .btns .rightBtn .dark{
+	color: #5C5A7E;
+}
+.exportKeyModal .content{
+	color: #FFF0FE;
+	font-size: 0.22rem;
+	width: 100%;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	padding: 0 0.7rem;
+	letter-spacing: 0.01rem;
+	line-height: 0.26rem;
+	height: auto;
+}
+.exportKeyModal .privateKey{
+	padding: 0 0.7rem;
+	color: #F7B40F;
+	text-align: center;
+	font-size: 0.22rem;
+	margin-top: 1.28rem;
+	margin-bottom: 0.34rem;
+	word-break: break-all;
+}
+.exportKeyModal .copyBtn{
+	background-image: url(../../img/register/copyKeyBtn@3x.png);
+	width: 2.94rem;
+	height: 0.78rem;
+	line-height: 0.78rem;
+	text-align: center;
+	margin: 0 auto;
+	background-size: contain;
+	color: #FFF0FE;
+	font-size: 0.26rem;
+}
+.exportKeyModal .arrow img{
+	width: 0.3rem;
+	height: 0.48rem;
+	margin-top: 0.4rem;
+}
+.exportKeyModal .qrCode{
+	background-image: url(../../img/register/qrCodeBg@3x.png);
+	background-size: contain;
+	width: 3.06rem;
+	height: 3.06rem;
+	margin: 0 auto;
+}
+.exportKeyModal .qrCode img{
+	width: 2.46rem;
+	height: 2.46rem;
+}
+
+/*Bobby明细 模态框*/
+.homePage .modal .bobbyDetailModal {
+	width: 6.14rem;
+	height: 8.74rem;
+	background-image: url(../../img/register/bobbyDetailModal.png);
+	background-size: contain;
+	transition: all 0.45s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.bobbyDetailModal .header {
+	display: flex;
+	display: -webkit-flex;
+	align-items: center;
+	-webkit-align-items: center;
+	justify-content: space-between;
+	-webkit-justify-content: space-between;
+	height: 0.76rem;
+	width: 6.14rem;
+	padding-left: 0.64rem;
+	padding-right: 0.44rem;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	position: fixed;
+}
+.bobbyDetailModal .emptyDiv{
+	height: 0.76rem;
+}
+.bobbyDetailModal .contentBox{
+	overflow-y: scroll;
+    overflow-x: hidden;
+    height: 8.6rem;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    padding: 0 0.1rem;
+}
+.bobbyDetailModal .contentBox::-webkit-scrollbar {
+    display: none;
+}
+.bobbyDetailModal .header div {
+	font-size: 0.36rem;
+	color: #B0D4FE;
+	letter-spacing: 0.01rem;
+}
+
+.bobbyDetailModal .header img {
+	width: 0.36rem;
+	height: 0.34rem;
+	margin-top: 0.06rem;
+}
+.bobbyDetailModal .contentBox{
+	overflow-y: scroll;
+    overflow-x: hidden;
+    max-height: 7.6rem;
+}
+.bobbyDetailModal .contentBox::-webkit-scrollbar {
+    display: none;
+}
+.bobbyDetailModal .contentBox .info{
+	color: #B0D4FE;
+	font-size: 0.24rem;
+	line-height: 0.28rem;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	width: 100%;
+	letter-spacing: 0.005rem;
+	padding: 0.24rem 0.36rem;
+	border-bottom: #5D669E 0.02rem solid;
+}
+.bobbyDetailModal .detail .noData{
+	width: 100%;
+	text-align: center;
+	color: #B0D4FE;
+	font-size: 0.26rem;
+	height: 2rem;
+	line-height: 2rem;
+}
+.scoreDetailModal .detail .noData{
+	width: 100%;
+	text-align: center;
+	color: #B0D4FE;
+	font-size: 0.26rem;
+	height: 2rem;
+	line-height: 2rem;
+}
+.bobbyDetailModal .detail .detailItem {
+	height: 0.9rem;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	border-bottom: #5D669E 1px solid;
+	text-align: left;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	padding: 0.16rem 0.36rem;
+}
+.bobbyDetailModal .detailItem .title{
+	max-width: 50%;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	justify-content: space-between;
+	align-items: center;
+}
+.bobbyDetailModal .detailItem .detailInfo{
+	color: #B0D4FE;
+	font-size: 0.26rem;
+}
+.bobbyDetailModal .detailItem .time{
+	color: #5D578F;
+	font-size: 0.2rem;
+}
+.bobbyDetailModal .detailItem .srore{
+	color: #B0D4FE;
+	font-size: 0.26rem;
+	text-align: right;
+}
+.bobbyDetailModal .detailItem .yellowColor{
+	color: #FFBA00;
+}
+/*算力 明细*/
+.homePage .modal .scoreDetailModal {
+	width: 6.14rem;
+	height: 9.66rem;
+	background-image: url(../../img/register/scoreDetail.png);
+	background-size: contain;
+	transition: all 0.45s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.scoreDetailModal .header {
+	display: flex;
+	display: -webkit-flex;
+	align-items: center;
+	-webkit-align-items: center;
+	justify-content: space-between;
+	-webkit-justify-content: space-between;
+	height: 0.76rem;
+	width: 6.14rem;
+	padding-left: 0.64rem;
+	padding-right: 0.44rem;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	position: fixed;
+}
+.scoreDetailModal .emptyDiv{
+	height: 0.76rem;
+}
+.scoreDetailModal .contentBox{
+	overflow-y: scroll;
+    overflow-x: hidden;
+    height: 8.6rem;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    padding: 0 0.1rem;
+}
+.scoreDetailModal .contentBox::-webkit-scrollbar {
+    display: none;
+}
+.scoreDetailModal .header div {
+	font-size: 0.36rem;
+	color: #B0D4FE;
+	letter-spacing: 0.01rem;
+}
+.scoreDetailModal .header img {
+	width: 0.36rem;
+	height: 0.34rem;
+	margin-top: 0.06rem;
+}
+.scoreDetailModal .contentBox .info{
+	color: #B0D4FE;
+	font-size: 0.24rem;
+	line-height: 0.28rem;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	width: 100%;
+	letter-spacing: 0.005rem;
+	padding: 0.34rem 0.36rem;
+	text-align: center;
+	border-bottom: #5D669E 0.02rem solid;
+}
+.scoreDetailModal .detail .detailItem {
+	height: 0.9rem;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	border-bottom: #5D669E 1px solid;
+	text-align: left;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	padding: 0 0.36rem;
+}
+.scoreDetailModal .detailItem .title{
+	max-width: 50%;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	justify-content: space-between;
+	align-items: center;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	padding: 0.16rem 0;
+	flex: 1;
+	text-align: left;
+}
+.scoreDetailModal .detailItem .detailInfo{
+	width: 100%;
+	color: #B0D4FE;
+	font-size: 0.26rem;
+}
+.scoreDetailModal .detailItem .time{
+	width: 100%;
+	color: #5D578F;
+	font-size: 0.2rem;
+}
+.scoreDetailModal .detailItem .action{
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	font-size: 0.24rem;
+	height: 100%;
+	/*margin-right: 0.2rem;*/
+	flex: 1;
+}
+.scoreDetailModal .detailItem .action1{
+	color: #B0D4FE;
+	overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 2.5rem;
+} 
+.scoreDetailModal .detailItem .action2{
+	color: #5D578F;
+	margin-top: 0.14rem;
+	overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 2.5rem;
+}
+.scoreDetailModal .detailItem .srore{
+	flex: 1;
+	color: #B0D4FE;
+	font-size: 0.26rem;
+	text-align: right;
+}
+.scoreDetailModal .detailItem .yellowColor{
+	color: #FFBA00;
+}

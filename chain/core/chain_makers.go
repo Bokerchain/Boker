@@ -14,6 +14,7 @@ import (
 	"github.com/Bokerchain/Boker/chain/core/types"
 	"github.com/Bokerchain/Boker/chain/core/vm"
 	"github.com/Bokerchain/Boker/chain/ethdb"
+	"github.com/Bokerchain/Boker/chain/log"
 	"github.com/Bokerchain/Boker/chain/params"
 )
 
@@ -60,6 +61,8 @@ func (b *BlockGen) SetExtra(data []byte) {
 //添加一个交易到区块
 func (b *BlockGen) AddTx(tx *types.Transaction, boker bokerapi.Api) {
 
+	log.Info("(b *BlockGen) AddTx", "hash", tx.Hash())
+
 	//判断gas池是否为nil
 	if b.gasPool == nil {
 		b.SetCoinbase(common.Address{})
@@ -80,6 +83,7 @@ func (b *BlockGen) AddTx(tx *types.Transaction, boker bokerapi.Api) {
 		b.header.GasUsed,
 		vm.Config{},
 		boker)
+	log.Info("(b *BlockGen) AddTx ApplyTransaction", "b.header.Number", b.header.Number, "err", err)
 
 	//如果返回失败，则退出此协程
 	if err != nil {
@@ -87,6 +91,7 @@ func (b *BlockGen) AddTx(tx *types.Transaction, boker bokerapi.Api) {
 	}
 
 	//将交易加入到交易数组中
+	log.Info("(b *BlockGen) AddTx append", "b.header.Number", b.header.Number, "err", err)
 	b.txs = append(b.txs, tx)
 
 	//将回执加入到回执数组中

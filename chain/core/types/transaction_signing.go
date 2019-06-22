@@ -217,6 +217,9 @@ func (fs FrontierSigner) Hash(tx *Transaction) common.Hash {
 		tx.data.Recipient,
 		tx.data.Amount,
 		tx.data.Payload,
+		tx.data.Type,
+		tx.data.Time,
+		tx.data.Extra,
 	})
 }
 

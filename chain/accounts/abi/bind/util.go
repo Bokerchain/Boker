@@ -52,6 +52,37 @@ func WaitMined(ctx context.Context, b DeployBackend, tx *types.Transaction) (*ty
 	}
 }
 
+func WaitTransaction(ctx context.Context, b DeployBackend, txHash common.Hash) (*types.Receipt, error) {
+
+	log.Info("WaitTransaction", "txHash", txHash)
+
+	queryTicker := time.NewTicker(time.Second)
+	defer queryTicker.Stop()
+
+	logger := log.New("txHash", txHash)
+
+	for {
+
+		log.Info("WaitTransaction", "txHash", txHash)
+
+		receipt, err := b.TransactionReceipt(ctx, txHash)
+		if receipt != nil {
+			return receipt, nil
+		}
+		if err != nil {
+			logger.Trace("Receipt retrieval failed", "err", err)
+		} else {
+			logger.Trace("Transaction not yet mined")
+		}
+		// Wait for the next round.
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		case <-queryTicker.C:
+		}
+	}
+}
+
 // WaitDeployed waits for a contract deployment transaction and returns the on-chain
 // contract address when it is mined. It stops waiting when ctx is canceled.
 func WaitDeployed(ctx context.Context, b DeployBackend, tx *types.Transaction) (common.Address, error) {

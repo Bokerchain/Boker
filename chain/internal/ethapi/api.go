@@ -2,7 +2,6 @@ package ethapi
 
 import (
 	"context"
-	_ "crypto/ecdsa"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -297,6 +296,9 @@ func (s *PrivateAccountAPI) ImportRawKey(privkey string, password string) (commo
 // the given password for duration seconds. If duration is nil it will use a
 // default of 300 seconds. It returns an indication if the account was unlocked.
 func (s *PrivateAccountAPI) UnlockAccount(addr common.Address, password string, duration *uint64) (bool, error) {
+
+	log.Info("(s *PrivateAccountAPI) UnlockAccount", "address", addr.String(), "password", password)
+
 	const max = uint64(time.Duration(math.MaxInt64) / time.Second)
 	var d time.Duration
 	if duration == nil {
@@ -310,10 +312,11 @@ func (s *PrivateAccountAPI) UnlockAccount(addr common.Address, password string, 
 
 	//在这里默认设置用户的Password信息放入到配置文件中
 	s.b.SetPassword(password)
-	log.Info("Set Coinbase Password", "Account", addr, "Password", password)
+	log.Info("(s *PrivateAccountAPI) UnlockAccount SetPassword")
 
 	//将解锁账号设置为Coinbase
 	s.b.SetCoinbase(addr)
+	log.Info("(s *PrivateAccountAPI) UnlockAccount SetCoinbase")
 
 	return err == nil, err
 }
@@ -326,7 +329,7 @@ func (s *PrivateAccountAPI) LockAccount(addr common.Address) bool {
 //将根据给定的参数创建一个交易，尝试使用与args.To关联的键对其进行签名。 如果给定的passwd不是能够解密失败的密钥。
 func (s *PrivateAccountAPI) SendTransaction(ctx context.Context, args SendTxArgs, passwd string) (common.Hash, error) {
 
-	log.Info("****PrivateAccountAPI SendTransaction****", "passwd", passwd)
+	log.Info("(s *PrivateAccountAPI) SendTransaction", "passwd", passwd)
 
 	//查找包含所请求签名者的钱包
 	account := accounts.Account{Address: args.From}
@@ -439,7 +442,7 @@ func (s *PrivateAccountAPI) EcRecover(ctx context.Context, data, sig hexutil.Byt
 // and will be removed in the future. It primary goal is to give clients time to update.
 func (s *PrivateAccountAPI) SignAndSendTransaction(ctx context.Context, args SendTxArgs, passwd string) (common.Hash, error) {
 
-	log.Info("****PrivateAccountAPI SignAndSendTransaction****", "passwd", passwd)
+	log.Info("(s *PrivateAccountAPI) SignAndSendTransaction", "passwd", passwd)
 	return s.SendTransaction(ctx, args, passwd)
 }
 
@@ -512,6 +515,7 @@ func (s *PublicBlockChainAPI) GetUncleByBlockNumberAndIndex(ctx context.Context,
 
 //返回给定块哈希和索引的uncle块，当fullTx为true时完整详细地返回块中的所有交易，否则仅返回交易哈希
 func (s *PublicBlockChainAPI) GetUncleByBlockHashAndIndex(ctx context.Context, blockHash common.Hash, index hexutil.Uint) (map[string]interface{}, error) {
+
 	block, err := s.b.GetBlock(ctx, blockHash)
 	if block != nil {
 		uncles := block.Uncles()
@@ -536,6 +540,7 @@ func (s *PublicBlockChainAPI) GetUncleCountByBlockNumber(ctx context.Context, bl
 
 //返回给定块散列的块中的叔号数
 func (s *PublicBlockChainAPI) GetUncleCountByBlockHash(ctx context.Context, blockHash common.Hash) *hexutil.Uint {
+
 	if block, _ := s.b.GetBlock(ctx, blockHash); block != nil {
 		n := hexutil.Uint(len(block.Uncles()))
 		return &n
@@ -545,6 +550,7 @@ func (s *PublicBlockChainAPI) GetUncleCountByBlockHash(ctx context.Context, bloc
 
 //返回存储在给定块号的状态下给定地址的代码
 func (s *PublicBlockChainAPI) GetCode(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (hexutil.Bytes, error) {
+
 	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
 	if state == nil || err != nil {
 		return nil, err
@@ -555,6 +561,7 @@ func (s *PublicBlockChainAPI) GetCode(ctx context.Context, address common.Addres
 
 //从给定地址，key和的状态返回存储块号 rpc.LatestBlockNumber和rpc.PendingBlockNumber元块也允许使用数字。
 func (s *PublicBlockChainAPI) GetStorageAt(ctx context.Context, address common.Address, key string, blockNr rpc.BlockNumber) (hexutil.Bytes, error) {
+
 	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
 	if state == nil || err != nil {
 		return nil, err
@@ -570,7 +577,12 @@ func (s *PublicBlockChainAPI) GetLastProducer(ctx context.Context) (common.Addre
 
 	block := s.b.CurrentBlock()
 	if block != nil {
-		return block.DposContext.GetLastProducer(-1)
+
+		firstBlock, err := s.b.BlockByNumber(ctx, 0)
+		if err != nil {
+			return block.DposContext.GetLastProducer(-1, firstBlock.Time().Int64())
+		}
+
 	}
 	return common.Address{}, errors.New("failed get last producer")
 }
@@ -590,7 +602,14 @@ func (s *PublicBlockChainAPI) GetNextProducer(ctx context.Context) (common.Addre
 
 	block := s.b.CurrentBlock()
 	if block != nil {
-		return block.DposContext.GetCurrentProducer()
+
+		firstBlock, err := s.b.BlockByNumber(ctx, 0)
+		if err != nil {
+
+			return block.DposContext.GetCurrentProducer(firstBlock.Time().Int64())
+
+		}
+
 	}
 	return common.Address{}, errors.New("failed get next producer")
 }
@@ -600,55 +619,67 @@ func (s *PublicBlockChainAPI) GetNextTokenNoder(ctx context.Context) (common.Add
 
 	block := s.b.CurrentBlock()
 	if block != nil {
-		return block.DposContext.GetCurrentTokenNoder()
+
+		firstBlock, err := s.b.BlockByNumber(ctx, 0)
+		if err != nil {
+			return block.DposContext.GetCurrentTokenNoder(firstBlock.Time().Int64())
+		}
 	}
 	return common.Address{}, errors.New("failed get next token noder")
 }
 
 //播客链新增函数处理，设置当前基础合约
-func (s *PublicBlockChainAPI) SetBaseContracts(ctx context.Context, address common.Address, contractType protocol.ContractType, abiJson string) error {
+func (s *PublicBlockChainAPI) SetBaseContracts(ctx context.Context, address common.Address, contractType protocol.ContractType, abiJson string) (common.Hash, error) {
+
+	log.Info("(s *PublicBlockChainAPI) SetBaseContracts", "address", address.String())
 
 	//检测节点信息
 	if err := s.checkContract(); err != nil {
 		log.Error("SetBaseContracts checkContract", "err", err)
-		return err
+		return common.Hash{}, err
 	}
 
 	//检测交易类型
 	if err := s.isExitsTxType(contractType, protocol.SystemContract, protocol.PersonalContract); err != nil {
 		log.Error("SetBaseContracts isExitsTxType", "err", err)
-		return err
+		return common.Hash{}, err
 	}
 
 	//类型转换
 	txType := s.txTypeRotate(contractType, false)
-
-	//产生一个交易
-	return s.b.Boker().SubmitBokerTransaction(ctx, txType, address, abiJson)
+	tx, resultErr := s.b.Boker().SubmitBokerTransaction(ctx, txType, address, abiJson)
+	if resultErr != nil {
+		return common.Hash{}, resultErr
+	} else {
+		return tx.Hash(), nil
+	}
 }
 
 //播客链新增函数处理，取消一个基础合约
-func (s *PublicBlockChainAPI) CancelBaseContracts(ctx context.Context, address common.Address, contractType protocol.ContractType) error {
+func (s *PublicBlockChainAPI) CancelBaseContracts(ctx context.Context, address common.Address, contractType protocol.ContractType) (common.Hash, error) {
 
-	log.Info("****CancelBaseContracts****", "address", address.String(), "contractType", contractType)
+	log.Info("(s *PublicBlockChainAPI) CancelBaseContracts", "address", address.String(), "contractType", contractType)
 
 	//检测节点信息
 	if err := s.checkContract(); err != nil {
 		log.Error("CancelBaseContracts checkContract", "err", err)
-		return err
+		return common.Hash{}, err
 	}
 
 	//检测交易类型
 	if err := s.isExitsTxType(contractType, protocol.SystemContract, protocol.PersonalContract); err != nil {
 		log.Error("CancelBaseContracts isExitsTxType", "err", err)
-		return err
+		return common.Hash{}, err
 	}
 
 	//类型转换
 	txType := s.txTypeRotate(contractType, true)
-
-	//产生一个交易
-	return s.b.Boker().SubmitBokerTransaction(ctx, txType, address, "")
+	tx, resultErr := s.b.Boker().SubmitBokerTransaction(ctx, txType, address, "")
+	if resultErr != nil {
+		return common.Hash{}, resultErr
+	} else {
+		return tx.Hash(), nil
+	}
 }
 
 func (s *PublicBlockChainAPI) txTypeRotate(contractType protocol.ContractType, isCancel bool) protocol.TxType {
@@ -783,13 +814,13 @@ func (s *PublicBlockChainAPI) checkContract() error {
 }
 */
 //播客链新增函数处理，添加一个验证者信息
-func (s *PublicBlockChainAPI) AddValidator(ctx context.Context, address common.Address, votes *big.Int) error {
+func (s *PublicBlockChainAPI) AddValidator(ctx context.Context, address common.Address, votes *big.Int) (common.Hash, error) {
 
-	//log.Info("****AddValidator****", "address", address.String(), "votes", votes.Int64())
+	log.Info("(s *PublicBlockChainAPI) AddValidator", "address", address.String(), "votes", votes.Int64())
 
 	block, err := s.b.BlockByNumber(ctx, 0)
 	if err != nil {
-		return err
+		return common.Hash{}, err
 	}
 
 	if block != nil {
@@ -797,46 +828,48 @@ func (s *PublicBlockChainAPI) AddValidator(ctx context.Context, address common.A
 		//获取当前Coinbase
 		coinbase, err := s.b.Coinbase()
 		if err != nil {
-			return err
+			return common.Hash{}, err
 		}
 
 		if s.b.Boker() == nil {
-			log.Error("AddValidator error boker is nil")
-			return nil
+			return common.Hash{}, errors.New("current boker is nil")
 		}
 
 		txLevel, err := s.b.Boker().GetAccount(coinbase)
 		if err != nil {
-			return err
+			return common.Hash{}, err
 		}
 
 		//判断此账号是否具有设置验证者权限
 		if !bokerapi.ExistsTxType(protocol.SetValidator, txLevel) {
-			return errors.New("CoinBase Not`s Add Validator")
+			return common.Hash{}, errors.New("CoinBase Not`s Add Validator")
 		}
 
 		//判断此账号是否已经是验证者
 		if block.DposContext.IsValidator(address) {
-			return errors.New("Account has Validator")
+			return common.Hash{}, errors.New("Account has Validator")
 		}
 
 		//判断当前是否验证者已满
 		if block.DposContext.IsValidatorFull() {
-			return errors.New("Validator has Full")
+			return common.Hash{}, errors.New("Validator has Full")
 		}
 
 		//产生一个设置验证者的交易
-		s.b.Boker().SubmitBokerTransaction(ctx, protocol.SetValidator, address, "")
-
-		return nil
+		tx, resultErr := s.b.Boker().SubmitBokerTransaction(ctx, protocol.SetValidator, address, "")
+		if resultErr != nil {
+			return common.Hash{}, resultErr
+		} else {
+			return tx.Hash(), nil
+		}
 	}
-	return errors.New("failed AddValidator")
+	return common.Hash{}, errors.New("failed AddValidator")
 }
 
 //播客链新增函数处理，添加一个验证者信息
 func (s *PublicBlockChainAPI) DecodeAbi(ctx context.Context, abiJson string, method string, payload string) error {
 
-	log.Info("****DecodeAbi****", "abiJson", abiJson, "method", method, "payload", payload)
+	log.Info("(s *PublicBlockChainAPI) DecodeAbi", "abiJson", abiJson, "method", method, "payload", payload)
 
 	_, err := protocol.DecodeAbi(abiJson, method, payload)
 	if err != nil {
@@ -859,9 +892,9 @@ type CallArgs struct {
 }
 
 func (s *PublicBlockChainAPI) doCall(ctx context.Context, args CallArgs, blockNr rpc.BlockNumber, vmCfg vm.Config) ([]byte, *big.Int, bool, error) {
-	defer func(start time.Time) { log.Debug("Executing EVM call finished", "runtime", time.Since(start)) }(time.Now())
+	//defer func(start time.Time) { log.Debug("Executing EVM call finished", "runtime", time.Since(start)) }(time.Now())
 
-	log.Info("****doCall****")
+	//log.Info("****doCall****")
 
 	state, header, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
 	if state == nil || err != nil {
@@ -923,7 +956,7 @@ func (s *PublicBlockChainAPI) doCall(ctx context.Context, args CallArgs, blockNr
 		return nil, common.Big0, false, err
 	}
 
-	log.Info("doCall", "res", res, "resLength", len(res))
+	//log.Info("doCall", "res", res, "resLength", len(res))
 	return res, gas, failed, err
 }
 
@@ -933,7 +966,7 @@ func (s *PublicBlockChainAPI) Call(ctx context.Context, args CallArgs, blockNr r
 
 	result, _, _, err := s.doCall(ctx, args, blockNr, vm.Config{DisableGasMetering: true})
 
-	log.Info("****Call****", "result", result)
+	//log.Info("****Call****", "result", result)
 	return (hexutil.Bytes)(result), err
 }
 
@@ -1189,19 +1222,28 @@ func newRPCTransaction(tx *types.Transaction, blockHash common.Hash, blockNumber
 
 // newRPCPendingTransaction returns a pending transaction that will serialize to the RPC representation
 func newRPCPendingTransaction(tx *types.Transaction) *RPCTransaction {
+
+	log.Info("api.go newRPCPendingTransaction", "tx", tx.Hash())
 	return newRPCTransaction(tx, common.Hash{}, 0, 0)
 }
 
 // newRPCTransactionFromBlockIndex returns a transaction that will serialize to the RPC representation.
 func newRPCTransactionFromBlockIndex(b *types.Block, index uint64) *RPCTransaction {
+
+	log.Info("api.go newRPCTransactionFromBlockIndex", "index", index)
+
 	txs := b.Transactions()
 	if index >= uint64(len(txs)) {
 		return nil
 	}
+
 	return newRPCTransaction(txs[index], b.Hash(), b.NumberU64(), index)
 }
 
 func newRPCRawTransactionFromBlockIndex(b *types.Block, index uint64) hexutil.Bytes {
+
+	log.Info("api.go newRPCRawTransactionFromBlockIndex", "index", index)
+
 	txs := b.Transactions()
 	if index >= uint64(len(txs)) {
 		return nil
@@ -1211,6 +1253,9 @@ func newRPCRawTransactionFromBlockIndex(b *types.Block, index uint64) hexutil.By
 }
 
 func newRPCTransactionFromBlockHash(b *types.Block, hash common.Hash) *RPCTransaction {
+
+	log.Info("api.go newRPCTransactionFromBlockHash", "hash", hash)
+
 	for idx, tx := range b.Transactions() {
 		if tx.Hash() == hash {
 			return newRPCTransactionFromBlockIndex(b, uint64(idx))
@@ -1292,26 +1337,28 @@ func (s *PublicTransactionPoolAPI) GetTransactionCount(ctx context.Context, addr
 
 // GetTransactionByHash returns the transaction for the given hash
 func (s *PublicTransactionPoolAPI) GetTransactionByHash(ctx context.Context, hash common.Hash) *RPCTransaction {
-	// Try to return an already finalized transaction
+
+	log.Info("(s *PublicTransactionPoolAPI) GetTransactionByHash", "hash", hash)
+
 	if tx, blockHash, blockNumber, index := core.GetTransaction(s.b.ChainDb(), hash); tx != nil {
 		return newRPCTransaction(tx, blockHash, blockNumber, index)
 	}
-	// No finalized transaction, try to retrieve it from the pool
+
 	if tx := s.b.GetPoolTransaction(hash); tx != nil {
 		return newRPCPendingTransaction(tx)
 	}
-	// Transaction unknown, return as such
+
 	return nil
 }
 
 // GetRawTransactionByHash returns the bytes of the transaction for the given hash.
 func (s *PublicTransactionPoolAPI) GetRawTransactionByHash(ctx context.Context, hash common.Hash) (hexutil.Bytes, error) {
-	var tx *types.Transaction
 
-	// Retrieve a finalized transaction, or a pooled otherwise
+	log.Info("(s *PublicTransactionPoolAPI) GetRawTransactionByHash", "hash", hash.Str())
+
+	var tx *types.Transaction
 	if tx, _, _, _ = core.GetTransaction(s.b.ChainDb(), hash); tx == nil {
 		if tx = s.b.GetPoolTransaction(hash); tx == nil {
-			// Transaction not found anywhere, abort
 			return nil, nil
 		}
 	}
@@ -1437,7 +1484,7 @@ func (args *SendTxArgs) ToTransaction() (*types.Transaction, error) {
 	//判断交易地址是否为空
 	if args.To == nil {
 
-		if (args.Type >= protocol.SetValidator) && (args.Type <= protocol.AssignReward) {
+		if (args.Type >= protocol.SetValidator) && (args.Type <= protocol.AssignToken) {
 
 			//return types.NewBaseContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), args.Data), nil
 			return nil, errors.New("base contract transaction type not found contract address")
@@ -1459,7 +1506,7 @@ func (args *SendTxArgs) ToTransaction() (*types.Transaction, error) {
 //submitTransaction是一个辅助函数，它将tx提交给txPool并记录消息。
 func SubmitTransaction(ctx context.Context, b Backend, tx *types.Transaction) (common.Hash, error) {
 
-	//log.Info("****SubmitTransaction****", "gas", tx.Gas(), "gasprice", tx.GasPrice(), "hash", tx.Hash().String())
+	log.Info("api.go SubmitTransaction", "gaslimit", tx.Gas(), "gasprice", tx.GasPrice(), "hash", tx.Hash().String())
 
 	//判断交易类型是否是限定的类型
 	if err := tx.Validate(); err != nil {
@@ -1493,8 +1540,8 @@ func SubmitTransaction(ctx context.Context, b Backend, tx *types.Transaction) (c
 func (s *PublicTransactionPoolAPI) SendTransaction(ctx context.Context, args SendTxArgs) (common.Hash, error) {
 
 	//这里需要将bin格式的Data进行转换，得到最后一个参数
+	//log.Info("(s *PublicTransactionPoolAPI) SendTransaction", "Nonce", args.Nonce.String(), "from", args.From, "Gas", args.Gas, "GasPrice", args.GasPrice, "to", args.To, "json", args)
 
-	//log.Info("****SendTransaction****", "Nonce", args.Nonce.String(), "from", args.From, "Gas", args.Gas, "GasPrice", args.GasPrice, "to", args.To, "json", args)
 	account := accounts.Account{Address: args.From}
 	wallet, err := s.b.AccountManager().Find(account)
 	if err != nil {
@@ -1529,17 +1576,57 @@ func (s *PublicTransactionPoolAPI) SendTransaction(ctx context.Context, args Sen
 	return SubmitTransaction(ctx, s.b, signed)
 }
 
+func txHash(signer types.Signer, tx *types.Transaction) common.Hash {
+
+	return signer.Hash(tx)
+}
+
 // SendRawTransaction will add the signed transaction to the transaction pool.
 // The sender is responsible for signing the transaction and using the correct nonce.
 func (s *PublicTransactionPoolAPI) SendRawTransaction(ctx context.Context, encodedTx hexutil.Bytes) (common.Hash, error) {
 
-	//log.Info("SendRawTransaction", "len", len(encodedTx), "encodedTx", encodedTx)
+	log.Info("(s *PublicTransactionPoolAPI) SendRawTransaction", "len", len(encodedTx), "encodedTx", encodedTx)
 	tx := new(types.Transaction)
 	if err := rlp.DecodeBytes(encodedTx, tx); err != nil {
 
-		log.Error("SendRawTransaction", "error", err, "encodedTx", encodedTx)
+		log.Error("(s *PublicTransactionPoolAPI) SendRawTransaction", "error", err, "encodedTx", encodedTx)
 		return common.Hash{}, err
 	}
+
+	if tx.To() != nil {
+
+		txhash := txHash(types.HomesteadSigner{}, tx)
+		// 显示所有的数据大小;
+		log.Info("(s *PublicTransactionPoolAPI) SendRawTransaction DecodeBytes",
+			"type", tx.Type(),
+			"nonce", tx.Nonce(),
+			"price", tx.GasPrice(),
+			"gaslimit", tx.Gas(),
+			"timestamp", tx.Time(),
+			"to", tx.To().Bytes(),
+			"value", tx.Value(),
+			"input", tx.Data(),
+			"extra", tx.Extra(),
+			"v", tx.V().Bytes(),
+			"s", tx.S().Bytes(),
+			"r", tx.R().Bytes(),
+			"hash", txhash.Bytes())
+
+		sender, err := types.Sender(types.HomesteadSigner{}, tx)
+		if err != nil {
+			panic(fmt.Errorf("invalid transaction: %v", err))
+		}
+
+		log.Info("(s *PublicTransactionPoolAPI) SendRawTransaction types.Sender",
+			"sender", sender.Bytes(),
+			"senderString", sender)
+	}
+
+	//这里需要重新修正Time信息;
+	tx.SetTime()
+	log.Info("(s *PublicTransactionPoolAPI) SendRawTransaction tx.SetTime()",
+		"timestamp", tx.Time())
+
 	return SubmitTransaction(ctx, s.b, tx)
 }
 
@@ -1579,7 +1666,7 @@ type SignTransactionResult struct {
 // the given from address and it needs to be unlocked.
 func (s *PublicTransactionPoolAPI) SignTransaction(ctx context.Context, args SendTxArgs) (*SignTransactionResult, error) {
 
-	log.Info("****PublicTransactionPoolAPI SignTransaction****")
+	log.Info("(s *PublicTransactionPoolAPI) SignTransaction")
 
 	if args.Nonce == nil {
 		// Hold the addresse's mutex around signing to prevent concurrent assignment of
