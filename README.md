@@ -17,7 +17,7 @@ Our goal is to acheive video sharing, benefits sharing and user resources sharin
 * Twitter： [BokerChain](https://twitter.com/BokerBobby)
 		
 ### Bokerchain Co-Founder
-* WeChat: [区什么块什么链啊](Blockchain_fxh7622) 
+* WeChat: 区什么块什么链啊
 * Twitter: [区什么块什么链啊](https://twitter.com/chain_fxh7622) 
 
 ### Smart Contract
