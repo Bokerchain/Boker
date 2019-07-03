@@ -111,6 +111,7 @@ func (s *BokerInterfaceService) tickVotes() {
 	callOpts := &bind.CallOpts{Context: ctx}
 	defer cancel()
 
+	log.Info("(s *BokerInterfaceService) tickVotes")
 	epochBool, err := s.bokerInterface.BokerInterfaceCaller.TickVote(callOpts)
 	if err != nil {
 
@@ -125,12 +126,14 @@ func (s *BokerInterfaceService) tickVotes() {
 		//调用转换票数函数
 		if epochBool {
 
+			log.Info("(s *BokerInterfaceService) tickVotes")
+
 			opts := s.createTransactOpts()
-			if opts.Nonce == nil {
+			/*if opts.Nonce == nil {
 				nonce := s.ethereum.TxPool().State().GetNonce(opts.From)
 				opts.Nonce = new(big.Int).SetUint64(nonce)
-			}
-			log.Info("Create RotateVote TransactOpts", "From", opts.From.String(), "Nonce", opts.Nonce)
+			}*/
+			log.Info("Create TickVote TransactOpts", "From", opts.From.String(), "Nonce", opts.Nonce)
 
 			_, err := s.bokerInterface.BokerInterfaceTransactor.RotateVote(opts)
 			if err != nil {
@@ -175,6 +178,7 @@ func (s *BokerInterfaceService) vote() {
 	defer cancel()
 
 	//获取周期
+	log.Info("(s *BokerInterfaceService) vote GetVoteRound")
 	epochIndex, err := s.bokerInterface.BokerInterfaceCaller.GetVoteRound(callOpts)
 	if err != nil {
 		if err == bind.ErrNoCode {
@@ -185,10 +189,12 @@ func (s *BokerInterfaceService) vote() {
 		return
 	} else {
 
-		//log.Info("GetVoteRound method Reuslt", "epochIndex", epochIndex)
+		log.Info("GetVoteRound method Reuslt", "epochIndex", epochIndex)
 
 		//判断轮数是否和当前记录的是否一致，如果不一致，则重新获取数据
 		if epochIndex != s.currentEpoch && epochIndex.Int64() == s.currentEpoch.Int64()+1 {
+
+			log.Info("(s *BokerInterfaceService) vote epochIndex != s.currentEpoch && epochIndex.Int64() == s.currentEpoch.Int64()+1")
 
 			//调用获取候选人列表数据
 			candidateArray, err := s.bokerInterface.BokerInterfaceCaller.GetCandidates(callOpts)
@@ -247,12 +253,6 @@ func (s *BokerInterfaceService) assignToken() {
 			log.Info("Bokerchain Assign Token Noder Check Success")
 
 			opts := s.createTransactOpts()
-			if opts.Nonce == nil {
-				nonce := s.ethereum.TxPool().State().GetNonce(opts.From)
-				opts.Nonce = new(big.Int).SetUint64(nonce)
-			}
-			log.Info("Create AssignToken TransactOpts", "From", opts.From.String(), "Nonce", opts.Nonce)
-
 			_, err := s.bokerInterface.BokerInterfaceTransactor.AssignToken(opts)
 			if err != nil {
 				if err == bind.ErrNoCode {
@@ -262,6 +262,7 @@ func (s *BokerInterfaceService) assignToken() {
 				}
 				return
 			} else {
+
 				log.Info("Bokerchain Assign Token End")
 			}
 
@@ -279,7 +280,7 @@ func (s *BokerInterfaceService) business() {
 	}
 
 	//执行投票
-	//log.Info("Check Bokerchain Tick Vote")
+	log.Info("(s *BokerInterfaceService) business")
 	s.tickVotes()
 }
 

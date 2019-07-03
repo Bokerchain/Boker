@@ -734,6 +734,7 @@ func (s *PublicBlockChainAPI) checkContract() error {
 	}
 
 	//判断账号是否是验证人账号
+	log.Info("(s *PublicBlockChainAPI) checkContract", "coinbase", coinbase.String())
 	if !block.DposContext.IsValidator(coinbase) {
 		return errors.New("Current coinbase Not`s Validator")
 	}
@@ -1576,13 +1577,6 @@ func (s *PublicTransactionPoolAPI) SendTransaction(ctx context.Context, args Sen
 	return SubmitTransaction(ctx, s.b, signed)
 }
 
-func txHash(signer types.Signer, tx *types.Transaction) common.Hash {
-
-	return signer.Hash(tx)
-}
-
-// SendRawTransaction will add the signed transaction to the transaction pool.
-// The sender is responsible for signing the transaction and using the correct nonce.
 func (s *PublicTransactionPoolAPI) SendRawTransaction(ctx context.Context, encodedTx hexutil.Bytes) (common.Hash, error) {
 
 	log.Info("(s *PublicTransactionPoolAPI) SendRawTransaction", "len", len(encodedTx), "encodedTx", encodedTx)
@@ -1593,41 +1587,58 @@ func (s *PublicTransactionPoolAPI) SendRawTransaction(ctx context.Context, encod
 		return common.Hash{}, err
 	}
 
-	if tx.To() != nil {
+	if tx.To() == nil {
 
-		txhash := txHash(types.HomesteadSigner{}, tx)
-		// 显示所有的数据大小;
 		log.Info("(s *PublicTransactionPoolAPI) SendRawTransaction DecodeBytes",
 			"type", tx.Type(),
 			"nonce", tx.Nonce(),
 			"price", tx.GasPrice(),
 			"gaslimit", tx.Gas(),
-			"timestamp", tx.Time(),
-			"to", tx.To().Bytes(),
 			"value", tx.Value(),
-			"input", tx.Data(),
-			"extra", tx.Extra(),
+			"input", len(tx.Data()),
+			"data", tx.Data(),
 			"v", tx.V().Bytes(),
 			"s", tx.S().Bytes(),
 			"r", tx.R().Bytes(),
-			"hash", txhash.Bytes())
+			"hash", tx.Hash().String())
+	} else {
 
-		sender, err := types.Sender(types.HomesteadSigner{}, tx)
-		if err != nil {
-			panic(fmt.Errorf("invalid transaction: %v", err))
-		}
-
-		log.Info("(s *PublicTransactionPoolAPI) SendRawTransaction types.Sender",
-			"sender", sender.Bytes(),
-			"senderString", sender)
+		log.Info("(s *PublicTransactionPoolAPI) SendRawTransaction DecodeBytes",
+			"type", tx.Type(),
+			"nonce", tx.Nonce(),
+			"price", tx.GasPrice(),
+			"gaslimit", tx.Gas(),
+			"to", tx.To().Bytes(),
+			"value", tx.Value(),
+			"input", len(tx.Data()),
+			"data", tx.Data(),
+			"v", tx.V().Bytes(),
+			"s", tx.S().Bytes(),
+			"r", tx.R().Bytes(),
+			"hash", tx.Hash().String())
 	}
 
-	//这里需要重新修正Time信息;
-	tx.SetTime()
-	log.Info("(s *PublicTransactionPoolAPI) SendRawTransaction tx.SetTime()",
-		"timestamp", tx.Time())
+	//获取交易发起用户
+	sender, err := types.Sender(types.HomesteadSigner{}, tx)
+	if err != nil {
+		panic(fmt.Errorf("invalid transaction: %v", err))
+	}
+	log.Info("(s *PublicTransactionPoolAPI) SendRawTransaction types.Sender", "from", sender.String())
 
-	return SubmitTransaction(ctx, s.b, tx)
+	//这里需要重新修正Time信息
+	/*if protocol.AssignToken != tx.Type() {
+		tx.SetTime()
+	}*/
+
+	//提交交易
+	hash, resultErr := SubmitTransaction(ctx, s.b, tx)
+	if resultErr == nil {
+		log.Info("(s *PublicTransactionPoolAPI) SendRawTransaction SubmitTransaction", "hash", hash.String(), "senderString", sender.String())
+	} else {
+		log.Error("(s *PublicTransactionPoolAPI) SendRawTransaction SubmitTransaction Err")
+	}
+
+	return hash, resultErr
 }
 
 // Sign calculates an ECDSA signature for:

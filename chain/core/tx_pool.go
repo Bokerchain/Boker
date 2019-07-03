@@ -27,6 +27,10 @@ const (
 	rmTxChanSize = 10
 )
 
+const (
+	MaxOverSize = 32 * 1024
+)
+
 var (
 	ErrInvalidSender = errors.New("invalid sender")          //如果交易包含无效签名
 	ErrNonceTooLow   = errors.New("nonce too low")           //Nonce太低
@@ -401,8 +405,7 @@ func (pool *TxPool) reset(oldHead, newHead *types.Header) {
 	for addr, list := range pool.pending {
 		txs := list.Flatten() // Heavy but will be cached and is needed by the miner anyway
 		pool.pendingState.SetNonce(addr, txs[len(txs)-1].Nonce()+1)
-
-		//log.Info("(pool *TxPool) reset", "addr", addr, "nonce", txs[len(txs)-1].Nonce()+1)
+		log.Info("(pool *TxPool) reset", "addr", addr, "nonce", txs[len(txs)-1].Nonce()+1)
 	}
 
 	//检查队列并尽可能地将事务移到pending，或删除那些已经失效的事务
@@ -552,6 +555,11 @@ func (pool *TxPool) normalValidateTx(tx *types.Transaction, local bool) error {
 		"value", tx.Value(),
 		"pool.currentMaxGas", pool.currentMaxGas)
 
+	//Dos攻击判断
+	if tx.Size() > MaxOverSize {
+		return ErrOversizedData
+	}
+
 	//如果当前的最大Gas数量小于交易所标记的Gas数量，则放回GasLimit错误(这里需要添加针对基础合约类型的判断，因为基础合约采用的Gas为最大值)
 	if pool.currentMaxGas.Cmp(tx.Gas()) < 0 {
 		return ErrGasLimit
@@ -613,11 +621,6 @@ func (pool *TxPool) baseValidateTx(tx *types.Transaction, local bool) error {
 
 //对交易进行基本信息的验证
 func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
-
-	//Dos攻击判断
-	if tx.Size() > 32*1024 {
-		return ErrOversizedData
-	}
 
 	//交易值是否进行签名判断
 	if tx.Value().Sign() < 0 {
@@ -754,6 +757,7 @@ func (pool *TxPool) enqueueTx(hash common.Hash, tx *types.Transaction) (bool, er
 	inserted, old := pool.queue[from].Add(tx, pool.config.PriceBump)
 	if !inserted {
 		// An older transaction was better, discard this
+		log.Error("(pool *TxPool) enqueueTx", "nonce", tx.Nonce())
 		queuedDiscardCounter.Inc(1)
 		return false, ErrReplaceUnderpriced
 	}
@@ -816,6 +820,7 @@ func (pool *TxPool) promoteTx(addr common.Address, hash common.Hash, tx *types.T
 	// 把交易加入到队列,并发送消息告诉所有的订阅者, 这个订阅者在eth协议内部. 会接收这个消息并把这个消息通过网路广播出去.
 	pool.beats[addr] = time.Now()
 	pool.pendingState.SetNonce(addr, tx.Nonce()+1)
+	log.Info("(pool *TxPool) promoteTx", "addr", addr, "nonce", tx.Nonce()+1)
 
 	go pool.txFeed.Send(TxPreEvent{tx})
 }
@@ -823,7 +828,7 @@ func (pool *TxPool) promoteTx(addr common.Address, hash common.Hash, tx *types.T
 //本地节点产生单条交易
 func (pool *TxPool) AddLocal(tx *types.Transaction) error {
 
-	//log.Info("(pool *TxPool) AddLocal", "Nonce", tx.Nonce())
+	log.Info("(pool *TxPool) AddLocal", "Nonce", tx.Nonce())
 	return pool.addTx(tx, !pool.config.NoLocals)
 }
 
@@ -851,7 +856,7 @@ func (pool *TxPool) AddRemotes(txs []*types.Transaction) []error {
 //将交易放入到交易池中
 func (pool *TxPool) addTx(tx *types.Transaction, local bool) error {
 
-	//log.Info("(pool *TxPool) addTx", "hash", tx.Hash())
+	log.Info("(pool *TxPool) addTx", "hash", tx.Hash())
 
 	pool.mu.Lock()
 	defer pool.mu.Unlock()
@@ -971,7 +976,9 @@ func (pool *TxPool) removeTx(hash common.Hash) {
 			}
 			// Update the account nonce if needed
 			if nonce := tx.Nonce(); pool.pendingState.GetNonce(addr) > nonce {
+
 				pool.pendingState.SetNonce(addr, nonce)
+				log.Info("(pool *TxPool) removeTx", "addr", addr, "nonce", nonce)
 			}
 			return
 		}
@@ -989,7 +996,7 @@ func (pool *TxPool) removeTx(hash common.Hash) {
 //把已经变得可以执行的交易从future queue 插入到pending queue. 在这个过程中，所有删除无效的交易（低随机数，低余额）。
 func (pool *TxPool) promoteExecutables(accounts []common.Address) {
 
-	//log.Info("(pool *TxPool) promoteExecutables")
+	log.Info("(pool *TxPool) promoteExecutables")
 
 	// accounts存储了所有潜在需要更新的账户。 如果账户传入为nil，代表所有已知的账户。
 	if accounts == nil {
@@ -1001,15 +1008,13 @@ func (pool *TxPool) promoteExecutables(accounts []common.Address) {
 
 	for _, addr := range accounts {
 
-		//log.Info("(pool *TxPool) promoteExecutables", "addr", addr)
-
 		list := pool.queue[addr]
 		if list == nil {
 			continue
 		}
 
 		//删除所有的nonce太低的交易
-		//log.Info("(pool *TxPool) promoteExecutables Forward")
+		log.Info("(pool *TxPool) promoteExecutables Forward")
 		for _, tx := range list.Forward(pool.currentState.GetNonce(addr)) {
 			hash := tx.Hash()
 			log.Info("(pool *TxPool) promoteExecutables Removed old queued transaction", "hash", hash)
@@ -1018,7 +1023,7 @@ func (pool *TxPool) promoteExecutables(accounts []common.Address) {
 		}
 
 		//删除所有余额不足的交易。
-		//log.Info("(pool *TxPool) promoteExecutables GetBalance")
+		log.Info("(pool *TxPool) promoteExecutables GetBalance")
 		drops, _ := list.Filter(pool.currentState.GetBalance(addr), pool.currentMaxGas)
 		for _, tx := range drops {
 			hash := tx.Hash()
@@ -1111,7 +1116,9 @@ func (pool *TxPool) promoteExecutables(accounts []common.Address) {
 
 							// Update the account nonce to the dropped transaction
 							if nonce := tx.Nonce(); pool.pendingState.GetNonce(offenders[i]) > nonce {
+
 								pool.pendingState.SetNonce(offenders[i], nonce)
+								log.Info("(pool *TxPool) promoteExecutables", "addr", offenders[i], "nonce", nonce)
 							}
 							log.Trace("Removed fairness-exceeding pending transaction", "hash", hash)
 						}
@@ -1136,6 +1143,7 @@ func (pool *TxPool) promoteExecutables(accounts []common.Address) {
 						// Update the account nonce to the dropped transaction
 						if nonce := tx.Nonce(); pool.pendingState.GetNonce(addr) > nonce {
 							pool.pendingState.SetNonce(addr, nonce)
+							log.Info("(pool *TxPool) promoteExecutables11", "addr", addr, "nonce", nonce)
 						}
 						log.Trace("Removed fairness-exceeding pending transaction", "hash", hash)
 					}

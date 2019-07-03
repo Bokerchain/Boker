@@ -212,7 +212,7 @@ func (c *BoundContract) Transact(opts *TransactOpts, method string, params ...in
 
 		//判断合约类型是否是基础合约
 		extra := []byte("")
-		log.Info("Create Transact", "protocol.PersonalContract", protocol.PersonalContract)
+		log.Info("Create Transact", "contractType", contractType)
 		if contractType == protocol.PersonalContract {
 
 			//用户触发的基础合约（用户触发，但是不收取Gas费用）
@@ -257,12 +257,21 @@ func (c *BoundContract) Transact(opts *TransactOpts, method string, params ...in
 			return nil, errors.New("unknown system contract method name")
 		}
 	}
+
+	//测试使用
+	if method == protocol.FireEventMethod {
+
+		log.Info("(c *BoundContract) Transact", "FireEventMethod", protocol.FireEventMethod)
+		extra := []byte("")
+		return c.transact(opts, &c.address, input, extra, protocol.UserEvent)
+	}
+
 	return c.transact(opts, &c.address, input, []byte(""), protocol.Binary)
 }
 
 func (c *BoundContract) Transfer(opts *TransactOpts) (*types.Transaction, error) {
 
-	log.Info("****Transfer****")
+	log.Info("(c *BoundContract) Transfer")
 
 	var e *eth.Ethereum
 	if err := GethNode.Service(&e); err != nil {
@@ -289,27 +298,22 @@ func (c *BoundContract) baseTransact(opts *TransactOpts, contract *common.Addres
 	//判断Nonce值是否为空
 	var nonce uint64
 	if opts.Nonce == nil {
-
-		//如果Nonce值为空，则初始化一个nonce值来进行初始化
 		nonce, err = c.transactor.PendingNonceAt(ensureContext(opts.Context), opts.From)
 		if err != nil {
 			return nil, fmt.Errorf("failed to retrieve account nonce: %v", err)
 		}
+		log.Info("(c *BoundContract) baseTransact1", "nonce", nonce)
 	} else {
 		nonce = opts.Nonce.Uint64()
+		log.Info("(c *BoundContract) baseTransact2", "nonce", nonce)
 	}
-	//log.Info("baseTransact", "nonce", nonce)
+	log.Info("(c *BoundContract) baseTransact", "nonce", nonce)
 
 	/*这里不对Gas和GasLimit进行设置，因为在函数NewBaseTransaction里面已经针对基础业务进行了设置*/
 	var rawTx *types.Transaction
 	if contract == nil {
-
-		//如果合约尚未创建，则创建合约
-		//rawTx = types.NewBaseContractCreation(nonce, value, input)
 		return nil, errors.New("not found base contract address")
 	} else {
-
-		//合约已经创建，则创建一个交易
 		rawTx = types.NewBaseTransaction(transactTypes, nonce, c.address, value, payload)
 	}
 
@@ -333,7 +337,7 @@ func (c *BoundContract) baseTransact(opts *TransactOpts, contract *common.Addres
 
 func (c *BoundContract) normalTransact(opts *TransactOpts, contract *common.Address, payload []byte, extra []byte, transactTypes protocol.TxType) (*types.Transaction, error) {
 
-	//log.Info("****normalTransact****", "from", opts.From)
+	log.Info("(c *BoundContract) normalTransact", "from", opts.From)
 
 	//判断Value值是否为空
 	var err error
@@ -354,6 +358,7 @@ func (c *BoundContract) normalTransact(opts *TransactOpts, contract *common.Addr
 	} else {
 		nonce = opts.Nonce.Uint64()
 	}
+	log.Info("(c *BoundContract) normalTransact", "from", opts.From, "nonce", nonce)
 
 	//如果GasPrice为空，则设置一个建议的GasPrice
 	gasPrice := opts.GasPrice

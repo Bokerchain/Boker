@@ -709,6 +709,8 @@ func (env *Work) commitTransaction(tx *types.Transaction, bc *core.BlockChain, c
 	snap := env.state.Snapshot()
 	dposSnap := env.dposContext.Snapshot()
 
+	log.Info("(env *Work) commitTransaction", "Hash", tx.Hash().String(), "Nonce", tx.Nonce())
+
 	//执行交易
 	receipt, _, err := core.ApplyTransaction(env.config,
 		env.dposContext,

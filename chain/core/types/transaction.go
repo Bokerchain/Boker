@@ -58,16 +58,17 @@ type Transaction struct {
 
 //这里注意算法 交易费 = gasUsed * gasPrice
 type txdata struct {
-	AccountNonce uint64          `json:"nonce"    gencodec:"required"` //交易Nonce
-	Price        *big.Int        `json:"gasPrice" gencodec:"required"` //Gas单价
-	GasLimit     *big.Int        `json:"gas"      gencodec:"required"` //GasLimit
-	Recipient    *common.Address `json:"to"       rlp:"nil"`           //接收地址，可以为nil
-	Amount       *big.Int        `json:"value"    gencodec:"required"` //交易使用的数量
-	Payload      []byte          `json:"input"    gencodec:"required"` //交易可以携带的数据，在不同类型的交易中有不同的含义(这个字段在eth.sendTransaction()中对应的是data字段，在eth.getTransaction()中对应的是input字段)
+	AccountNonce uint64          `json:"nonce"    gencodec:"required"`         //交易Nonce
+	Price        *big.Int        `json:"gasPrice" gencodec:"required"`         //Gas单价
+	GasLimit     *big.Int        `json:"gas"      gencodec:"required"`         //GasLimit
+	Recipient    *common.Address `json:"to"       rlp:"nil"`                   //接收地址，可以为nil
+	Amount       *big.Int        `json:"value"    gencodec:"required"`         //交易使用的数量
+	Type         protocol.TxType `json:"type"   gencodec:"required"`           //交易类型
+	Time         *big.Int        `json:"timestamp"        gencodec:"required"` //交易发起时间
+	Payload      []byte          `json:"input"    gencodec:"required"`         //交易可以携带的数据
+	Extra        []byte          `json:"extra"    gencodec:"required"`         //扩展数据
 
-	Type  protocol.TxType `json:"type"   gencodec:"required"`           //交易类型
-	Time  *big.Int        `json:"timestamp"        gencodec:"required"` //交易发起时间
-	Extra []byte          `json:"extra"    gencodec:"required"`         //扩展数据
+	//需要节点设置的部分，这部分不参与到Hash的计算中（由于客户端和节点值不同，因此不能参与到Hash计算中）
 
 	V *big.Int `json:"v" gencodec:"required"`
 	R *big.Int `json:"r" gencodec:"required"`

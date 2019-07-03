@@ -285,6 +285,8 @@ func (self *StateDB) SetBalance(addr common.Address, amount *big.Int) {
 func (self *StateDB) SetNonce(addr common.Address, nonce uint64) {
 	stateObject := self.GetOrNewStateObject(addr)
 	if stateObject != nil {
+
+		log.Info("(self *StateDB) SetNonce", "addr", addr, "nonce", nonce)
 		stateObject.SetNonce(nonce)
 	}
 }

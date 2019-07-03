@@ -337,7 +337,12 @@ func (dc *DposContext) IsValidator(address common.Address) bool {
 	if err != nil {
 		return false
 	}
+	log.Info("(dc *DposContext) IsValidator", "len", len(validators))
+
 	for _, v := range validators {
+
+		log.Info("(dc *DposContext) IsValidator", "v", v.String())
+
 		if address == v {
 			return true
 		}

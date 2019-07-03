@@ -191,12 +191,14 @@ func (m *txSortedMap) Ready(start uint64) types.Transactions {
 	var ready types.Transactions
 	for next := (*m.index)[0]; m.index.Len() > 0 && (*m.index)[0] == next; next++ {
 
-		//log.Info("(m *txSortedMap) Ready append", "next", next)
+		log.Info("(m *txSortedMap) Ready append", "next", next)
 		ready = append(ready, m.items[next])
 		delete(m.items, next)
 		heap.Pop(m.index)
 	}
 	m.cache = nil
+
+	log.Info("(m *txSortedMap) Ready", "len", len(ready))
 
 	return ready
 }

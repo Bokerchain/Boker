@@ -197,6 +197,8 @@ func (c *BokerContracts) CancelContract(address common.Address) error {
 		if (c.services.contract != nil) && c.services.contract.IsStart() {
 
 			//终止
+			log.Info("(c *BokerContracts) SetContract Stop Contract")
+			c.services.contract.Stop()
 		}
 	}
 	return nil

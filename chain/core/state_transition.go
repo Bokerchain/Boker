@@ -234,10 +234,15 @@ func (st *StateTransition) preCheck() error {
 
 	// Make sure this transaction's nonce is correct
 	if msg.CheckNonce() {
+
+		log.Info("(st *StateTransition) preCheck is Transition")
+
 		nonce := st.state.GetNonce(sender.Address())
 		if nonce < msg.Nonce() {
+			log.Info("(st *StateTransition) preCheck", "nonce", nonce, "msg.Nonce", msg.Nonce(), "Address", sender.Address().String())
 			return ErrNonceTooHigh
 		} else if nonce > msg.Nonce() {
+			log.Info("(st *StateTransition) preCheck", "nonce", nonce, "msg.Nonce", msg.Nonce(), "Address", sender.Address().String())
 			return ErrNonceTooLow
 		}
 	}
@@ -295,7 +300,7 @@ func (st *StateTransition) getExtra(boker bokerapi.Api) string {
 //通过应用当前消息并返回结果来转换状态包括操作所需的气体以及用过的气体。 如果它返回错误失败了，表示存在共识问题。
 func (st *StateTransition) TransitionDb(boker bokerapi.Api) (ret []byte, requiredGas, usedGas *big.Int, failed bool, extra []byte, err error) {
 
-	//log.Info("****TransitionDb****")
+	log.Info("(st *StateTransition) TransitionDb")
 	if err = st.preCheck(); err != nil {
 		return
 	}
@@ -331,9 +336,9 @@ func (st *StateTransition) TransitionDb(boker bokerapi.Api) (ret []byte, require
 		//得到扩展字段
 		extra = []byte(st.getExtra(boker))
 		st.state.SetNonce(sender.Address(), st.state.GetNonce(sender.Address())+1)
-		ret, st.gas, vmerr = evm.Call(sender, st.to().Address(), st.data, st.gas, st.value)
+		log.Info("(st *StateTransition) TransitionDb", "addr", sender.Address(), "nonce", st.state.GetNonce(sender.Address()))
 
-		//log.Info("evm Call", "ret", ret, "gas", st.gas)
+		ret, st.gas, vmerr = evm.Call(sender, st.to().Address(), st.data, st.gas, st.value)
 	}
 	if vmerr != nil {
 
@@ -373,6 +378,7 @@ func (st *StateTransition) BaseTransitionDb(boker bokerapi.Api) (ret []byte, req
 
 	extra = []byte(st.getExtra(boker))
 	st.state.SetNonce(st.from().Address(), st.state.GetNonce(st.from().Address())+1)
+	log.Info("(st *StateTransition) BaseTransitionDb", "addr", st.from().Address(), "nonce", st.state.GetNonce(st.from().Address()))
 
 	//由于是基础业务，因此这里设置gas为最大值
 	st.gas = protocol.MaxGasPrice.Uint64()
@@ -415,11 +421,13 @@ func (st *StateTransition) ContractTransitionDb(txType protocol.TxType, boker bo
 	} else if txType == protocol.CancelPersonalContract {
 		boker.SetContract(*st.msg.To(), protocol.PersonalContract, true, "")
 	} else if txType == protocol.CancelSystemContract {
-		boker.SetContract(*st.msg.To(), protocol.SystemContract, true, "")
+		boker.CancelContract(*st.msg.To())
 	}
 
 	extra = st.extra
 	st.state.SetNonce(st.from().Address(), st.state.GetNonce(st.from().Address())+1)
+	log.Info("(st *StateTransition) ContractTransitionDb", "addr", st.from().Address(), "nonce", st.state.GetNonce(st.from().Address()))
+
 	return ret, new(big.Int).SetInt64(0), new(big.Int).SetInt64(0), false, extra, err
 }
 
@@ -431,6 +439,8 @@ func (st *StateTransition) VoteTransitionDb(txType protocol.TxType, boker bokera
 	}
 	extra = []byte(st.getExtra(boker))
 	st.state.SetNonce(st.from().Address(), st.state.GetNonce(st.from().Address())+1)
+	log.Info("(st *StateTransition) VoteTransitionDb", "addr", st.from().Address(), "nonce", st.state.GetNonce(st.from().Address()))
+
 	return ret, new(big.Int).SetInt64(0), new(big.Int).SetInt64(0), false, extra, err
 }
 
@@ -442,6 +452,8 @@ func (st *StateTransition) ValidatorTransitionDb(txType protocol.TxType, boker b
 	}
 	extra = []byte(st.getExtra(boker))
 	st.state.SetNonce(st.from().Address(), st.state.GetNonce(st.from().Address())+1)
+	log.Info("(st *StateTransition) ValidatorTransitionDb", "addr", st.from().Address(), "nonce", st.state.GetNonce(st.from().Address()))
+
 	return ret, new(big.Int).SetInt64(0), new(big.Int).SetInt64(0), false, extra, err
 }
 

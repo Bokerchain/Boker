@@ -69,6 +69,8 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB, cfg
 	//得到区块中所有的交易，并将这些交易使用Dpos引擎进行执行。
 	for i, tx := range block.Transactions() {
 
+		log.Info("(p *StateProcessor) Process", "i", i, "Hash", tx.Hash().String(), "Nonce", tx.Nonce())
+
 		//设置当前statedb状态,以便后面evm创建交易日志
 		statedb.Prepare(tx.Hash(), block.Hash(), i)
 		receipt, _, err := ApplyTransaction(p.config, block.DposCtx(), p.bc, nil, gp, statedb, header, tx, totalUsedGas, cfg, p.boker)
@@ -103,6 +105,8 @@ func binaryTransaction(config *params.ChainConfig,
 	cfg vm.Config,
 	msg types.Message,
 	boker bokerapi.Api) (*types.Receipt, *big.Int, error) {
+
+	log.Info("binaryTransaction", "Number", header.Number)
 
 	msg, err := tx.AsMessage(types.MakeSigner(config, header.Number))
 	if err != nil {
@@ -215,7 +219,7 @@ func baseTransaction(config *params.ChainConfig,
 	msg types.Message,
 	boker bokerapi.Api) (*types.Receipt, *big.Int, error) {
 
-	//log.Info("****baseTransaction****")
+	log.Info("****baseTransaction****")
 
 	msg, err := tx.AsMessage(types.MakeSigner(config, header.Number))
 	if err != nil {
@@ -223,7 +227,7 @@ func baseTransaction(config *params.ChainConfig,
 		log.Error("baseTransaction AsMessage", "err", err)
 		return nil, nil, err
 	}
-	//log.Info("baseTransaction", "Type", tx.Type(), "Time", header.Time.Int64())
+	log.Info("baseTransaction", "Type", tx.Type(), "Time", header.Time.Int64())
 
 	//判断是否是分配通证合约
 	if tx.Type() == protocol.AssignToken {
@@ -236,7 +240,7 @@ func baseTransaction(config *params.ChainConfig,
 		tokenNoder, err := dposContext.GetTokenNoder(tx.Time().Int64(), firstBlock.Time().Int64())
 		if err != nil {
 
-			//log.Error("baseTransaction dposContext.GetCurrentTokenNoder", "tx Time", tx.Time().Int64(), "firstTimer", firstBlock.Time().Int64(), "err", err)
+			log.Error("baseTransaction dposContext.GetCurrentTokenNoder", "tx Time", tx.Time().Int64(), "firstTimer", firstBlock.Time().Int64(), "err", err)
 			return nil, nil, err
 		}
 
@@ -397,7 +401,7 @@ func ApplyTransaction(config *params.ChainConfig,
 		case protocol.SetPersonalContract, protocol.CancelPersonalContract, protocol.SetSystemContract, protocol.CancelSystemContract:
 			//设置合约(已经测试)
 			return contractSetTransaction(config, dposContext, bc, author, gp, statedb, header, tx, usedGas, cfg, msg, boker)
-		case protocol.VoteUser, protocol.VoteEpoch, protocol.AssignToken, protocol.RegisterCandidate: //基础交易(已经测试)
+		case protocol.VoteUser, protocol.VoteEpoch, protocol.AssignToken, protocol.RegisterCandidate, protocol.UserEvent: //基础交易(已经测试)
 
 			return baseTransaction(config, dposContext, bc, author, gp, statedb, header, tx, usedGas, cfg, msg, boker)
 		case protocol.SetValidator: //设置验证人(已经测试)

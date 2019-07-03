@@ -24,6 +24,7 @@ import (
 
 	"github.com/Bokerchain/Boker/chain/common"
 	"github.com/Bokerchain/Boker/chain/crypto"
+	"github.com/Bokerchain/Boker/chain/log"
 	"github.com/Bokerchain/Boker/chain/rlp"
 	"github.com/Bokerchain/Boker/chain/trie"
 )
@@ -361,6 +362,11 @@ func (self *stateObject) SetNonce(nonce uint64) {
 }
 
 func (self *stateObject) setNonce(nonce uint64) {
+
+	if self.data.Nonce != nonce {
+		log.Info("(self *stateObject) setNonce", "self.data.Nonce", self.data.Nonce, "nonce", nonce)
+	}
+
 	self.data.Nonce = nonce
 	if self.onDirty != nil {
 		self.onDirty(self.Address())

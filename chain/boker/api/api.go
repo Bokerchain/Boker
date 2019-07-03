@@ -18,6 +18,8 @@ type Api interface {
 
 	SetContract(address common.Address, contractType protocol.ContractType, isCancel bool, abiJson string) error //设置合约级别
 
+	CancelContract(address common.Address) error
+
 	GetContractAddr(protocol.ContractType) (common.Address, error) //得到合约帐号
 
 	SubmitBokerTransaction(ctx context.Context,

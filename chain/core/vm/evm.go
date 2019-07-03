@@ -22,7 +22,7 @@ import (
 
 	"github.com/Bokerchain/Boker/chain/common"
 	"github.com/Bokerchain/Boker/chain/crypto"
-	_ "github.com/Bokerchain/Boker/chain/log"
+	"github.com/Bokerchain/Boker/chain/log"
 	"github.com/Bokerchain/Boker/chain/params"
 )
 
@@ -322,6 +322,7 @@ func (evm *EVM) Create(caller ContractRef, code []byte, gas uint64, value *big.I
 	//确保已经在指定地址没有现有合约(nonce可以看做为交易的流水号，要求凭证号严格递增)
 	nonce := evm.StateDB.GetNonce(caller.Address())
 	evm.StateDB.SetNonce(caller.Address(), nonce+1)
+	log.Info("(evm *EVM) Create", "addr", caller.Address(), "nonce", nonce+1)
 
 	//生成合约地址，使用sender的address+nonce的rlp值，然后Keccak256加密
 	contractAddr = crypto.CreateAddress(caller.Address(), nonce)

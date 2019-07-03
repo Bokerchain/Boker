@@ -156,6 +156,10 @@ func (boker *BokerBackend) SetContract(address common.Address, contractType prot
 	return boker.contracts.SetContract(address, contractType, isCancel, abiJson)
 }
 
+func (boker *BokerBackend) CancelContract(address common.Address) error {
+	return boker.contracts.CancelContract(address)
+}
+
 func (boker *BokerBackend) GetContractAddr(contractType protocol.ContractType) (common.Address, error) {
 	return boker.contracts.GetContractAddr(contractType)
 }
