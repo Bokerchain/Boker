@@ -101,6 +101,11 @@ func NewBaseTransaction(txType protocol.TxType, nonce uint64, to common.Address,
 	return newTransaction(txType, nonce, &to, amount, protocol.MaxGasLimit, protocol.MaxGasPrice, payload)
 }
 
+//创建基础交易
+func NewAssginTransaction(txType protocol.TxType, nonce uint64, to common.Address, amount *big.Int, payload []byte, now int64) *Transaction {
+	return newAssginTransaction(txType, nonce, &to, amount, protocol.MaxGasLimit, protocol.MaxGasPrice, payload, now)
+}
+
 //创建合约
 func NewContractCreation(nonce uint64, amount, gasLimit, gasPrice *big.Int, payload []byte) *Transaction {
 	return newTransaction(protocol.Binary, nonce, nil, amount, gasLimit, gasPrice, payload)
@@ -143,6 +148,50 @@ func newTransaction(txType protocol.TxType, nonce uint64, to *common.Address, am
 
 	// 显示所有的数据大小;
 	log.Info("transaction.go newTransaction",
+		"AccountNonce", unsafe.Sizeof(d.AccountNonce),
+		"Type", unsafe.Sizeof(d.Type),
+		"Price", unsafe.Sizeof(d.Price))
+
+	return &Transaction{data: d}
+}
+
+func newAssginTransaction(txType protocol.TxType, nonce uint64, to *common.Address, amount, gasLimit, gasPrice *big.Int, payload []byte, now int64) *Transaction {
+
+	//判断数据是否长度大于0
+	if len(payload) > 0 {
+		payload = common.CopyBytes(payload)
+	}
+
+	//构造一个交易结构(注意这里的txType类型和Gas的关系)
+	d := txdata{
+		AccountNonce: nonce,
+		Recipient:    to,
+		Payload:      payload,
+		Amount:       new(big.Int),
+		GasLimit:     new(big.Int),
+		Time:         new(big.Int),
+		Price:        new(big.Int),
+		Type:         txType,
+		V:            new(big.Int),
+		R:            new(big.Int),
+		S:            new(big.Int),
+	}
+
+	//设置交易时间
+	d.Time.SetInt64(now)
+
+	if amount != nil {
+		d.Amount.Set(amount)
+	}
+	if gasLimit != nil {
+		d.GasLimit.Set(gasLimit)
+	}
+	if gasPrice != nil {
+		d.Price.Set(gasPrice)
+	}
+
+	// 显示所有的数据大小;
+	log.Info("transaction.go newAssginTransaction",
 		"AccountNonce", unsafe.Sizeof(d.AccountNonce),
 		"Type", unsafe.Sizeof(d.Type),
 		"Price", unsafe.Sizeof(d.Price))

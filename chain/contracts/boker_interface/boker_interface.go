@@ -228,9 +228,15 @@ func (s *BokerInterfaceService) vote() {
 
 func (s *BokerInterfaceService) assignToken() {
 
+	var lastTxTime int64 = 0
+
 	for {
 
-		time.Sleep(time.Duration(1) * protocol.BokerInterval)
+		time.Sleep(time.Duration(500) * protocol.AssignTickInterval)
+
+		if lastTxTime != 0 && lastTxTime == time.Now().Unix() {
+			continue
+		}
 
 		//得到第一个区块
 		blocks := s.ethereum.BlockChain().GetBlockByNumber(0)
@@ -239,11 +245,12 @@ func (s *BokerInterfaceService) assignToken() {
 		}
 		//得到第一个区块的时间
 		firstTimer := blocks.Time().Int64()
-		offset := time.Now().Unix() - firstTimer
+		now := time.Now().Unix()
+		offset := now - firstTimer
 
 		if offset%protocol.TokenNoderInterval == 0 {
 
-			log.Info("Bokerchain Assign Token Start", "Now", time.Now().Unix(), "firstTimer", firstTimer)
+			log.Info("Bokerchain Assign Token Start", "Now", now, "firstTimer", firstTimer)
 
 			//通证分配节点是否是当前节点
 			if err := s.getCurrentTokenNoder(); err != nil {
@@ -253,7 +260,7 @@ func (s *BokerInterfaceService) assignToken() {
 			log.Info("Bokerchain Assign Token Noder Check Success")
 
 			opts := s.createTransactOpts()
-			_, err := s.bokerInterface.BokerInterfaceTransactor.AssignToken(opts)
+			tx, err := s.bokerInterface.BokerInterfaceTransactor.AssignToken(opts, now)
 			if err != nil {
 				if err == bind.ErrNoCode {
 					log.Info("Bokerchain Assign Token Address Not Found", "Contract", s.addr)
@@ -262,6 +269,11 @@ func (s *BokerInterfaceService) assignToken() {
 				}
 				return
 			} else {
+
+				if tx != nil {
+
+					lastTxTime = tx.Time().Int64()
+				}
 
 				log.Info("Bokerchain Assign Token End")
 			}
@@ -335,6 +347,38 @@ func (s *BokerInterfaceService) getCurrentTokenNoder() error {
 
 		//得到当前的出块节点
 		tokenNoder, err := s.ethereum.BlockChain().CurrentBlock().DposCtx().GetCurrentTokenNoder(firstTimer)
+		if err != nil {
+			return protocol.ErrInvalidTokenNoder
+		}
+
+		//得到当前挖矿节点
+		coinbase, err := s.ethereum.Coinbase()
+		if err != nil {
+			return protocol.ErrInvalidCoinbase
+		}
+
+		//将当前出块节点和当前节点进行比较，如果是当前出块节点，则允许继续进行处理
+		if tokenNoder == coinbase {
+			return nil
+		}
+	}
+	return protocol.ErrInvalidSystem
+}
+
+func (s *BokerInterfaceService) getNowTokenNoder(now int64) error {
+
+	if s.ethereum != nil {
+
+		//得到第一个区块
+		blocks := s.ethereum.BlockChain().GetBlockByNumber(0)
+		if blocks == nil {
+			return protocol.ErrInvalidSystem
+		}
+		//得到第一个区块的时间
+		firstTimer := blocks.Time().Int64()
+
+		//得到当前的出块节点
+		tokenNoder, err := s.ethereum.BlockChain().CurrentBlock().DposCtx().GetNowTokenNoder(firstTimer, now)
 		if err != nil {
 			return protocol.ErrInvalidTokenNoder
 		}

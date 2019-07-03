@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/big"
 	_ "reflect"
+	"time"
 
 	"github.com/Bokerchain/Boker/chain"
 	"github.com/Bokerchain/Boker/chain/accounts/abi"
@@ -158,6 +159,22 @@ func (c *BoundContract) getTokenNoder(opts *TransactOpts) (common.Address, error
 	return ether.BlockChain().CurrentBlock().DposCtx().GetCurrentTokenNoder(firstTimer)
 }
 
+//得到当前分币帐号
+func (c *BoundContract) getNowTokenNoder(opts *TransactOpts, now int64) (common.Address, error) {
+
+	var ether *eth.Ethereum
+	if err := GethNode.Service(&ether); err != nil {
+		return common.Address{}, err
+	}
+
+	if ether.BlockChain().CurrentBlock() == nil {
+		return common.Address{}, errors.New("failed to lookup token node")
+	}
+
+	firstTimer := ether.BlockChain().GetBlockByNumber(0).Time().Int64()
+	return ether.BlockChain().CurrentBlock().DposCtx().GetNowTokenNoder(firstTimer, now)
+}
+
 //得到当前的验证者帐号
 func (c *BoundContract) getProducer(opts *TransactOpts) (common.Address, error) {
 
@@ -185,8 +202,9 @@ func typeof(v interface{}) bool {
 	}
 }
 
-//使用输入的值作为参数调用合约方法
 func (c *BoundContract) Transact(opts *TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
+
+	var now = time.Now().Unix()
 
 	log.Info("Create Transact", "method", method)
 
@@ -233,14 +251,17 @@ func (c *BoundContract) Transact(opts *TransactOpts, method string, params ...in
 			if method == protocol.AssignTokenMethod {
 
 				//得到当前的分币节点
-				tokennoder, err := c.getTokenNoder(opts)
+				tokennoder, err := c.getNowTokenNoder(opts, now)
 				if err != nil {
 					return nil, errors.New("get assign token error")
 				}
 				if tokennoder != opts.From {
 					return nil, errors.New("current assign token not is from account")
 				}
-				return c.transact(opts, &c.address, input, extra, protocol.AssignToken)
+
+				return c.assginTransact(opts, &c.address, input, extra, protocol.AssignToken, now)
+
+				//return c.transact(opts, &c.address, input, extra, protocol.AssignToken)
 
 			} else if method == protocol.RotateVoteMethod {
 
@@ -267,6 +288,50 @@ func (c *BoundContract) Transact(opts *TransactOpts, method string, params ...in
 	}
 
 	return c.transact(opts, &c.address, input, []byte(""), protocol.Binary)
+}
+
+func (c *BoundContract) TryTransact(opts *TransactOpts, now int64, method string, params ...interface{}) (*types.Transaction, error) {
+
+	log.Info("(c *BoundContract) TryTransact", "now", now, "method", method)
+
+	input, err := c.abi.Pack(method, params...)
+	if err != nil {
+		return nil, err
+	}
+
+	if GethNode != nil {
+
+		var e *eth.Ethereum
+		if err := GethNode.Service(&e); err != nil {
+			return nil, err
+		}
+
+		if method == protocol.AssignTokenMethod {
+
+			tokennoder, err := c.getNowTokenNoder(opts, now)
+			if err != nil {
+				return nil, errors.New("get assign token error")
+			}
+			if tokennoder != opts.From {
+				return nil, errors.New("current assign token not is from account")
+			}
+			return c.assginTransact(opts, &c.address, input, []byte(""), protocol.AssignToken, now)
+
+		} else if method == protocol.RotateVoteMethod {
+
+			tokennoder, err := c.getTokenNoder(opts)
+			if err != nil {
+				return nil, errors.New("get rotate vote error")
+			}
+			if tokennoder != opts.From {
+				return nil, errors.New("current rotate vote not is from account")
+			}
+			return c.transact(opts, &c.address, input, []byte(""), protocol.VoteEpoch)
+		} else {
+			return nil, errors.New("unknown system contract method name")
+		}
+	}
+	return nil, errors.New("node not run")
 }
 
 func (c *BoundContract) Transfer(opts *TransactOpts) (*types.Transaction, error) {
@@ -329,6 +394,49 @@ func (c *BoundContract) baseTransact(opts *TransactOpts, contract *common.Addres
 	}
 
 	//将交易注入pending池中
+	if err := c.transactor.SendTransaction(ensureContext(opts.Context), signedTx); err != nil {
+		return nil, err
+	}
+	return signedTx, nil
+}
+
+func (c *BoundContract) assginTransact(opts *TransactOpts, contract *common.Address, payload []byte, extra []byte, transactTypes protocol.TxType, now int64) (*types.Transaction, error) {
+
+	var err error
+	value := opts.Value
+	if value == nil {
+		value = new(big.Int)
+	}
+
+	var nonce uint64
+	if opts.Nonce == nil {
+		nonce, err = c.transactor.PendingNonceAt(ensureContext(opts.Context), opts.From)
+		if err != nil {
+			return nil, fmt.Errorf("failed to retrieve account nonce: %v", err)
+		}
+		log.Info("(c *BoundContract) baseTransact1", "nonce", nonce)
+	} else {
+		nonce = opts.Nonce.Uint64()
+		log.Info("(c *BoundContract) baseTransact2", "nonce", nonce)
+	}
+	log.Info("(c *BoundContract) baseTransact", "nonce", nonce)
+
+	var rawTx *types.Transaction
+	if contract == nil {
+		return nil, errors.New("not found base contract address")
+	} else {
+		rawTx = types.NewAssginTransaction(transactTypes, nonce, c.address, value, payload, now)
+	}
+
+	if opts.Signer == nil {
+		return nil, errors.New("no signer to authorize the transaction with")
+	}
+
+	signedTx, err := opts.Signer(types.HomesteadSigner{}, opts.From, rawTx)
+	if err != nil {
+		return nil, err
+	}
+
 	if err := c.transactor.SendTransaction(ensureContext(opts.Context), signedTx); err != nil {
 		return nil, err
 	}

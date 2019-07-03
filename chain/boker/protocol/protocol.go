@@ -18,17 +18,18 @@ import (
 )
 
 const (
-	ExtraVanity        = 32           //扩展字段的前缀字节数量
-	ExtraSeal          = 65           //扩展字段的后缀字节数量
-	InmemorySignatures = 4096         //保留在内存中的最近块签名的数量
-	ProducerInterval   = int64(5)     //打包时间间隔（秒）
-	TokenNoderInterval = int64(300)   //分配通证时间间隔(秒)
-	EpochInterval      = int64(86400) //一个周期的时间（86400秒 = 1天）
-	MaxValidatorSize   = 1            //DPOS的验证者数量
-	SafeSize           = 1            //安全的验证者数量
-	ConsensusSize      = 1            //共识确认验证者数量
-	BokerInterval      = time.Second  //分配通证时间间隔(秒)
-	AssignInterval     = time.Minute  //分配通证时间间隔单位
+	ExtraVanity        = 32               //扩展字段的前缀字节数量
+	ExtraSeal          = 65               //扩展字段的后缀字节数量
+	InmemorySignatures = 4096             //保留在内存中的最近块签名的数量
+	ProducerInterval   = int64(5)         //打包时间间隔（秒）
+	TokenNoderInterval = int64(300)       //分配通证时间间隔(秒)
+	EpochInterval      = int64(86400)     //一个周期的时间（86400秒 = 1天）
+	MaxValidatorSize   = 1                //DPOS的验证者数量
+	SafeSize           = 1                //安全的验证者数量
+	ConsensusSize      = 1                //共识确认验证者数量
+	BokerInterval      = time.Second      //分配通证时间间隔(秒)
+	AssignTickInterval = time.Millisecond //分配通证时间间隔(秒)
+	AssignInterval     = time.Minute      //分配通证时间间隔单位
 	AssignTimer        = 5
 )
 

@@ -400,6 +400,26 @@ func (dc *DposContext) GetCurrentTokenNoder(firstTimer int64) (common.Address, e
 	return producers[offset], nil
 }
 
+func (dc *DposContext) GetNowTokenNoder(firstTimer int64, now int64) (common.Address, error) {
+
+	producers, err := dc.GetEpochTrie()
+	if err != nil {
+		return common.Address{}, errors.New("failed to GetValidators")
+	}
+	producerSize := len(producers)
+	if producerSize == 0 {
+		return common.Address{}, errors.New("failed to producers length is zero")
+	}
+
+	offset := (now - firstTimer) % protocol.EpochInterval
+	offset /= protocol.TokenNoderInterval
+
+	log.Info("GetCurrentTokenNoder", "offset", offset)
+
+	offset %= int64(producerSize)
+	return producers[offset], nil
+}
+
 func (dc *DposContext) GetLastProducer(indexOffset int, firstTimer int64) (common.Address, error) {
 
 	producers, err := dc.GetEpochTrie()
@@ -493,7 +513,7 @@ func (dc *DposContext) GetTokenNoder(now int64, firstTimer int64) (tokennoder co
 	offset := (now - firstTimer) % protocol.EpochInterval
 	if offset%protocol.TokenNoderInterval != 0 {
 
-		log.Info("GetTokenNoder", "offset", offset%protocol.TokenNoderInterval)
+		log.Info("GetTokenNoder", "now", now, "offset", offset, "spare", offset%protocol.TokenNoderInterval)
 		return common.Address{}, protocol.ErrInvalidTokenTime
 	}
 	offset /= protocol.TokenNoderInterval

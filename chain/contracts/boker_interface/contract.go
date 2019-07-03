@@ -6,6 +6,7 @@ package boker_contract
 import (
 	"math/big"
 	"strings"
+	"time"
 
 	"github.com/Bokerchain/Boker/chain/accounts/abi"
 	"github.com/Bokerchain/Boker/chain/accounts/abi/bind"
@@ -458,22 +459,22 @@ func (_BokerInterface *BokerInterfaceCallerSession) Version() (string, error) {
 // AssignToken is a paid mutator transaction binding the contract method 0xa237213c.
 //
 // Solidity: function assignToken() returns()
-func (_BokerInterface *BokerInterfaceTransactor) AssignToken(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _BokerInterface.contract.Transact(opts, "assignToken")
+func (_BokerInterface *BokerInterfaceTransactor) AssignToken(opts *bind.TransactOpts, now int64) (*types.Transaction, error) {
+	return _BokerInterface.contract.TryTransact(opts, now, "assignToken")
 }
 
 // AssignToken is a paid mutator transaction binding the contract method 0xa237213c.
 //
 // Solidity: function assignToken() returns()
 func (_BokerInterface *BokerInterfaceSession) AssignToken() (*types.Transaction, error) {
-	return _BokerInterface.Contract.AssignToken(&_BokerInterface.TransactOpts)
+	return _BokerInterface.Contract.AssignToken(&_BokerInterface.TransactOpts, time.Now().Unix())
 }
 
 // AssignToken is a paid mutator transaction binding the contract method 0xa237213c.
 //
 // Solidity: function assignToken() returns()
 func (_BokerInterface *BokerInterfaceTransactorSession) AssignToken() (*types.Transaction, error) {
-	return _BokerInterface.Contract.AssignToken(&_BokerInterface.TransactOpts)
+	return _BokerInterface.Contract.AssignToken(&_BokerInterface.TransactOpts, time.Now().Unix())
 }
 
 // RotateVote is a paid mutator transaction binding the contract method 0x11070fcd.
