@@ -74,6 +74,9 @@ func NewContract(db ethdb.Database, ethereum *eth.Ethereum, transactions *BokerT
 	c.ethereum = ethereum
 	c.transactions = transactions
 
+	tmpContracts, _ := c.getContractsTrie()
+	log.Info("NewContract c.getContractsTrie", "len(tmpContracts)", len(tmpContracts))
+
 	//从树中加载合约信息
 	log.Info("Load Bokerchain Base Contract Config")
 	var err error
@@ -88,7 +91,7 @@ func NewContract(db ethdb.Database, ethereum *eth.Ethereum, transactions *BokerT
 	address, err = c.getContractAddress(protocol.SystemContract)
 	if err != nil {
 
-		log.Debug("Bokerchain System Contract is`t Exists")
+		log.Error("Bokerchain System Contract is`t Exists")
 		return c, nil
 	}
 
@@ -123,7 +126,7 @@ func NewContractAbiTrie(root common.Hash, db ethdb.Database) (*trie.Trie, error)
 func (c *BokerContracts) SetContract(address common.Address, contractType protocol.ContractType, isCancel bool, abiJson string) error {
 
 	//设置基础合约
-	log.Info("(c *BokerContracts) SetContract", "address", address.String(), "contractType", contractType)
+	log.Info("(c *BokerContracts) SetContract", "address", address.String(), "contractType", contractType, "len(c.contracts)", len(c.contracts))
 
 	exist, err := c.existContract(address)
 	if exist {
@@ -131,13 +134,12 @@ func (c *BokerContracts) SetContract(address common.Address, contractType protoc
 		return protocol.ErrContractExist
 	}
 
-	/****处理树的操作****/
-
 	//设置单个树的信息
 	if err = c.singleTrie.TryUpdate(address.Bytes(), []byte(strconv.Itoa(int(contractType)))); err != nil {
 		log.Error("(c *BokerContracts) SetContract singleTrie.TryUpdate failed", "err", err)
 		return err
 	}
+
 	//设置基础合约的abi信息树
 	if err = c.abiTrie.TryUpdate(address.Bytes(), []byte(abiJson)); err != nil {
 		log.Error("(c *BokerContracts) SetContract abiTrie.TryUpdate failed", "err", err)
@@ -150,6 +152,11 @@ func (c *BokerContracts) SetContract(address common.Address, contractType protoc
 		log.Error("(c *BokerContracts) SetContract setContractsTrie failed", "err", err)
 		return protocol.ErrSaveContractTrie
 	}
+	tmpContracts, err := c.getContractsTrie()
+	log.Info("(c *BokerContracts) SetContract SystemContract ", "len(tmpContracts)", len(tmpContracts))
+
+	tmpAddress, err := c.getContractAddress(protocol.SystemContract)
+	log.Info("(c *BokerContracts) SetContract SystemContract ", "tmpAddress", tmpAddress.String())
 
 	//判断是否需要启动合约
 	if contractType == protocol.SystemContract {
@@ -220,7 +227,13 @@ func (c *BokerContracts) setContractsTrie() error {
 		log.Error("failed to encode contracts to rlp", "error", err)
 		return err
 	}
+	log.Info("(c *BokerContracts) setContractsTrie",
+		"protocol.Contracts", protocol.Contracts,
+		"contracts", len(contracts),
+		"hash", c.contractsTrie.Hash())
+
 	c.contractsTrie.Update(protocol.Contracts, contractsRLP)
+
 	return nil
 }
 

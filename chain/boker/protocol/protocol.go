@@ -59,7 +59,6 @@ const (
 
 	/****系统基础合约交易类型****/
 	AssignToken //分配通证(每次分配通证的时候触发)
-	//AssignReward //出块节点的通证奖励(每次分配通证的时候触发)
 )
 
 //新增合约类型
@@ -98,13 +97,13 @@ var (
 )
 
 var (
-	EpochPrefix     = []byte("epoch-")     //存放周期信息
-	ValidatorPrefix = []byte("validator-") //存放验证者投票信息
-	BlockCntPrefix  = []byte("blockCnt-")  //存放投票数量
-	ValidatorsKey   = []byte("validators") //存放所有的验证者列表
-	SinglePrefix    = []byte("single-")    //
-	Contracts       = []byte("contracts")  //
-	AbiPrefix       = []byte("abi-")       //
+	EpochPrefix     = []byte("epoch-")      //存放周期信息
+	ValidatorPrefix = []byte("validator-")  //存放验证者投票信息
+	BlockCntPrefix  = []byte("blockCnt-")   //存放投票数量
+	SinglePrefix    = []byte("single-")     //
+	AbiPrefix       = []byte("abi-")        //
+	ValidatorsKey   = []byte("validators-") //存放所有的验证者列表
+	Contracts       = []byte("contracts-")  //
 )
 
 var (

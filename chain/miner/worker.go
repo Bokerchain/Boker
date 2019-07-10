@@ -215,8 +215,6 @@ func (self *worker) mintBlock(now int64) {
 
 		if self.chain.Boker().IsValidator(self.coinbase) {
 
-			//log.Info("mintBlock")
-
 			work, err := self.createNewWork()
 			if err != nil {
 				log.Error("Failed to create the new work", "err", err)

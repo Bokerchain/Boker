@@ -303,11 +303,13 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 		utils.Fatalf("ethereum service is nil")
 	}
 
-	block := ethereum.BlockChain().GetBlockByNumber(0)
+	//由于设置的默克尔树会发生变化，因此这里不能使用第一个区块的信息 fxh7622
+	//block := ethereum.BlockChain().GetBlockByNumber(0)
+	block := ethereum.BlockChain().CurrentBlock()
 	bokerChain := boker.New()
 	bokerChain.Init(ethereum, block.Header().BokerProto)
 	ethereum.SetBoker(bokerChain)
-	log.Info("Set BokerChain Pointer")
+	log.Info("Set BokerChain Pointer", "Block Number", block.Number())
 
 	//在这里启动worker的createNewWork，由于之前启动有可能ETH还没有启动完成
 	log.Info("Get Worker and CreateNewWork")

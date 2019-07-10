@@ -421,7 +421,11 @@ func (d *Dpos) Finalize(chain consensus.ChainReader, header *types.Header, state
 
 	singleTrie, contractsTrie, abiTrie := boker.GetContractTrie()
 	header.BokerProto = protocol.ToBokerProto(singleTrie.Hash(), contractsTrie.Hash(), abiTrie.Hash())
-	//log.Info("Get Bokerchain Trie", "BokerProto", header.BokerProto.Root().String(), 	"singleTrie", singleTrie.Hash().String(), "contractsTrie", contractsTrie.Hash().String(), "abiTrie", abiTrie.Hash().String())
+	log.Info("Get Bokerchain Trie",
+		"BokerProto", header.BokerProto.Root().String(),
+		"singleTrie", singleTrie.Hash().String(),
+		"contractsTrie", contractsTrie.Hash().String(),
+		"abiTrie", abiTrie.Hash().String())
 
 	return types.NewBlock(header, txs, uncles, receipts), nil
 }

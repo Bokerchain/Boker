@@ -153,7 +153,20 @@ func (boker *BokerBackend) GetContract(address common.Address) (protocol.Contrac
 
 //SetContract 回写合约信息
 func (boker *BokerBackend) SetContract(address common.Address, contractType protocol.ContractType, isCancel bool, abiJson string) error {
-	return boker.contracts.SetContract(address, contractType, isCancel, abiJson)
+
+	err := boker.contracts.SetContract(address, contractType, isCancel, abiJson)
+	if err != nil {
+		return err
+	}
+
+	bokerProto, err := boker.CommitTrie()
+	if err != nil {
+		return err
+	}
+
+	log.Info("(boker *BokerBackend) SetContract", "ContractsHash", bokerProto.ContractsHash.String())
+
+	return nil
 }
 
 func (boker *BokerBackend) CancelContract(address common.Address) error {
@@ -179,14 +192,28 @@ func (boker *BokerBackend) SubmitBokerTransaction(ctx context.Context, txType pr
 
 func (boker *BokerBackend) CommitTrie() (*protocol.BokerBackendProto, error) {
 
+	log.Info("(boker *BokerBackend) CommitTrie")
+
 	//提交基础合约交易
 	contractsRoot, err := boker.contracts.contractsTrie.CommitTo(boker.ethereum.ChainDb())
 	if err != nil {
 		return nil, err
 	}
 
+	singleRoot, err := boker.contracts.singleTrie.CommitTo(boker.ethereum.ChainDb())
+	if err != nil {
+		return nil, err
+	}
+
+	abiRoot, err := boker.contracts.abiTrie.CommitTo(boker.ethereum.ChainDb())
+	if err != nil {
+		return nil, err
+	}
+
 	return &protocol.BokerBackendProto{
-		ContractsHash: contractsRoot,
+		SingleHash:     singleRoot,
+		ContractsHash:  contractsRoot,
+		ContracAbiHash: abiRoot,
 	}, nil
 }
 
